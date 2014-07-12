@@ -455,14 +455,14 @@ public abstract class Request {
             } else {
                 String path = url.getPath();
                 if (path != null) {
-                    path = new Regex(path, "(/.+?(/|$))").getMatch(0);
+                    path = new Regex(path, "^(/.+)/").getMatch(0);
                 }
                 if (path == null) {
                     location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + "/" + location;
                 } else if (path.endsWith("/")) {
                     location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
                 } else {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
+                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + "/" + location;
                 }
             }
         }
