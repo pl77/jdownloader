@@ -394,7 +394,8 @@ public class HTMLParser {
     final private static Pattern                missingHTTPPattern          = Pattern.compile("^www\\.", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     
-    final private static Pattern                urlEncodedProtocol      = Pattern.compile("(%3A%2F%2F|%253A%252F%252F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    // full | double full | partial | partial | partial | partial | partial | partial
+    final private static Pattern                urlEncodedProtocol      = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static HtmlParserResultSet _getHttpLinksDeepWalker(HtmlParserCharSequence data, final String url, HtmlParserResultSet results) {
         if (results == null) {
