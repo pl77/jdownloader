@@ -141,6 +141,21 @@ public class Cookies {
         this.cookies.remove(cookie);
     }
     
+    /** 
+     * Removes Cookie from current session, based on keyName
+     * @author raztoki
+     * @since JD2
+     * */
+    public void remove(final String keyName) {
+        if (keyName == null) {
+            return;
+        }
+        final Cookie ckie = get(keyName);
+        if (ckie != null) {
+            this.cookies.remove(ckie);
+        }
+    }
+    
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder();
