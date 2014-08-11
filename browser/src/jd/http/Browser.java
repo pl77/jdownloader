@@ -48,6 +48,7 @@ import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogSource;
 import org.appwork.utils.net.HTTPHeader;
+import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 
@@ -261,6 +262,13 @@ public class Browser {
         }
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
+            final PublicSuffixList psl = PublicSuffixList.getInstance();
+            if (psl != null) {
+                final String domain = psl.getDomain(ret.toLowerCase(Locale.ENGLISH));
+                if (domain != null) {
+                    return domain;
+                }
+            }
             int indexPoint = ret.lastIndexOf(".");
             indexPoint = ret.lastIndexOf(".", indexPoint - 1);
             if (indexPoint >= 0) {
