@@ -97,7 +97,7 @@ public class HTMLParser {
         }
 
         public boolean contains(final CharSequence s) {
-            return this.indexOf(s.toString()) > -1;
+            return this.indexOf(s, 0) >= 0;
         }
 
         @Override
@@ -174,7 +174,6 @@ public class HTMLParser {
                         ;
                     }
                 }
-
                 /* Found first character, now look at the rest of v2 */
                 if (i <= max) {
                     int j = i + 1;
@@ -182,7 +181,6 @@ public class HTMLParser {
                     for (int k = targetOffset + 1; j < end && source[j] == target.charAt(k); j++, k++) {
                         ;
                     }
-
                     if (j == end) {
                         /* Found whole string. */
                         return i - sourceOffset;
@@ -393,9 +391,9 @@ public class HTMLParser {
     final private static Pattern                specialReplace2Pattern      = Pattern.compile("%21", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                missingHTTPPattern          = Pattern.compile("^www\\.", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    
+
     // full | double full | partial | partial | partial | partial | partial | partial
-    final private static Pattern                urlEncodedProtocol      = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern                urlEncodedProtocol          = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static HtmlParserResultSet _getHttpLinksDeepWalker(HtmlParserCharSequence data, final String url, HtmlParserResultSet results) {
         if (results == null) {
@@ -456,9 +454,16 @@ public class HTMLParser {
                 }
             }
         }
-        if (HTMLParser.deepWalkCheck(results, indexBefore)) {
+        if (HTMLParser.deepWalkCheck(results, indexBefore) && !urlDecoded.equals(data)) {
             /* no changes in results size, and data contains urlcoded http://, so lets urldecode it */
             HTMLParser._getHttpLinksFinder(urlDecoded, url, results);
+        }
+        if (HTMLParser.deepWalkCheck(results, indexBefore) && data.contains(":\\/\\/")) {
+            /**
+             * \\ escaped urls, eg JSON
+             */
+            data = data.replaceAll(Pattern.compile("\\\\"), "");
+            HTMLParser._getHttpLinksFinder(data, url, results);
         }
         return results;
     }
@@ -655,7 +660,7 @@ public class HTMLParser {
             //
             return results;
         }
-        if (!data.contains("://") && !new Regex(data, HTMLParser.urlEncodedProtocol).matches() && !data.contains("www.")) {
+        if (!data.contains("://") && !data.contains(":\\/\\/") && !new Regex(data, HTMLParser.urlEncodedProtocol).matches() && !data.contains("www.")) {
             /* data must contain at least the protocol separator */
             if (!data.matches(HTMLParser.checkPatternHREFUNESCAPESRC)) {
                 /* maybe easy encrypted website or a href */
@@ -733,11 +738,11 @@ public class HTMLParser {
     public static HtmlParserCharSequence decodeURLParamEncodedURL(HtmlParserCharSequence content) {
         if (content != null && new Regex(content.toString(), HTMLParser.urlEncodedProtocol).matches()) {
             String inputString = content.getStringAvoidCopy();
-            content = new HtmlParserCharSequence(decodeURLParamEncodedURL(inputString));
+            content = new HtmlParserCharSequence(HTMLParser.decodeURLParamEncodedURL(inputString));
         }
         return content;
     }
-    
+
     public static String decodeURLParamEncodedURL(String content) {
         // has to be first. to allow for multiple double encode of % eg. %253A%252F%252F
         content = content.replaceAll("%25", "%");
@@ -861,7 +866,7 @@ public class HTMLParser {
             // this finds a URLencoded URL within 'link'. We only want to find URLEncoded link, and not a value belonging to 'link'
             final String urlEncodedLink = new Regex(link, "(?:https?|ftp)" + HTMLParser.urlEncodedProtocol + "[^&]+").getMatch(-1);
             if (urlEncodedLink != null) {
-                tmplinks.add(decodeURLParamEncodedURL(urlEncodedLink));
+                tmplinks.add(HTMLParser.decodeURLParamEncodedURL(urlEncodedLink));
             }
         }
         links = null;
