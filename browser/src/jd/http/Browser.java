@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 
 import jd.http.requests.FormData;
 import jd.http.requests.GetRequest;
+import jd.http.requests.HeadRequest;
 import jd.http.requests.PostFormDataRequest;
 import jd.http.requests.PostRequest;
 import jd.http.requests.RequestVariable;
@@ -659,6 +660,10 @@ public class Browser {
         return new GetRequest(this.getURL(url));
     }
 
+    public Request createHeadRequest(String url) throws IOException {
+        return new HeadRequest(this.getURL(url));
+    }
+
     /* this is buggy as we must set correct referer! */
     @Deprecated
     public Request createGetRequestRedirectedRequest(final Request oldRequest) throws IOException {
@@ -1219,7 +1224,10 @@ public class Browser {
      */
     public URLConnectionAdapter openGetConnection(final String string) throws IOException {
         return this.openRequestConnection(this.createGetRequest(string));
+    }
 
+    public URLConnectionAdapter openHeadConnection(final String string) throws IOException {
+        return this.openRequestConnection(this.createHeadRequest(string));
     }
 
     /**
