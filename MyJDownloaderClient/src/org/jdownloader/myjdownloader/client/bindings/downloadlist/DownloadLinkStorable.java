@@ -22,14 +22,6 @@ public class DownloadLinkStorable extends AbstractLinkStorable {
         this.status = status;
     }
 
-    public String getStatusIcon() {
-        return statusIcon;
-    }
-
-    public void setStatusIcon(String statusIcon) {
-        this.statusIcon = statusIcon;
-    }
-
     private String statusIconKey = null;
 
     public String getStatusIconKey() {
@@ -40,9 +32,8 @@ public class DownloadLinkStorable extends AbstractLinkStorable {
         this.statusIconKey = statusIconKey;
     }
 
-    private String  statusIcon = null;
-    private boolean skipped    = false;
-    private long    speed      = -1;
+    private boolean skipped = false;
+    private long    speed   = -1;
 
     public DownloadLinkStorable(/* Storable */) {
 
