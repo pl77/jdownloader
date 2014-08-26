@@ -64,6 +64,15 @@ public class DownloadLinkQuery extends AbstractLinkQuery {
     private boolean eta         = false;
     private boolean finished    = false;
     private boolean priority    = false;
+    private boolean status      = false;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 
     public boolean isPriority() {
         return priority;

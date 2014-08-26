@@ -2,8 +2,7 @@ package org.jdownloader.myjdownloader.client.bindings.downloadlist;
 
 import org.jdownloader.myjdownloader.client.bindings.AbstractLinkStorable;
 
-
-public class DownloadLinkStorable extends AbstractLinkStorable{
+public class DownloadLinkStorable extends AbstractLinkStorable {
 
     private long    bytesLoaded      = -1;
 
@@ -13,9 +12,38 @@ public class DownloadLinkStorable extends AbstractLinkStorable{
 
     private boolean finished         = false;
     private boolean running          = false;
+    private String  status           = null;
 
-    private boolean skipped          = false;
-    private long    speed            = -1;
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatusIcon() {
+        return statusIcon;
+    }
+
+    public void setStatusIcon(String statusIcon) {
+        this.statusIcon = statusIcon;
+    }
+
+    private String statusIconKey = null;
+
+    public String getStatusIconKey() {
+        return statusIconKey;
+    }
+
+    public void setStatusIconKey(String statusIconKey) {
+        this.statusIconKey = statusIconKey;
+    }
+
+    private String  statusIcon = null;
+    private boolean skipped    = false;
+    private long    speed      = -1;
+
     public DownloadLinkStorable(/* Storable */) {
 
     }
