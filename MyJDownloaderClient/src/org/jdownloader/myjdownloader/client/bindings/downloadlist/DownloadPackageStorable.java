@@ -2,22 +2,37 @@ package org.jdownloader.myjdownloader.client.bindings.downloadlist;
 
 import org.jdownloader.myjdownloader.client.bindings.AbstractPackageStorable;
 
-
-
-
 public class DownloadPackageStorable extends AbstractPackageStorable {
 
     private String activeTask = null;
+    private String status     = null;
 
-    private long bytesLoaded = -1;
+    public String getStatus() {
+        return status;
+    }
 
-    private long eta = -1l;
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    private boolean finished = false;
+    public String getStatusIconKey() {
+        return statusIconKey;
+    }
 
-    private boolean running = false;
+    public void setStatusIconKey(String statusIconKey) {
+        this.statusIconKey = statusIconKey;
+    }
 
-    private long speed = -1;
+    private String  statusIconKey = null;
+    private long    bytesLoaded   = -1;
+
+    private long    eta           = -1l;
+
+    private boolean finished      = false;
+
+    private boolean running       = false;
+
+    private long    speed         = -1;
 
     public DownloadPackageStorable(/* Storable */) {
     }
