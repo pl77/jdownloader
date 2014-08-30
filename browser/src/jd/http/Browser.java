@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1417,6 +1418,31 @@ public class Browser {
      */
     public void setAllowedResponseCodes(final int... allowedResponseCodes) {
         this.allowedResponseCodes = allowedResponseCodes;
+    }
+    
+    /**
+     * Grabs existing response codes, and adds new input. This solves the issue were
+     * setAllowedResponseCodes(int...) destroys old with new.
+     *
+     * @param input
+     * @author raztoki
+     * @since JD2
+     */
+    public void addAllowedResponseCodes(final int... input) {
+        final int[] original = this.getAllowedResponseCodes();
+        final HashSet<Integer> dupe = new HashSet<Integer>();
+        for (final int a : original) {
+            dupe.add(a);
+        }
+        for (final int a : input) {
+            dupe.add(a);
+        }
+        final int[] outcome = new int[dupe.size()];
+        int index = 0;
+        for (final Integer i : dupe) {
+            outcome[index++] = i;
+        }
+        this.setAllowedResponseCodes(outcome);
     }
 
     public void setConnectTimeout(final int connectTimeout) {
