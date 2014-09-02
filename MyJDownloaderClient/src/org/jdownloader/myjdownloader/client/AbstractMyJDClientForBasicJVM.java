@@ -50,10 +50,8 @@ public abstract class AbstractMyJDClientForBasicJVM extends AbstractMyJDClient<T
             return md.digest((username.toLowerCase(Locale.ENGLISH) + password + domain.toLowerCase(Locale.ENGLISH)).getBytes("UTF-8"));
         } catch (final NoSuchAlgorithmException e) {
             throw MyJDownloaderException.get(e);
-            
         } catch (final UnsupportedEncodingException e) {
             throw MyJDownloaderException.get(e);
-            
         }
     }
     
@@ -154,7 +152,6 @@ public abstract class AbstractMyJDClientForBasicJVM extends AbstractMyJDClient<T
     @Override
     protected byte[] hmac(final byte[] key, final byte[] content) throws MyJDownloaderException {
         try {
-            
             final Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
             final SecretKeySpec secret_key = new SecretKeySpec(key, "HmacSHA256");
             sha256_HMAC.init(secret_key);

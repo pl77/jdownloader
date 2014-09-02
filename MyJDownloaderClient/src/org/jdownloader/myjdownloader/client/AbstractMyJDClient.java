@@ -334,6 +334,10 @@ public abstract class AbstractMyJDClient<GenericType> {
     
     public void cancelRegistrationEmail(final String email, final String key) throws MyJDownloaderException {
         try {
+            if (email == null || !email.matches("^.+?@.+$") || key == null || key.trim().length() == 0) {
+                //
+                throw new AuthException();
+            }
             this.uncryptedPost("/my/cancelregistrationemail?email=" + this.urlencode(email) + "&key=" + this.urlencode(key));
         } catch (final APIException e) {
             throw new RuntimeException(e);
@@ -350,6 +354,10 @@ public abstract class AbstractMyJDClient<GenericType> {
      */
     public synchronized SessionInfo connect(final String email, final String password) throws MyJDownloaderException {
         try {
+            if (email == null || !email.matches("^.+?@.+$") || password == null || password.trim().length() == 0) {
+                //
+                throw new AuthException();
+            }
             // localSecret = createSecret(username, password, "jd");
             final byte[] loginSecret = this.createSecret(email, password, "server");
             final byte[] deviceSecret = this.createSecret(email, password, "device");
@@ -720,6 +728,10 @@ public abstract class AbstractMyJDClient<GenericType> {
      */
     public void requestPasswordResetEmail(final CaptchaChallenge challenge, final String email) throws MyJDownloaderException {
         try {
+            if (email == null || !email.matches("^.+?@.+$")) {
+                //
+                throw new EmailInvalidException();
+            }
             this.uncryptedPost("/my/requestpasswordresetemail?email=" + this.urlencode(email) + "&captchaResponse=" + this.urlencode(challenge.getCaptchaResponse()) + "&captchaChallenge=" + this.urlencode(challenge.getCaptchaChallenge()));
         } catch (final APIException e) {
             throw new RuntimeException(e);
@@ -737,6 +749,10 @@ public abstract class AbstractMyJDClient<GenericType> {
      */
     public void requestRegistrationEmail(final CaptchaChallenge challenge, final String email, final String referer) throws MyJDownloaderException {
         try {
+            if (email == null || !email.matches("^.+?@.+$")) {
+                //
+                throw new EmailInvalidException();
+            }
             this.uncryptedPost("/my/requestregistrationemail?email=" + this.urlencode(email) + "&captchaResponse=" + this.urlencode(challenge.getCaptchaResponse()) + "&captchaChallenge=" + this.urlencode(challenge.getCaptchaChallenge()) + "&referer=" + this.urlencode(referer == null ? this.appKey : referer));
         } catch (final APIException e) {
             throw new RuntimeException(e);
