@@ -409,15 +409,72 @@ public class Browser {
         }
         Browser.REQUEST_INTERVAL_LIMIT_MAP.put(domain, i);
     }
-
+    
+    private static HashMap<String, ArrayList<Long>> REQUESTS_THRESHOLD_TIME_HISTORY_MAP;
+    private static HashMap<String, Long>          REQUESTS_THRESHOLD_INTERVAL_MAP;
+    private static HashMap<String, Integer>       REQUESTS_THRESHOLD_REQUESTS_MAP;
+    
+    /** 
+     * sets request thresholds based on upper burstable limit. eg. 20(x) requests over 60000(y)[=1min]. Then on after it sets limit between interval.
+     *  
+     * @author raztoki 
+     * @since JD2
+     * @param host
+     * @param i (ms)
+     * @param x (requests)
+     * @param y (ms)
+     * @throws Exception 
+     */
+    public static synchronized void setRequestIntervalLimitGlobal(final String host, final int i, final int x, final long y) throws Exception {
+        if (x <= 0 || y <= 0 || i <= 0) {
+            throw new Exception("'x' and 'y' and 'i' have to be above zero!");
+            // return;
+        } 
+        final String domain = Browser.getHost(host);
+        if (domain == null) {
+            throw new Exception("Browser.getHost(host) returned null");
+            // return;
+        }
+        // Utilise existing method
+        setRequestIntervalLimitGlobal(domain, i);
+        // here we go.
+        if (Browser.REQUESTS_THRESHOLD_INTERVAL_MAP == null) {
+            Browser.REQUESTS_THRESHOLD_INTERVAL_MAP = new HashMap<String, Long>();
+            Browser.REQUESTS_THRESHOLD_REQUESTS_MAP = new HashMap<String, Integer>();
+            Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP = new HashMap<String, ArrayList<Long>>();
+        }
+        Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.put(domain, x);
+        Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.put(domain, y);
+    }
+    
     private static synchronized void waitForPageAccess(final Browser browser, final Request request) throws InterruptedException {
         final String host = Browser.getHost(request.getUrl());
+        ArrayList<Long> ts = null;
+        if (Browser.REQUESTS_THRESHOLD_INTERVAL_MAP != null && Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.containsKey(host)) { 
+            ts = Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP.get(host);
+            if (ts == null) {
+                ts = new ArrayList<Long>();
+            }
+        }
         try {
+            if (ts != null) {
+                final long maxInterval = Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.get(host); 
+                final ArrayList<Long> currentStill = new ArrayList<Long>();
+                for (final Long t : ts) {
+                    if (System.currentTimeMillis() - t > maxInterval) {
+                        currentStill.add(t);
+                    }
+                }
+                ts = currentStill;
+                if (ts.size() <= Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.get(host)) {
+                    return;
+                } 
+            }
             Integer localLimit = null;
             Integer globalLimit = null;
             Long localLastRequest = null;
             Long globalLastRequest = null;
-
+            
             if (browser.requestIntervalLimitMap != null) {
                 localLimit = browser.requestIntervalLimitMap.get(host);
                 localLastRequest = browser.requestTimeMap.get(host);
@@ -467,6 +524,10 @@ public class Browser {
             if (Browser.REQUESTTIME_MAP != null) {
                 Browser.REQUESTTIME_MAP.put(host, System.currentTimeMillis());
             }
+            if (ts != null){
+                ts.add(System.currentTimeMillis());
+                Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP.put(host, ts);
+            }
         }
     }
 
@@ -497,7 +558,8 @@ public class Browser {
     private HashMap<String, Integer> requestIntervalLimitMap;
 
     private HashMap<String, Long>    requestTimeMap;
-
+    private HashMap<String, ArrayList<Long>>    requestTimeStampMap;
+    
     private boolean                  verbose          = false;
 
     public Browser() {
@@ -1421,7 +1483,7 @@ public class Browser {
     }
     
     /**
-     * Grabs existing response codes, and adds new input. This solves the issue were
+     * Adds input to existing response codes. This solves the issue were
      * setAllowedResponseCodes(int...) destroys old with new.
      *
      * @param input
