@@ -14,8 +14,6 @@ import org.jdownloader.myjdownloader.client.exceptions.device.ApiFileNotFoundExc
 
 public class EventDistributor implements Runnable, EventsDistributorListener {
 
-
-
     private EventsInterface                      link;
 
     private SubscriptionResponse                 subscription;
@@ -118,7 +116,7 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
                     SubscriptionResponse resp = link.setsubscription(subscription.getSubscriptionid(), subscribes.toArray(new String[] {}), null);
                     resp = updateConnectionSetup(resp);
                     if (resp != null && resp.getSubscriptionid() >= 0) {
-                        subscription = resp;
+                        updateSubscription(resp);
                         printSub();
                         return;
                     }
@@ -128,7 +126,7 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
                 SubscriptionResponse resp = link.subscribe(subscribes.toArray(new String[] {}), null);
                 if (resp != null && resp.getSubscriptionid() >= 0) {
                     resp = updateConnectionSetup(resp);
-                    subscription = resp;
+                    updateSubscription(resp);
                     printSub();
                     return;
                 }
@@ -140,6 +138,10 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
             }
         }
 
+    }
+
+    public void updateSubscription(SubscriptionResponse resp) {
+        subscription = resp;
     }
 
     public SubscriptionResponse updateConnectionSetup(SubscriptionResponse resp) {
@@ -156,8 +158,8 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
             if (subscription != null) {
                 System.out.println("Unsubscribe " + subscription.getSubscriptionid());
                 link.unsubscribe(subscription.getSubscriptionid());
+                updateSubscription(null);
 
-                subscription = null;
             }
         }
     }
@@ -171,7 +173,7 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
             if (subscription != null) {
                 final SubscriptionResponse resp = updateConnectionSetup(subscription);
                 if (resp != null && resp.getSubscriptionid() >= 0) {
-                    subscription = resp;
+                    updateSubscription(resp);
                     printSub();
 
                 }
@@ -198,7 +200,9 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
     }
 
     public void run() {
-        if (running.get()) { throw new RuntimeException("Already running!"); }
+        if (running.get()) {
+            throw new RuntimeException("Already running!");
+        }
         running.set(true);
         stopping.set(false);
         try {
@@ -238,7 +242,7 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
                     }
                 } catch (final ApiFileNotFoundException e) {
                     System.out.println("Channel Closed: " + subscription.getSubscriptionid());
-                    subscription = null;
+                    updateSubscription(null);
 
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -271,6 +275,10 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
     @Override
     public String getFilterPattern() {
         throw new RuntimeException("Not implemented");
+    }
+
+    public SubscriptionResponse getSubscription() {
+        return subscription;
     }
 
 }
