@@ -447,6 +447,23 @@ public class Browser {
         Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.put(domain, y);
     }
     
+    private static long teststart;
+    private static int count;
+    private static boolean isdebug;;
+    
+    public static void main(String args[]) throws Exception {
+        System.out.print("START OF TEST!!!!");
+        teststart = System.currentTimeMillis();
+        isdebug = true;
+        final String host = "keep2share.cc";
+        Browser.setRequestIntervalLimitGlobal(host, 3000, 20, 60000);
+        while (true) {
+            Browser btest = new Browser();
+            Request qtest = btest.createGetRequest("http://" + host);
+            waitForPageAccess(btest, qtest);
+        }
+   }
+    
     private static synchronized void waitForPageAccess(final Browser browser, final Request request) throws InterruptedException {
         final String host = Browser.getHost(request.getUrl());
         ArrayList<Long> ts = null;
@@ -458,17 +475,58 @@ public class Browser {
         }
         try {
             if (ts != null) {
+                if (isdebug) { 
+                    count++;
+                    System.out.println("\r\nTEST RUN COUNT: "+ count);
+                    System.out.println("TEST RUN TIME: " + ((System.currentTimeMillis() - teststart) / 1000) + "seconds");
+                }
                 final long maxInterval = Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.get(host); 
                 final ArrayList<Long> currentStill = new ArrayList<Long>();
+                if (isdebug) { 
+                    System.out.println("BEFORE CLEANUP: Map size = "+ ts.size());
+                }
                 for (final Long t : ts) {
-                    if (System.currentTimeMillis() - t > maxInterval) {
+                    long time = System.currentTimeMillis() - t;
+                    if ( time < maxInterval) {
                         currentStill.add(t);
                     }
                 }
+                if (isdebug) { 
+                    System.out.println("AFTER CLEANUP: Map size: "+ currentStill.size() + " - " + ts.size() + " = " + (currentStill.size() - ts.size()) + " change.");
+                }
                 ts = currentStill;
-                if (ts.size() <= Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.get(host)) {
+                if (ts.size() < Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.get(host)) {
+                    if (isdebug) { 
+                        System.out.println("ts.size() == LESS THAN requestmap threshold, NO WAIT REQUIRED!!!"); 
+                    }
                     return;
                 } 
+                // since ArrayList preserves order, oldest entry should always be 0 
+                final long requestsThresholdOldestTimestamp = ts.get(0);
+                final int globalLimit = Browser.REQUEST_INTERVAL_LIMIT_MAP.get(host);
+                final long globalLastRequest = (Browser.REQUESTTIME_MAP.get(host) == null ? System.currentTimeMillis() : Browser.REQUESTTIME_MAP.get(host));
+                // effectively you could have to wait x minutes before slot opens up, all depends on how wide the y interval is. Once the burst map is full we then use specified average wait(i) based upon the last request
+                // current time - oldest timestamp should give us the elapsed time.
+                long wait1 = System.currentTimeMillis() - requestsThresholdOldestTimestamp;
+                // now determine how long until it expires against maxInterval 
+                wait1 = maxInterval - wait1;
+                long wait2 = globalLimit - (System.currentTimeMillis() - globalLastRequest);
+                if (wait1 < 0) 
+                    wait1 = 0;
+                if (wait2 < 0)
+                    wait2 = 0;
+                if (wait1 > maxInterval || wait2 > wait1) {
+                    if (isdebug) { 
+                        System.out.println("WAIT1 = " + wait1);
+                    }
+                    Thread.sleep(wait1); 
+                } else {
+                    if (isdebug) { 
+                        System.out.println("WAIT2 = " + wait2);
+                    }
+                    Thread.sleep(wait2);
+                }
+                return;
             }
             Integer localLimit = null;
             Integer globalLimit = null;
@@ -483,7 +541,6 @@ public class Browser {
                 globalLimit = Browser.REQUEST_INTERVAL_LIMIT_MAP.get(host);
                 globalLastRequest = Browser.REQUESTTIME_MAP.get(host);
             }
-
             if (localLimit == null && globalLimit == null) {
                 return;
             }
@@ -524,8 +581,11 @@ public class Browser {
             if (Browser.REQUESTTIME_MAP != null) {
                 Browser.REQUESTTIME_MAP.put(host, System.currentTimeMillis());
             }
-            if (ts != null){
+            if (ts != null) {
                 ts.add(System.currentTimeMillis());
+                if (isdebug) { 
+                    System.out.println("SAVING: Map size: " + ts.size());
+                }
                 Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP.put(host, ts);
             }
         }
