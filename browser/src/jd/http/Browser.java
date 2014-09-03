@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -447,17 +448,28 @@ public class Browser {
         Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.put(domain, y);
     }
     
-    private static long teststart;
-    private static int count;
+    private static long testStart;
+    private static int testCount;
+    private static int randomCount;
     private static boolean isdebug;;
     
     public static void main(String args[]) throws Exception {
         System.out.print("START OF TEST!!!!");
-        teststart = System.currentTimeMillis();
+        testStart = System.currentTimeMillis();
         isdebug = true;
         final String host = "keep2share.cc";
         Browser.setRequestIntervalLimitGlobal(host, 3000, 20, 60000);
         while (true) {
+            randomCount++;
+            if (randomCount >= 3) {
+                int ran = 0;
+                while (ran <= 1200) {
+                    ran = new Random().nextInt(4000);
+                }
+                randomCount = 0;
+                System.out.println("\r\nTEST randomisation delay: " + (ran / 1000) + "seconds");
+                Thread.sleep(ran);
+            }
             Browser btest = new Browser();
             Request qtest = btest.createGetRequest("http://" + host);
             waitForPageAccess(btest, qtest);
@@ -476,11 +488,12 @@ public class Browser {
         try {
             if (ts != null) {
                 if (isdebug) { 
-                    count++;
-                    System.out.println("\r\nTEST RUN COUNT: "+ count);
-                    System.out.println("TEST RUN TIME: " + ((System.currentTimeMillis() - teststart) / 1000) + "seconds");
+                    testCount++;
+                    System.out.println("\r\nTEST RUN COUNT: "+ testCount);
+                    System.out.println("TEST RUN TIME: " + ((System.currentTimeMillis() - testStart) / 1000) + "seconds");
                 }
-                final long maxInterval = Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.get(host); 
+                final long maxInterval = Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.get(host);
+                final int arrayMaxSize = Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.get(host);
                 final ArrayList<Long> currentStill = new ArrayList<Long>();
                 if (isdebug) { 
                     System.out.println("BEFORE CLEANUP: Map size = "+ ts.size());
@@ -495,7 +508,7 @@ public class Browser {
                     System.out.println("AFTER CLEANUP: Map size: "+ currentStill.size() + " - " + ts.size() + " = " + (currentStill.size() - ts.size()) + " change.");
                 }
                 ts = currentStill;
-                if (ts.size() < Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.get(host)) {
+                if (ts.size() < arrayMaxSize) {
                     if (isdebug) { 
                         System.out.println("ts.size() == LESS THAN requestmap threshold, NO WAIT REQUIRED!!!"); 
                     }
@@ -515,7 +528,8 @@ public class Browser {
                     wait1 = 0;
                 if (wait2 < 0)
                     wait2 = 0;
-                if (wait1 > maxInterval || wait2 > wait1) {
+                if (ts.size() < arrayMaxSize && (wait1 > maxInterval || wait2 > wait1)) {
+                 // only enter if we are equal to or less than arrayMaxSize.
                     if (isdebug) { 
                         System.out.println("WAIT1 = " + wait1);
                     }
