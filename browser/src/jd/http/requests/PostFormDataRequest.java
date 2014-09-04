@@ -98,6 +98,7 @@ public class PostFormDataRequest extends Request {
      */
     @Override
     public long postRequest() throws IOException {
+        this.httpConnection.connect();
         return this.postContent(this.httpConnection);
     }
 
