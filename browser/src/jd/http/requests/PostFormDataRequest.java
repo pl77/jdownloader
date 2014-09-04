@@ -83,7 +83,7 @@ public class PostFormDataRequest extends Request {
             for (int i = 0; i < this.formDatas.size(); i++) {
                 this.write(this.formDatas.get(i), output);
             }
-            final OutputStreamWriter writer = new OutputStreamWriter(output);
+            final OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
             writer.write(this.boundary);
             writer.write("--\r\n");
             writer.flush();
