@@ -42,7 +42,9 @@ public class PostRequest extends Request {
     }
 
     public static java.util.List<RequestVariable> variableMaptoArray(final LinkedHashMap<String, String> post) {
-        if (post == null) { return null; }
+        if (post == null) {
+            return null;
+        }
         final java.util.List<RequestVariable> ret = new ArrayList<RequestVariable>();
         for (final Entry<String, String> entry : post.entrySet()) {
             ret.add(new RequestVariable(entry.getKey(), entry.getValue()));
@@ -107,12 +109,16 @@ public class PostRequest extends Request {
                 }
             }
         }
-        if (buffer.length() == 0) { return ""; }
+        if (buffer.length() == 0) {
+            return "";
+        }
         return buffer.substring(1);
     }
 
     public String log() {
-        if (this.sendWHAT == null) { return null; }
+        if (this.sendWHAT == null) {
+            return null;
+        }
         switch (this.sendWHAT) {
         case NOTHING:
             return "zero content send";
@@ -128,7 +134,9 @@ public class PostRequest extends Request {
     }
 
     private long postContent(final URLConnectionAdapter httpConnection) throws IOException {
-        if (this.sendWHAT == null) { throw new IOException("preRequest needs to be called first!"); }
+        if (this.sendWHAT == null) {
+            throw new IOException("preRequest needs to be called first!");
+        }
         String postString = null;
         CountingOutputStream output = null;
         if (httpConnection != null && httpConnection.getOutputStream() != null) {
@@ -166,6 +174,7 @@ public class PostRequest extends Request {
      */
     @Override
     public long postRequest() throws IOException {
+        this.httpConnection.connect();
         return this.postContent(this.httpConnection);
     }
 
