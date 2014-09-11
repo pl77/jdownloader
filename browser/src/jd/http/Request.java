@@ -106,7 +106,7 @@ public abstract class Request {
         }
         ByteArrayOutputStream tmpOut = null;
         final long contentLength = con.getLongContentLength();
-        if (contentLength != -1) {
+        if (contentLength >= 0) {
             final int length = contentLength > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) contentLength;
             tmpOut = new ByteArrayOutputStream(length);
         } else {
@@ -125,9 +125,11 @@ public abstract class Request {
                     tmpOut.write(buffer, 0, len);
                 }
             }
-            okay = true;
-        } catch (final EOFException e) {
-            e.printStackTrace();
+            final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
+            final String contentEncoding = con.getHeaderField("Content-Encoding");
+            if (con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding) && contentLength >= 0 && tmpOut.size() != contentLength) {
+                throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + tmpOut.size());
+            }
             okay = true;
         } catch (final IOException e) {
             if (e.toString().contains("end of ZLIB") || e.toString().contains("Premature") || e.toString().contains("Corrupt GZIP trailer")) {
