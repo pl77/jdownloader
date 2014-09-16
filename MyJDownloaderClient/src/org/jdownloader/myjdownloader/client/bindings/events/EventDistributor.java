@@ -259,7 +259,7 @@ public class EventDistributor implements Runnable, EventsDistributorListener {
     public void onNewMyJDEvent(final String publisher, final String eventid, final Object eventData) {
 
         for (final EventsDistributorListener fi : listeners) {
-            if (Pattern.compile(fi.getEventPattern()).matcher(publisher + "." + eventid).matches()) {
+            if (Pattern.compile(fi.getEventPattern()).matcher(publisher + "." + eventid).find()) {
                 if (!(fi.getFilterPattern() != null && fi.getFilterPattern().trim().length() > 0 && Pattern.compile(fi.getFilterPattern()).matcher(publisher + "." + eventid).matches())) {
                     fi.onNewMyJDEvent(publisher, eventid, eventData);
                 }
