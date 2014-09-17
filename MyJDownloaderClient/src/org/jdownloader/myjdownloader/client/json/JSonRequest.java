@@ -10,17 +10,46 @@ package org.jdownloader.myjdownloader.client.json;
  * for details
  */
 
-
 /**
  * @author daniel
  * 
  */
-public class JSonRequest extends AbstractJsonData{
+public class JSonRequest extends AbstractJsonData {
 
-    private String   url;
+    private String url;
+    // diff Keep alive
+    private long   diffKA;
+
+    public long getDiffKA() {
+        return diffKA;
+    }
+
+    public void setDiffKA(long diffKA) {
+        this.diffKA = diffKA;
+    }
+
+    public String getDiffID() {
+        return diffID;
+    }
+
+    public void setDiffID(String diffID) {
+        this.diffID = diffID;
+    }
+
+    private String diffType;
+
+    public String getDiffType() {
+        return diffType;
+    }
+
+    public void setDiffType(String diffType) {
+        this.diffType = diffType;
+    }
+
+    private String   diffID;
     private long     rid;
     private Object[] params;
-    private int apiVer=-1;
+    private int      apiVer = -1;
 
     public int getApiVer() {
         return apiVer;
