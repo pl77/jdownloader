@@ -46,7 +46,7 @@ define("deviceController",["device"], function(JDAPIDevice) {
 					}
 					ret.resolve(devices.list);
 				});
-			});Fr
+			});
 			return ret;
 		},
 		_iterateAndCheckForLocalMode: function(iterator, finishedCallback) {
