@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JDAPI Unit Tests</title>
+  <link rel="stylesheet" href="bower_components/qunit/qunit/qunit.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <!-- JavaScript at the bottom for fast page loading -->
+  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if necessary -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/jquery-mockjax/jquery.mockjax.js"></script>
+  <!-- Include JDAPI Stuff -->
+  <script src="bower_components/requirejs/require.js"></script>
+  <script src="test/unit_tests.js"></script>
+  <script src="bower_components/qunit/qunit/qunit.js"></script>
+
+  <script src="http://localhost:35729/livereload.js"></script>
+
+ 	<script>
+ 		//wait for require.js before autostarting tests
+	 	QUnit.config.autostart = false;
+		require(['jdapi_unit_tests'], function(APITests){
+      console.log(APITests);
+      var tests = new APITests();
+      tests.testCore();
+      tests.testApiServer(); 
+      tests.testApiService();
+      tests.testDeviceController();
+      QUnit.start(); //Tests loaded, run tests
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "myjdclient",
+  "version": "1.0.13",
+  "authors": [
+    "Sebastian Metzger <metzger@appwork.org>"
+  ],
+  "description": "JavaScript Library for using the MyJDownloader API",
+  "main": "jdapi.js",
+  "keywords": [
+    "JDownloader",
+    "API",
+    "remote"
+  ],
+  "homepage": "http://my.jdownloader.org",
+  "private": true,
+  "dependencies": {
+    "jquery": "latest",
+    "requirejs": "latest",
+    "qunit": "latest"
+  }
+}

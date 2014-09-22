@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JDAPI JavaScript API</title>
+</head>
+<body>
+  <h1>Example how to load the API in source code</h1>
+  <!-- JavaScript at the bottom for fast page loading -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <!-- Include JDAPI Stuff -->
+  <script src="bower_components/requirejs/require.js"></script>
+  <script src="build/jdapi.js"></script>
+
+	<script>
+		require(['jdapi'], function(API){
+		  	  // login with a MyJD Account
+		     var api = new API({email: "example@jdownloader.org", pass: "supersecret"}, function(){console.log("login success!"), "EXAMPLE_APP_KEY"});
+		});
+	   require(['jdapi'], function(API){
+	     // leaving the options param blank will try to restore the session from localstorage
+	     var api = new API({}, function(){console.log("login success!"), "EXAMPLE_APP_KEY"});
+	   });
+	</script>
+</body>
+</html>
