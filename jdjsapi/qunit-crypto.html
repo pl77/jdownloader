@@ -18,14 +18,14 @@
   <script src="bower_components/qunit/qunit/qunit.js"></script>
 
   <script src="http://localhost:35729/livereload.js"></script>
- 	<script>
- 		//wait for require.js before autostarting tests
-	 	QUnit.config.autostart = false;
-		require(['jdapi', 'test/config.js', 'test/api_tests.js'], function(API){
-	      window.jd = window.jd || {};
-	      window.jd.API = API;
-	      QUnit.start(); //Tests loaded, run tests
-		});
-	</script>
+  <script>
+    //wait for require.js before autostarting tests
+    QUnit.config.autostart = false;
+    require(['jdapi', 'test/config.js', 'test/crypto_tests.js'], function(API){
+        window.jd = window.jd || {};
+        window.jd.API = API;
+        QUnit.start(); //Tests loaded, run tests
+    });
+  </script>
 </body>
 </html>

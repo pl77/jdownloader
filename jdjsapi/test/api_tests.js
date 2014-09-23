@@ -131,14 +131,25 @@ require(["coreCryptoUtils"], function(cryptoUtils) {
 		var encryptionToken = {};
 		encryptionToken.server = CryptoJS.lib.WordArray.random(restoredOptions.serverEncryptionToken.sigBytes);
 		encryptionToken.device = CryptoJS.lib.WordArray.random(restoredOptions.deviceEncryptionToken.sigBytes);
-		// var testCipherText = cryptoUtils.encryptJSON(encryptionToken.server, "test");
-		// console.log(testCipherText);
+
+		var iv = encryptionToken.server.firstHalf();
+		var key = encryptionToken.server.secondHalf();
+
+		console.log("IV " + iv);
+		console.log("KEY " + key);
+
+		var testCipherText = cryptoUtils.encryptJSON(key, {'test': 0});
+
+		console.log(cryptoUtils.decryptJSON(encryptionToken.server, null, testCipherText));
+
 		$.mockjax({
 			url: 'http://api.jdownloader.org/my/listdevices*',
 			status: 200,
 			responseTime: 200,
 			responseText: cryptoUtils.encryptJSON(encryptionToken.server, JSON.stringify({
-				test: 2
+				data : {
+					list: []
+				}
 			}))
 		});
 	};

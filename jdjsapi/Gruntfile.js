@@ -28,7 +28,7 @@ module.exports = function(grunt) {
     },
     watch: {
       requirejs: {
-        files: ["src/**/*.js", "qunit/**/*.js", "qunit.html"],
+        files: ["src/**/*.js", "test/**/*.js", "*.html"],
         tasks: ["requirejs"],
         options: {
           livereload: true

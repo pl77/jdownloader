@@ -10,15 +10,22 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 		/* convert pass to secret hashes and delete it afterwards */
 		processPassword: function(options) {
 			if (!options.email || !options.pass) {
-				console.error("processPassword requires set options.email and options.pass");
+				throw "processPassword requires set options.email and options.pass";
 			}
 
 			options.loginSecret = this.hashPassword(options.email, options.pass, "server");
 			options.deviceSecret = this.hashPassword(options.email, options.pass, "device");
 			delete options.pass;
 		},
-		/* initialise the connection after a successful handshake */
+		/* initialise the tokens after a successful handshake or update tokens after a reconnect */
 		initialiseConnection: function(options, sessiontoken, regaintoken) {
+			if (!options.loginSecret && !options.serverEncryptionToken) {
+				throw "either loginSecret or serverEncryptionToken must be set, probably should call processPassword(options) first";
+			} else if(!options.deviceSecret){
+				throw "deviceSecret not set";
+			} else if(!sessiontoken || !regaintoken){
+				throw "sessiontoken and regaintoken are required to initialise connection";
+			}
 			options.sessiontoken = sessiontoken;
 			options.regaintoken = regaintoken;
 
@@ -32,6 +39,7 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 				delete options.loginSecret;
 			} else {
 				// calculate new secret
+				options.serverEncryptionTokenOld = options.serverEncryptionToken;
 				var tot = options.serverEncryptionToken.concat(ses);
 				options.serverEncryptionToken = CryptoJS.SHA256(tot);
 			}
