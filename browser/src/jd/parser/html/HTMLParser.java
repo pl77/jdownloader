@@ -964,11 +964,11 @@ public class HTMLParser {
         return ret;
     }
 
-    private static String getProtocol(final String url) {
-        if (url == null) {
-            return null;
+    public static String getProtocol(final String url) {
+        if (url != null) {
+            return new Regex(url, HTMLParser.LINKPROTOCOL).getMatch(0);
         }
-        return new Regex(url, HTMLParser.LINKPROTOCOL).getMatch(0);
+        return null;
     }
 
     /**
