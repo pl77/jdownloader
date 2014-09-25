@@ -14,8 +14,8 @@
   "homepage": "http://my.jdownloader.org",
   "private": true,
   "dependencies": {
-    "jquery": "latest",
-    "requirejs": "latest",
-    "qunit": "latest"
+    "jquery": "2.1.1",
+    "requirejs": "2.1.15",
+    "qunit": "1.15"
   }
 }

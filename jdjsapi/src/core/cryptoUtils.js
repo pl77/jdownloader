@@ -52,6 +52,10 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 			// set new device encryption token
 			options.deviceEncryptionToken = CryptoJS.SHA256(totDev);
 		},
+		/*
+		 * @param secret: CryptoJS.lib.WordArray used as secret
+		 * @param plain: the JSON object to encrypt
+		 */
 		encryptJSON: function(secret, plain) {
 			var iv = secret.firstHalf();
 			var key = secret.secondHalf();
@@ -63,7 +67,11 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 
 			return encrypted.toString();
 		},
-		//TODO, also give old tokens
+		/*
+		 * @param secret: CryptoJS.lib.WordArray used as secret
+		 * @param secretOld: The secret from before a reconnect, can be null
+		 * @param plain: the ciphtext to decrypt
+		 */
 		decryptJSON: function(secret, secretOld, encrypted) {
 			var plain = null;
 			var exception = null;

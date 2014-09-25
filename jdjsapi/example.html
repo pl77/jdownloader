@@ -14,8 +14,10 @@
 
 	<script>
 		require(['jdapi'], function(API){
-		  	  // login with a MyJD Account
-		     var api = new API({email: "example@jdownloader.org", pass: "supersecret"}, function(){console.log("login success!"), "EXAMPLE_APP_KEY"});
+		  	 // login with a MyJD Account
+		     var api = new API({email: "example@jdownloader.org", pass: "supersecret"}, function(){
+		     	console.log("login success!"), "EXAMPLE_APP_KEY"
+		     });
 		});
 	   require(['jdapi'], function(API){
 	     // leaving the options param blank will try to restore the session from localstorage
