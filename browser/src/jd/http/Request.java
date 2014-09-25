@@ -127,7 +127,7 @@ public abstract class Request {
             }
             final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
             final String contentEncoding = con.getHeaderField("Content-Encoding");
-            if (con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding) && contentLength >= 0 && tmpOut.size() != contentLength) {
+            if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && tmpOut.size() != contentLength) {
                 throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + tmpOut.size());
             }
             okay = true;
