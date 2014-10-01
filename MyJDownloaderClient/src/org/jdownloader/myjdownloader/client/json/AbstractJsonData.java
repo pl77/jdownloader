@@ -23,63 +23,64 @@ import java.util.Locale;
  * 
  */
 public abstract class AbstractJsonData implements JsonFactoryInterface {
+    
     private static final HashMap<Class<?>, Collection<GetterSetter>> GETTER_SETTER_CACHE = new HashMap<Class<?>, Collection<GetterSetter>>();
-
+    
     public static boolean isBoolean(final Type type) {
         return type == Boolean.class || type == boolean.class;
     }
-
+    
     public static boolean isNotEmpty(final String ip) {
         return !(ip == null || ip.trim().length() == 0);
     }
-
+    
     public static String createKey(final String key) {
         final StringBuilder sb = new StringBuilder();
         final char[] ca = key.toCharArray();
         boolean starter = true;
-        for (int i = 0; i < ca.length; i++) {
-            if (starter && Character.isUpperCase(ca[i])) {
-                sb.append(Character.toLowerCase(ca[i]));
+        for (char element : ca) {
+            if (starter && Character.isUpperCase(element)) {
+                sb.append(Character.toLowerCase(element));
             } else {
                 starter = false;
-                sb.append(ca[i]);
+                sb.append(element);
             }
         }
         return sb.toString();
     }
-
+    
     /**
      * @return
      */
     public static Collection<GetterSetter> getGettersSetteres(Class<?> clazz) {
-        Collection<GetterSetter> ret = GETTER_SETTER_CACHE.get(clazz);
+        Collection<GetterSetter> ret = AbstractJsonData.GETTER_SETTER_CACHE.get(clazz);
         if (ret != null) { return ret; }
         final Class<?> org = clazz;
-        synchronized (GETTER_SETTER_CACHE) {
-            ret = GETTER_SETTER_CACHE.get(clazz);
+        synchronized (AbstractJsonData.GETTER_SETTER_CACHE) {
+            ret = AbstractJsonData.GETTER_SETTER_CACHE.get(clazz);
             if (ret != null) { return ret; }
             final HashMap<String, GetterSetter> map = new HashMap<String, GetterSetter>();
             while (clazz != null) {
                 for (final Method m : clazz.getDeclaredMethods()) {
                     String key = null;
                     boolean getter = false;
-                    if (m.getName().startsWith("is") && isBoolean(m.getReturnType()) && m.getParameterTypes().length == 0) {
-                        key = (m.getName().substring(2));
+                    if (m.getName().startsWith("is") && AbstractJsonData.isBoolean(m.getReturnType()) && m.getParameterTypes().length == 0) {
+                        key = m.getName().substring(2);
                         getter = true;
-
+                        
                     } else if (m.getName().startsWith("get") && m.getParameterTypes().length == 0) {
-                        key = (m.getName().substring(3));
+                        key = m.getName().substring(3);
                         getter = true;
-
+                        
                     } else if (m.getName().startsWith("set") && m.getParameterTypes().length == 1) {
-                        key = (m.getName().substring(3));
+                        key = m.getName().substring(3);
                         getter = false;
-
+                        
                     }
-              
-                    if (isNotEmpty(key)) {
+                    
+                    if (AbstractJsonData.isNotEmpty(key)) {
                         final String unmodifiedKey = key;
-                        key = createKey(key);
+                        key = AbstractJsonData.createKey(key);
                         GetterSetter v = map.get(key);
                         if (v == null) {
                             v = new GetterSetter(key);
@@ -96,41 +97,41 @@ public abstract class AbstractJsonData implements JsonFactoryInterface {
                             v.setField(field);
                         } catch (final NoSuchFieldException e) {
                         }
-
+                        
                     }
                 }
                 clazz = clazz.getSuperclass();
             }
-            GETTER_SETTER_CACHE.put(org, map.values());
-            return GETTER_SETTER_CACHE.get(org);
+            AbstractJsonData.GETTER_SETTER_CACHE.put(org, map.values());
+            return AbstractJsonData.GETTER_SETTER_CACHE.get(org);
         }
-
+        
     }
-
+    
     public boolean equals(final Object pass, final Object pass2) {
         if (pass == pass2) { return true; }
         if (pass == null && pass2 != null) { return false; }
         return pass.equals(pass2);
     }
-
+    
     @Override
     public String toJsonString() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         Object obj = null;
         try {
-            final Constructor<? extends AbstractJsonData> c = getClass().getDeclaredConstructor(new Class[] {});
+            final Constructor<? extends AbstractJsonData> c = this.getClass().getDeclaredConstructor(new Class[] {});
             c.setAccessible(true);
             final AbstractJsonData empty = c.newInstance();
-
-            for (final GetterSetter gs : getGettersSetteres(getClass())) {
-
+            
+            for (final GetterSetter gs : AbstractJsonData.getGettersSetteres(this.getClass())) {
+                
                 obj = gs.get(this);
-
-                if (equals(obj, gs.get(empty))) {
+                
+                if (this.equals(obj, gs.get(empty))) {
                     continue;
                 }
                 map.put(Character.toLowerCase(gs.getKey().charAt(0)) + gs.getKey().substring(1), obj);
-
+                
             }
         } catch (final Exception e) {
             throw new RuntimeException(e);
