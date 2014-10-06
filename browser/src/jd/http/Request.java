@@ -37,6 +37,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
+import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
@@ -127,7 +128,11 @@ public abstract class Request {
             }
             final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
             final String contentEncoding = con.getHeaderField("Content-Encoding");
-            if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && tmpOut.size() != contentLength) {
+            if (HTTPConnection.RequestMethod.HEAD.equals(con.getRequestMethod())) {
+                if (tmpOut.size() > 0) {
+                    throw new IOException("HeadRequest with content!? Content-Length: " + contentLength + " does not match Read-Length: " + tmpOut.size());
+                }
+            } else if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && tmpOut.size() != contentLength) {
                 throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + tmpOut.size());
             }
             okay = true;
