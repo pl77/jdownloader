@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -409,16 +410,16 @@ public class Browser {
         }
         Browser.REQUEST_INTERVAL_LIMIT_MAP.put(domain, i);
     }
-
+    
     private static HashMap<String, ArrayList<Long>> REQUESTS_THRESHOLD_TIME_HISTORY_MAP;
-    private static HashMap<String, Long>            REQUESTS_THRESHOLD_INTERVAL_MAP;
-    private static HashMap<String, Integer>         REQUESTS_THRESHOLD_REQUESTS_MAP;
-
-    /**
+    private static HashMap<String, Long>          REQUESTS_THRESHOLD_INTERVAL_MAP;
+    private static HashMap<String, Integer>       REQUESTS_THRESHOLD_REQUESTS_MAP;
+    
+    /** 
      * sets request thresholds based on upper burstable limit. eg. 20(x) requests over 60000(y)[=1min]. Then on after it sets limit between
      * interval.
-     * 
-     * @author raztoki
+     *  
+     * @author raztoki 
      * @since JD2
      * @param host
      * @param i
@@ -427,13 +428,13 @@ public class Browser {
      *            (requests)
      * @param y
      *            (ms)
-     * @throws Exception
+     * @throws Exception 
      */
     public static synchronized void setRequestIntervalLimitGlobal(final String host, final int i, final int x, final long y) throws Exception {
         if (x <= 0 || y <= 0 || i <= 0) {
             throw new Exception("'x' and 'y' and 'i' have to be above zero!");
             // return;
-        }
+        } 
         final String domain = Browser.getHost(host);
         if (domain == null) {
             throw new Exception("Browser.getHost(host) returned null");
@@ -450,16 +451,11 @@ public class Browser {
         Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.put(domain, x);
         Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.put(domain, y);
     }
-
-    private static long    testStart;
-    private static int     testCount;
-    private static int     randomCount;
-    private static boolean isdebug;
-
+    
     private static synchronized void waitForPageAccess(final Browser browser, final Request request) throws InterruptedException {
         final String host = Browser.getHost(request.getUrl());
         ArrayList<Long> ts = null;
-        if (Browser.REQUESTS_THRESHOLD_INTERVAL_MAP != null && Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.containsKey(host)) {
+        if (Browser.REQUESTS_THRESHOLD_INTERVAL_MAP != null && Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.containsKey(host)) { 
             ts = Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP.get(host);
             if (ts == null) {
                 ts = new ArrayList<Long>();
@@ -467,34 +463,20 @@ public class Browser {
         }
         try {
             if (ts != null) {
-                if (Browser.isdebug) {
-                    Browser.testCount++;
-                    System.out.println("\r\nTEST RUN COUNT: " + Browser.testCount);
-                    System.out.println("TEST RUN TIME: " + (System.currentTimeMillis() - Browser.testStart) / 1000 + "seconds");
-                }
                 final long maxInterval = Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.get(host);
                 final int arrayMaxSize = Browser.REQUESTS_THRESHOLD_REQUESTS_MAP.get(host);
                 final ArrayList<Long> currentStill = new ArrayList<Long>();
-                if (Browser.isdebug) {
-                    System.out.println("BEFORE CLEANUP: Map size = " + ts.size());
-                }
                 for (final Long t : ts) {
                     long time = System.currentTimeMillis() - t;
-                    if (time < maxInterval) {
+                    if ( time < maxInterval) {
                         currentStill.add(t);
                     }
                 }
-                if (Browser.isdebug) {
-                    System.out.println("AFTER CLEANUP: Map size: " + currentStill.size() + " - " + ts.size() + " = " + (currentStill.size() - ts.size()) + " change.");
-                }
                 ts = currentStill;
                 if (ts.size() < arrayMaxSize) {
-                    if (Browser.isdebug) {
-                        System.out.println("ts.size() == LESS THAN requestmap threshold, NO WAIT REQUIRED!!!");
-                    }
                     return;
-                }
-                // since ArrayList preserves order, oldest entry should always be 0
+                } 
+                // since ArrayList preserves order, oldest entry should always be 0 
                 final long requestsThresholdOldestTimestamp = ts.get(0);
                 final int globalLimit = Browser.REQUEST_INTERVAL_LIMIT_MAP.get(host);
                 final long globalLastRequest = Browser.REQUESTTIME_MAP.get(host) == null ? System.currentTimeMillis() : Browser.REQUESTTIME_MAP.get(host);
@@ -502,7 +484,7 @@ public class Browser {
                 // burst map is full we then use specified average wait(i) based upon the last request
                 // current time - oldest timestamp should give us the elapsed time.
                 long wait1 = System.currentTimeMillis() - requestsThresholdOldestTimestamp;
-                // now determine how long until it expires against maxInterval
+                // now determine how long until it expires against maxInterval 
                 wait1 = maxInterval - wait1;
                 long wait2 = globalLimit - (System.currentTimeMillis() - globalLastRequest);
                 if (wait1 < 0) {
@@ -512,15 +494,9 @@ public class Browser {
                     wait2 = 0;
                 }
                 if (ts.size() < arrayMaxSize && (wait1 > maxInterval || wait2 > wait1)) {
-                    // only enter if we are equal to or less than arrayMaxSize.
-                    if (Browser.isdebug) {
-                        System.out.println("WAIT1 = " + wait1);
-                    }
-                    Thread.sleep(wait1);
+                 // only enter if we are equal to or less than arrayMaxSize.
+                    Thread.sleep(wait1); 
                 } else {
-                    if (Browser.isdebug) {
-                        System.out.println("WAIT2 = " + wait2);
-                    }
                     Thread.sleep(wait2);
                 }
                 return;
@@ -529,7 +505,7 @@ public class Browser {
             Integer globalLimit = null;
             Long localLastRequest = null;
             Long globalLastRequest = null;
-
+            
             if (browser.requestIntervalLimitMap != null) {
                 localLimit = browser.requestIntervalLimitMap.get(host);
                 localLastRequest = browser.requestTimeMap.get(host);
@@ -580,44 +556,41 @@ public class Browser {
             }
             if (ts != null) {
                 ts.add(System.currentTimeMillis());
-                if (Browser.isdebug) {
-                    System.out.println("SAVING: Map size: " + ts.size());
-                }
                 Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP.put(host, ts);
             }
         }
     }
 
-    private String                           acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
+    private String                   acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
 
     /*
      * -1 means use default Timeouts
      * 
      * 0 means infinite (DO NOT USE if not needed)
      */
-    private int                              connectTimeout   = -1;
+    private int                      connectTimeout   = -1;
 
-    private HashMap<String, Cookies>         cookies          = new HashMap<String, Cookies>();
+    private HashMap<String, Cookies> cookies          = new HashMap<String, Cookies>();
 
-    private boolean                          cookiesExclusive = true;
+    private boolean                  cookiesExclusive = true;
 
-    private String                           currentURL       = null;
+    private String                   currentURL       = null;
 
-    private String                           customCharset    = null;
-    private boolean                          debug            = false;
-    private boolean                          doRedirects      = false;
-    private RequestHeader                    headers;
-    private int                              limit            = 2 * 1024 * 1024;
-    private Logger                           logger           = null;
-    private ProxySelectorInterface           proxy;
-    private int                              readTimeout      = -1;
-    private Request                          request;
-    private HashMap<String, Integer>         requestIntervalLimitMap;
+    private String                   customCharset    = null;
+    private boolean                  debug            = false;
+    private boolean                  doRedirects      = false;
+    private RequestHeader            headers;
+    private int                      limit            = 2 * 1024 * 1024;
+    private Logger                   logger           = null;
+    private ProxySelectorInterface   proxy;
+    private int                      readTimeout      = -1;
+    private Request                  request;
+    private HashMap<String, Integer> requestIntervalLimitMap;
 
-    private HashMap<String, Long>            requestTimeMap;
-    private HashMap<String, ArrayList<Long>> requestTimeStampMap;
-
-    private boolean                          verbose          = false;
+    private HashMap<String, Long>    requestTimeMap;
+    private HashMap<String, ArrayList<Long>>    requestTimeStampMap;
+    
+    private boolean                  verbose          = false;
 
     public Browser() {
         final Thread currentThread = Thread.currentThread();
@@ -1023,14 +996,14 @@ public class Browser {
     }
 
     /**
-     * Returns the first form that has a 'key' that equals 'value'.
+     * Returns the first form that has input field with 'key' that equals 'value'.
      * 
      * @since JD2
      * @param key
      * @param value
      * @return
      */
-    public Form getFormbyKey(final String key, final String value) {
+    public Form getFormByInputFieldKeyValue(final String key, final String value) {
         for (final Form f : this.getForms()) {
             for (final InputField field : f.getInputFields()) {
                 if (key != null && key.equals(field.getKey())) {
@@ -1047,6 +1020,7 @@ public class Browser {
     }
 
     public Form getFormbyProperty(final String property, final String name) {
+        Form[] f = this.getForms();
         for (final Form form : this.getForms()) {
             if (form.getStringProperty(property) != null && form.getStringProperty(property).equalsIgnoreCase(name)) {
                 return form;
@@ -1346,6 +1320,9 @@ public class Browser {
         return this.openRequestConnection(this.createGetRequest(string));
     }
 
+    /** 
+     * @since JD2
+     **/
     public URLConnectionAdapter openHeadConnection(final String string) throws IOException {
         return this.openRequestConnection(this.createHeadRequest(string));
     }
@@ -1371,9 +1348,14 @@ public class Browser {
             request.getHeaders().put(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE, this.getAcceptLanguage());
             request.setConnectTimeout(this.getConnectTimeout());
             request.setReadTimeout(this.getReadTimeout());
-            if (this.currentURL != null) {
+            if (this.currentURL != null && this.getRedirectLocation() == null) {
+                // without this.getRedirectLocation() it messes with download core setting originalUrl code!
+                //                @see jd.plugins.BrowserAdapter.openDownload(Browser br, Downloadable downloadable, Request request, boolean resume, int chunks)    
+                //                if (originalUrl != null) {
+                //               request.getHeaders().put("Referer", originalUrl);
+                //            }
                 request.getHeaders().put(HTTPConstants.HEADER_REQUEST_REFERER, this.currentURL);
-            }
+            } 
             this.mergeHeaders(request);
         }
     }
@@ -1538,10 +1520,11 @@ public class Browser {
     public void setAllowedResponseCodes(final int... allowedResponseCodes) {
         this.allowedResponseCodes = allowedResponseCodes;
     }
-
+    
     /**
-     * Adds input to existing response codes. This solves the issue were setAllowedResponseCodes(int...) destroys old with new.
-     * 
+     * Adds input to existing response codes. This solves the issue were
+     * setAllowedResponseCodes(int...) destroys old with new.
+     *
      * @param input
      * @author raztoki
      * @since JD2
