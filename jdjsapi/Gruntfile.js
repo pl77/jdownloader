@@ -76,5 +76,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
 
   // Task definition
-  grunt.registerTask('default', ['watch']);
+  grunt.registerTask('default', ['requirejs']);
 };
