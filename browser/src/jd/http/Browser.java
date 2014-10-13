@@ -261,8 +261,8 @@ public class Browser {
         /* normal url */
         ret = new Regex(trimURL, "^[a-z0-9]{2,10}://(([^/]*?@)?)(([^@:./]+\\.?)+)(/|$|:\\d+$|:\\d+/)").getMatch(2);
         if (ret == null) {
-            // this should be IPv6 compliant.
-            ret = new Regex(trimURL, "^[^:\\s]+://(?:.*?@)?([^/]*)(?::\\d+)?").getMatch(0);
+            // this should be IPv6 compliant. must support directhttp://https://HOST && directhttp://https://user:pass@HOST etc.
+            ret = new Regex(trimURL, "^(?:[^:\\s]+://)?[^:\\s]+://(?:[^\\s@]+@)?([^\\s/]+)(?::\\d+)?").getMatch(0);
         }
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
