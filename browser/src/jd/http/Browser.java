@@ -261,7 +261,8 @@ public class Browser {
         /* normal url */
         ret = new Regex(trimURL, "^[a-z0-9]{2,10}://(([^/]*?@)?)(([^@:./]+\\.?)+)(/|$|:\\d+$|:\\d+/)").getMatch(2);
         if (ret == null) {
-            ret = new Regex(trimURL, "^(([^@:./]+\\.?)+)$").getMatch(0);
+            // this should be IPv6 compliant.
+            ret = new Regex(trimURL, "^[^:\\s]+://(?:.*?@)?([^/]*)(?::\\d+)?").getMatch(0);
         }
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
@@ -1020,7 +1021,6 @@ public class Browser {
     }
 
     public Form getFormbyProperty(final String property, final String name) {
-        Form[] f = this.getForms();
         for (final Form form : this.getForms()) {
             if (form.getStringProperty(property) != null && form.getStringProperty(property).equalsIgnoreCase(name)) {
                 return form;
@@ -1077,6 +1077,12 @@ public class Browser {
         return lRequest.getHttpConnection();
     }
 
+    /** 
+     * Gets Browser upper page load limit Byte value.
+     * 
+     * @since JD2
+     * @param i
+     */
     public int getLoadLimit() {
         return this.limit;
     }
@@ -1620,6 +1626,12 @@ public class Browser {
         this.keepResponseContentBytes = keepResponseContentBytes;
     }
 
+    /** 
+     * Sets Browser upper page load limit Byte value.
+     * 
+     * @since JD2
+     * @param i
+     */
     public void setLoadLimit(final int i) {
         this.limit = Math.max(0, i);
     }
