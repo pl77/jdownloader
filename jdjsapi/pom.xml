@@ -18,10 +18,41 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
         <executions>
-          <execution>
+         <execution>
+           <id>npm</id>
             <phase>install</phase>
             <configuration>
-              <target name="Build MyJD JS api">
+              <target name="npminstall">
+                <echo>
+                  <!-- NPM INSTALL  -->
+                </echo>
+                <exec executable="cmd" dir="."
+                      osfamily="windows" resultproperty="cmdresult" failonerror="false">
+                  <arg line="/c npm install > npm.status "/>
+                </exec>
+                <exec executable="bash" dir="${project.basedir}"
+                      osfamily="unix" resultproperty="cmdresult">
+                  <arg line="npm install"/>
+                </exec>
+                <loadfile property="npm.status"
+                          srcFile="npm.status"/>
+                <echo>${grunt.status}</echo>
+                <delete file="npm.status" quiet="true"/>
+                <condition property="cmdsuccess">
+                  <equals arg1="${cmdresult}" arg2="0"/>
+                </condition>
+                <fail unless="cmdsuccess"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>grunt</id>
+            <phase>install</phase>
+            <configuration>
+              <target name="grunt">
                 <echo>
                   <!-- GRUNT  -->
                 </echo>

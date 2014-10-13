@@ -65,7 +65,14 @@ module.exports = function(grunt) {
       //   },
       //   src: 'test/qunit3.html'
       // }
-    }
+    },
+     bower: {
+       install: {
+          options: {
+            targetDir: "bower_components"
+          }
+       }
+     }
   });
 
   // Plugin loading
@@ -74,7 +81,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-bower-task');
+  grunt.loadNpmTasks('grunt-npm-install');
 
   // Task definition
-  grunt.registerTask('default', ['requirejs']);
+  grunt.registerTask('default', ['npm-install', 'bower', 'requirejs']);
 };
