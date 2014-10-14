@@ -31,7 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -242,6 +241,10 @@ public class Browser {
         return Browser.getHost(url, false);
     }
 
+    private static final Pattern HOST_IP_PATTERN1    = Pattern.compile("^(?:[a-z0-9]{2,10}://)?[a-z0-9]{2,10}://(?:[^\\s@]+@)?(\\d+\\.\\d+\\.\\d+\\.\\d+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern HOST_IP_PATTERN2    = Pattern.compile("^(\\d+\\.\\d+\\.\\d+\\.\\d+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern HOST_DOMAIN_PATTERN = Pattern.compile("^(?:[a-z0-9]{2,10}://)?[a-z0-9]{2,10}://(?:[^\\s@]+@)?(([^@:./]+\\.?)+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     /*
      * this method extracts domain/ip from given url. optional keeps existing subdomains
      */
@@ -250,20 +253,17 @@ public class Browser {
             return null;
         }
         final String trimURL = url.trim();
-        /* direct ip */
-        String ret = new Regex(trimURL, "^[a-z0-9]{2,10}://(([^/]*?@)?)(\\d+\\.\\d+\\.\\d+\\.\\d+)(/|$|:\\d+$|:\\d+/)").getMatch(2);
+        /* direct ip with protocol */
+        String ret = new Regex(trimURL, Browser.HOST_IP_PATTERN1).getMatch(0);
         if (ret == null) {
-            ret = new Regex(trimURL, "^(\\d+\\.\\d+\\.\\d+\\.\\d+)$").getMatch(0);
+            /* direct ip without protocol */
+            ret = new Regex(trimURL, Browser.HOST_IP_PATTERN2).getMatch(0);
         }
         if (ret != null) {
             return ret;
         }
         /* normal url */
-        ret = new Regex(trimURL, "^[a-z0-9]{2,10}://(([^/]*?@)?)(([^@:./]+\\.?)+)(/|$|:\\d+$|:\\d+/)").getMatch(2);
-        if (ret == null) {
-            // this should be IPv6 compliant. must support directhttp://https://HOST && directhttp://https://user:pass@HOST etc.
-            ret = new Regex(trimURL, "^(?:[^:\\s]+://)?[^:\\s]+://(?:[^\\s@]+@)?([^\\s/]+)(?::\\d+)?").getMatch(0);
-        }
+        ret = new Regex(trimURL, Browser.HOST_DOMAIN_PATTERN).getMatch(0);
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
             final PublicSuffixList psl = PublicSuffixList.getInstance();
@@ -1077,7 +1077,7 @@ public class Browser {
         return lRequest.getHttpConnection();
     }
 
-    /** 
+    /**
      * Gets Browser upper page load limit Byte value.
      * 
      * @since JD2
@@ -1626,7 +1626,7 @@ public class Browser {
         this.keepResponseContentBytes = keepResponseContentBytes;
     }
 
-    /** 
+    /**
      * Sets Browser upper page load limit Byte value.
      * 
      * @since JD2
