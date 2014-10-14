@@ -241,9 +241,9 @@ public class Browser {
         return Browser.getHost(url, false);
     }
 
-    private static final Pattern HOST_IP_PATTERN1    = Pattern.compile("^(?:[a-z0-9]{2,10}://)?[a-z0-9]{2,10}://(?:[^\\s@]+@)?(\\d+\\.\\d+\\.\\d+\\.\\d+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern HOST_IP_PATTERN1    = Pattern.compile("^(?:[a-z0-9]{2,64}://)?[a-z0-9]{2,64}://(?:[^\\s@]+@)?(\\d+\\.\\d+\\.\\d+\\.\\d+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern HOST_IP_PATTERN2    = Pattern.compile("^(\\d+\\.\\d+\\.\\d+\\.\\d+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    private static final Pattern HOST_DOMAIN_PATTERN = Pattern.compile("^(?:[a-z0-9]{2,10}://)?[a-z0-9]{2,10}://(?:[^\\s@]+@)?(([^@:./]+\\.?)+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern HOST_DOMAIN_PATTERN = Pattern.compile("^(?:[a-z0-9]{2,64}://)?[a-z0-9]{2,64}://(?:[^\\s@]+@)?(([^@:./]+\\.?)+)(/|$|:\\d+$|:\\d+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /*
      * this method extracts domain/ip from given url. optional keeps existing subdomains
