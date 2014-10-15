@@ -23,10 +23,9 @@
  		//wait for require.js before autostarting tests
 	 	QUnit.config.autostart = false;
 		require(['jdapi_unit_tests'], function(APITests){
-      console.log(APITests);
       var tests = new APITests();
       tests.testCore();
-      tests.testApiServer(); 
+      tests.testApiServer();
       tests.testApiService();
       tests.testDeviceController();
       QUnit.start(); //Tests loaded, run tests

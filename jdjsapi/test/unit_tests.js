@@ -62,36 +62,35 @@ define("jdapi_unit_tests", ["coreCore", "device", "serverServer", "serviceServic
 		testCore : function(){
 			module("Test JDAPI Core");
 			test("JDAPI Core Set Up", function(){
-				expect(1);
 				var jdapiCore = new JDAPICore(this.options, this.onConnectedDeferred, this.APP_KEY);
 				ok("initialized");
 			});
-			test("JDAPI Core Interface functions available", function(assert){
-				var jdapiCore = new JDAPICore(this.options, this.onConnectedDeferred, this.APP_KEY);
-				assert.ok($.isFunction(jdapiCore.connect), "connect available");
-				assert.ok($.isFunction(jdapiCore.reconnect), "reconnect available");
-				assert.ok($.isFunction(jdapiCore.disconnect), "disconnect available");
-
-				assert.ok($.isFunction(jdapiCore.serverCall), "serverCall available");
-				assert.ok($.isFunction(jdapiCore.deviceCall), "deviceCall available");
-				assert.ok($.isFunction(jdapiCore.localDeviceCall), "localDeviceCall available");
-
-				assert.ok($.isFunction(jdapiCore.getSessionToken), "getSessionToken available");
-				assert.ok($.isFunction(jdapiCore.addAPIStateChangeListener), "addAPIStateChangeListener available");
-				assert.ok($.isFunction(jdapiCore.getAPIState), "getAPIState available");
-				assert.ok($.isFunction(jdapiCore.getCurrentUser), "getCurrentUser available");
-			});
-			test("JDAPI Core Test Getter", function(assert){
-				var jdapiCore = new JDAPICore(this.options, this.onConnectedDeferred, this.APP_KEY);
-				assert.ok($.isNumeric(jdapiCore.getAPIState()), "getAPIState works");
-				var currentUser = jdapiCore.getCurrentUser();
-
-				assert.notEqual(currentUser.loggedIn, undefined, "loggedIn flag undefined");
-				assert.notEqual(currentUser.loggedIn, null, "loggedIn flag null");
-
-				// assert.notEqual(currentUser.name, undefined, "name undefined");
-				// assert.notEqual(currentUser.name, null, "name null");
-			});
+//			test("JDAPI Core Interface functions available", function(assert){
+//				var jdapiCore = new JDAPICore(this.options, this.onConnectedDeferred, this.APP_KEY);
+//				assert.ok($.isFunction(jdapiCore.connect), "connect available");
+//				assert.ok($.isFunction(jdapiCore.reconnect), "reconnect available");
+//				assert.ok($.isFunction(jdapiCore.disconnect), "disconnect available");
+//
+//				assert.ok($.isFunction(jdapiCore.serverCall), "serverCall available");
+//				assert.ok($.isFunction(jdapiCore.deviceCall), "deviceCall available");
+//				assert.ok($.isFunction(jdapiCore.localDeviceCall), "localDeviceCall available");
+//
+//				assert.ok($.isFunction(jdapiCore.getSessionToken), "getSessionToken available");
+//				assert.ok($.isFunction(jdapiCore.addAPIStateChangeListener), "addAPIStateChangeListener available");
+//				assert.ok($.isFunction(jdapiCore.getAPIState), "getAPIState available");
+//				assert.ok($.isFunction(jdapiCore.getCurrentUser), "getCurrentUser available");
+//			});
+//			test("JDAPI Core Test Getter", function(assert){
+//				var jdapiCore = new JDAPICore(this.options, this.onConnectedDeferred, this.APP_KEY);
+//				assert.ok($.isNumeric(jdapiCore.getAPIState()), "getAPIState works");
+//				var currentUser = jdapiCore.getCurrentUser();
+//
+//				assert.notEqual(currentUser.loggedIn, undefined, "loggedIn flag undefined");
+//				assert.notEqual(currentUser.loggedIn, null, "loggedIn flag null");
+//
+//				// assert.notEqual(currentUser.name, undefined, "name undefined");
+//				// assert.notEqual(currentUser.name, null, "name null");
+//			});
 		},
 		testApiServer: function(){
 			module("Test JDAPI Server");

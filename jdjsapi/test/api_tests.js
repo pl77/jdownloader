@@ -124,67 +124,67 @@ var authFailedError = {
 /**
  * Retrive encryption token to mock server
  */
-require(["coreCryptoUtils"], function(cryptoUtils) {
-
-	var setupAjaxMock = function() {
-		var restoredOptions = JSON.parse(localStorage.getItem("jdapi/src/core/core.js"));
-		var encryptionToken = {};
-		encryptionToken.server = CryptoJS.lib.WordArray.random(restoredOptions.serverEncryptionToken.sigBytes);
-		encryptionToken.device = CryptoJS.lib.WordArray.random(restoredOptions.deviceEncryptionToken.sigBytes);
-
-		var iv = encryptionToken.server.firstHalf();
-		var key = encryptionToken.server.secondHalf();
-
-		console.log("IV " + iv);
-		console.log("KEY " + key);
-
-		var testCipherText = cryptoUtils.encryptJSON(key, {'test': 0});
-
-		console.log(cryptoUtils.decryptJSON(encryptionToken.server, null, testCipherText));
-
-		$.mockjax({
-			url: 'http://api.jdownloader.org/my/listdevices*',
-			status: 200,
-			responseTime: 200,
-			responseText: cryptoUtils.encryptJSON(encryptionToken.server, JSON.stringify({
-				data : {
-					list: []
-				}
-			}))
-		});
-	};
-
-	module("Test with mock objects", {
-		//Setup up API
-		setup: function() {
-			//interrupt execution while API initializes
-			stop();
-			api = new window.jd.API({
-				email: EMAIL,
-				pass: PASSWORD
-			}, function() {
-				setupAjaxMock();
-				start();
-			});
-		},
-		//Disconnect API
-		teardown: function() {
-			stop();
-			api.disconnect().always(function() {
-				start();
-			});
-		}
-	});
-
-	asyncTest("list devices", function() {
-		expect(1);
-		api.listDevices().done(function(devices) {
-			console.log(devices);
-			ok(devices, "DEVICE LIST RECEIVED");
-			start();
-		}).fail(function(err) {
-			ok(true, "DEVICE LIST RECEIVED FAILED");
-			console.error(err);
-		});
-	});
-});
+//require(["coreCryptoUtils"], function(cryptoUtils) {
+//
+//	var setupAjaxMock = function() {
+//		var restoredOptions = JSON.parse(localStorage.getItem("jdapi/src/core/core.js"));
+//		var encryptionToken = {};
+//		encryptionToken.server = CryptoJS.lib.WordArray.random(restoredOptions.serverEncryptionToken.sigBytes);
+//		encryptionToken.device = CryptoJS.lib.WordArray.random(restoredOptions.deviceEncryptionToken.sigBytes);
+//
+//		var iv = encryptionToken.server.firstHalf();
+//		var key = encryptionToken.server.secondHalf();
+//
+//		console.log("IV " + iv);
+//		console.log("KEY " + key);
+//
+//		var testCipherText = cryptoUtils.encryptJSON(key, {'test': 0});
+//
+//		console.log(cryptoUtils.decryptJSON(encryptionToken.server, null, testCipherText));
+//
+//		$.mockjax({
+//			url: 'http://api.jdownloader.org/my/listdevices*',
+//			status: 200,
+//			responseTime: 200,
+//			responseText: cryptoUtils.encryptJSON(encryptionToken.server, JSON.stringify({
+//				data : {
+//					list: []
+//				}
+//			}))
+//		});
+//	};
+//
+//	module("Test with mock objects", {
+//		//Setup up API
+//		setup: function() {
+//			//interrupt execution while API initializes
+//			stop();
+//			api = new window.jd.API({
+//				email: EMAIL,
+//				pass: PASSWORD
+//			}, function() {
+//				setupAjaxMock();
+//				start();
+//			});
+//		},
+//		//Disconnect API
+//		teardown: function() {
+//			stop();
+//			api.disconnect().always(function() {
+//				start();
+//			});
+//		}
+//	});
+//
+//	asyncTest("list devices", function() {
+//		expect(1);
+//		api.listDevices().done(function(devices) {
+//			console.log(devices);
+//			ok(devices, "DEVICE LIST RECEIVED");
+//			start();
+//		}).fail(function(err) {
+//			ok(true, "DEVICE LIST RECEIVED FAILED");
+//			console.error(err);
+//		});
+//	});
+//});
