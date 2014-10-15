@@ -1,86 +1,77 @@
 <project>
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jdownloader.gwt</groupId>
-	<artifactId>jdapi</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
-	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jdownloader.gwt</groupId>
+    <artifactId>jdapi</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
 
-	<dependencies>
-	</dependencies>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<build>
-		<plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
-         <execution>
-           <id>npm</id>
-            <phase>install</phase>
-            <configuration>
-              <target name="npminstall">
-                <echo>
-                  <!-- NPM INSTALL  -->
-                </echo>
-                <exec executable="cmd" dir="."
-                      osfamily="windows" resultproperty="cmdresult" failonerror="false">
-                  <arg line="/c npm install > npm.status "/>
-                </exec>
-                <exec executable="bash" dir="${project.basedir}"
-                      osfamily="unix" resultproperty="cmdresult">
-                  <arg line="npm install"/>
-                </exec>
-                <loadfile property="npm.status"
-                          srcFile="npm.status"/>
-                <echo>${grunt.status}</echo>
-                <delete file="npm.status" quiet="true"/>
-                <condition property="cmdsuccess">
-                  <equals arg1="${cmdresult}" arg2="0"/>
-                </condition>
-                <fail unless="cmdsuccess"/>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>grunt</id>
-            <phase>install</phase>
-            <configuration>
-              <target name="grunt">
-                <echo>
-                  <!-- GRUNT  -->
-                </echo>
-                <exec executable="cmd" dir="."
-                      osfamily="windows" resultproperty="cmdresult" failonerror="false">
-                  <arg line="/c grunt -no-color > grunt.status "/>
-                </exec>
-                <exec executable="bash" dir="${project.basedir}"
-                      osfamily="unix" resultproperty="cmdresult">
-                  <arg line="grunt"/>
-                </exec>
-                <loadfile property="grunt.status"
-                          srcFile="grunt.status"/>
-                <echo>${grunt.status}</echo>
-                <delete file="grunt.status" quiet="true"/>
-                <condition property="cmdsuccess">
-                  <equals arg1="${cmdresult}" arg2="0"/>
-                </condition>
-                <fail unless="cmdsuccess"/>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-		</plugins>
-	</build>
+    <dependencies></dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>npm</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target name="npminstall">
+                                <echo>
+                                    <!-- NPM INSTALL  -->
+                                </echo>
+                                <exec executable="cmd" dir="." osfamily="windows"
+                                    resultproperty="cmdresult" failonerror="false">
+                                    <arg line="/c npm install > npm.status " />
+                                </exec>
+                                <exec executable="npm" dir="." osfamily="unix"
+                                    resultproperty="cmdresult">
+                                    <arg value="install" />
+                                </exec>
+                                <condition property="cmdsuccess">
+                                    <equals arg1="${cmdresult}" arg2="0" />
+                                </condition>
+                                <fail unless="cmdsuccess" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>grunt</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target name="grunt">
+                                <echo>
+                                    <!-- GRUNT  -->
+                                </echo>
+                                <exec executable="cmd" dir="." osfamily="windows"
+                                    resultproperty="cmdresult" failonerror="false">
+                                    <arg line="/c grunt -no-color > grunt.status " />
+                                </exec>
+                                <exec executable="grunt" dir="." osfamily="unix"
+                                    resultproperty="cmdresult">
+                                    <arg value="-no-color" />
+                                </exec>
+                                <condition property="cmdsuccess">
+                                    <equals arg1="${cmdresult}" arg2="0" />
+                                </condition>
+                                <fail unless="cmdsuccess" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -58,5 +58,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-npm-install');
 
   // Task definition
-  grunt.registerTask('default', ['npm-install', 'bower', 'qunit', 'requirejs']);
+  grunt.registerTask('default', ['npm-install', 'bower', 'requirejs']);
 };
