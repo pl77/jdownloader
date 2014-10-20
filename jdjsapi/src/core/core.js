@@ -261,6 +261,15 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
 		getAPIState: function() {
 			return APIState.getAPIState();
 		},
+		getAPIStatePlain: function() {
+		  switch(APIState.getAPIState()){
+		    case 0: return "CONNECTED_STATE"; break;
+		    case 1: return "PENDING_STATE"; break;
+		    case 2: return "RECONNECT_STATE"; break;
+		    case 3: return "DISCONNECTED_STATE"; break;
+		    default: return "INVALID";
+		  };
+		},
 		getCurrentUser: function() {
 			return {
 				loggedIn: (this.getAPIState() !== 3),

@@ -259,6 +259,9 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
 		getAPIState: function() {
 			return this.jdAPICore.getAPIState();
 		},
+		getAPIStatePlain: function() {
+      return this.jdAPICore.getAPIStatePlain();
+    },
 		getCurrentUser: function() {
 			return this.jdAPICore.getCurrentUser();
 		}
