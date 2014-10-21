@@ -232,7 +232,7 @@ public abstract class Request {
         final String host = Browser.getHost(this.httpConnection.getURL());
         for (int i = 0; i < cookieHeaders.size(); i++) {
             final String header = cookieHeaders.get(i);
-            this.getCookies().add(Cookies.parseCookies(header, host, date));
+            this.getCookies().add(Cookies.parseCookies(header, host, date, true));
         }
     }
 

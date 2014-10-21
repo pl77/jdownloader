@@ -25,19 +25,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import jd.parser.Regex;
 
 public class Cookies {
-    
-    public static Cookies parseCookies(final String cookieString, final String host, final String serverTime) {
+
+    public static Cookies parseCookies(final String cookieString, final String host, final String serverTime, boolean isSetCookie) {
         final Cookies cookies = new Cookies();
-        
+
         final String header = cookieString;
-        
+
         String path = null;
         String expires = null;
         String domain = null;
         final LinkedHashMap<String, String> tmp = new LinkedHashMap<String, String>();
         /* Cookie individual elements */
         final StringTokenizer st = new StringTokenizer(header, ";");
-        
+
         while (st.hasMoreTokens()) {
             String key = null;
             String value = null;
@@ -52,7 +52,7 @@ public class Cookies {
                 key = st2[0].trim();
                 value = st2[1].trim();
             }
-            
+
             if (key != null) {
                 if (key.equalsIgnoreCase("path")) {
                     path = value;
@@ -61,13 +61,18 @@ public class Cookies {
                 } else if (key.equalsIgnoreCase("domain")) {
                     domain = value;
                 } else {
-                    tmp.put(key, value);
+                    if (!isSetCookie || tmp.size() == 0) {
+                        /**
+                         * SetCookie only contains a single cookie
+                         */
+                        tmp.put(key, value);
+                    }
                 }
             } else {
                 break;
             }
         }
-        
+
         for (final Entry<String, String> next : tmp.entrySet()) {
             /*
              * no cookies are cookies without a value
@@ -84,20 +89,22 @@ public class Cookies {
                 cookie.setHostTime(serverTime);
             }
         }
-        
         return cookies;
-        
     }
-    
+
+    public static Cookies parseCookies(final String cookieString, final String host, final String serverTime) {
+        return Cookies.parseCookies(cookieString, host, serverTime, false);
+    }
+
     private final CopyOnWriteArrayList<Cookie> cookies = new CopyOnWriteArrayList<Cookie>();
-    
+
     public Cookies() {
     }
-    
+
     public Cookies(final Cookies cookies) {
         this.add(cookies);
     }
-    
+
     public synchronized void add(final Cookie cookie) {
         for (final Cookie cookie2 : this.cookies) {
             if (cookie2.equals(cookie)) {
@@ -107,42 +114,49 @@ public class Cookies {
         }
         this.cookies.add(cookie);
     }
-    
+
     public void add(final Cookies newcookies) {
         for (final Cookie cookie : newcookies.getCookies()) {
             this.add(cookie);
         }
     }
-    
+
     public void clear() {
         this.cookies.clear();
     }
-    
+
     public Cookie get(final String key) {
-        if (key == null) { return null; }
-        for (final Cookie cookie : this.cookies) {
-            if (cookie.getKey().equals(key)) { return cookie; }
+        if (key == null) {
+            return null;
         }
         for (final Cookie cookie : this.cookies) {
-            if (cookie.getKey().equalsIgnoreCase(key)) { return cookie; }
+            if (cookie.getKey().equals(key)) {
+                return cookie;
+            }
+        }
+        for (final Cookie cookie : this.cookies) {
+            if (cookie.getKey().equalsIgnoreCase(key)) {
+                return cookie;
+            }
         }
         return null;
     }
-    
+
     public List<Cookie> getCookies() {
         return this.cookies;
     }
-    
+
     public boolean isEmpty() {
         return this.cookies.isEmpty();
     }
-    
+
     public void remove(final Cookie cookie) {
         this.cookies.remove(cookie);
     }
-    
-    /** 
+
+    /**
      * Removes Cookie from current session, based on keyName
+     * 
      * @author raztoki
      * @since JD2
      * */
@@ -150,12 +164,12 @@ public class Cookies {
         if (keyName == null) {
             return;
         }
-        final Cookie ckie = get(keyName);
+        final Cookie ckie = this.get(keyName);
         if (ckie != null) {
             this.cookies.remove(ckie);
         }
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder();
