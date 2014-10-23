@@ -188,6 +188,16 @@ public abstract class Request {
 
     protected boolean              keepByteArray  = false;
 
+    protected Boolean              sslTrustALL    = null;
+
+    public Boolean isSSLTrustALLSet() {
+        return this.sslTrustALL;
+    }
+
+    public void setSSLTrustALL(Boolean sslTrustALL) {
+        this.sslTrustALL = sslTrustALL;
+    }
+
     protected Request(final Request cloneRequest) {
         this.orgURL = cloneRequest.getUrl();
         this.setCustomCharset(cloneRequest.getCustomCharset());
@@ -530,6 +540,10 @@ public abstract class Request {
         return this.httpConnection == null ? this.isContentDecodedSet() : this.httpConnection.isContentDecoded();
     }
 
+    public Boolean isSSLTrustALL() {
+        return this.httpConnection == null ? this.isSSLTrustALLSet() : this.httpConnection.isSSLTrustALL();
+    }
+
     public boolean isContentDecodedSet() {
         return this.contentDecoded;
     }
@@ -548,6 +562,10 @@ public abstract class Request {
         this.httpConnection.setReadTimeout(this.getReadTimeout());
         this.httpConnection.setConnectTimeout(this.getConnectTimeout());
         this.httpConnection.setContentDecoded(this.isContentDecodedSet());
+        final Boolean isSSLTrustALL = this.isSSLTrustALLSet();
+        if (isSSLTrustALL != null) {
+            this.httpConnection.setSSLTrustALL(isSSLTrustALL);
+        }
         final RequestHeader headers = this.getHeaders();
         if (headers != null) {
             for (final HTTPHeader header : headers) {

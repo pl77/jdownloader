@@ -80,17 +80,19 @@ public class Browser {
 
     }
 
-    private static final HashMap<String, Cookies> COOKIES         = new HashMap<String, Cookies>();
-    private static ProxySelectorInterface         GLOBAL_PROXY    = null;
-    private static Logger                         LOGGER          = null;
+    private static final HashMap<String, Cookies> COOKIES            = new HashMap<String, Cookies>();
+    private static ProxySelectorInterface         GLOBAL_PROXY       = null;
+    private static Logger                         LOGGER             = null;
 
     private static HashMap<String, Integer>       REQUEST_INTERVAL_LIMIT_MAP;
 
     private static HashMap<String, Long>          REQUESTTIME_MAP;
 
-    private static int                            TIMEOUT_CONNECT = 30000;
+    private static int                            TIMEOUT_CONNECT    = 30000;
 
-    private static int                            TIMEOUT_READ    = 30000;
+    private static int                            TIMEOUT_READ       = 30000;
+
+    private Boolean                               defaultSSLTrustALL = null;
 
     public static ProxySelectorInterface _getGlobalProxy() {
         return Browser.GLOBAL_PROXY;
@@ -657,6 +659,7 @@ public class Browser {
         br.connectTimeout = this.connectTimeout;
         br.currentURL = this.currentURL;
         br.doRedirects = this.doRedirects;
+        br.defaultSSLTrustALL = this.defaultSSLTrustALL;
         br.setCustomCharset(this.customCharset);
         br.getHeaders().putAll(this.getHeaders());
         br.limit = this.limit;
@@ -1392,6 +1395,9 @@ public class Browser {
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
+                        if (request.isSSLTrustALLSet() == null) {
+                            request.setSSLTrustALL(this.getDefaultSSLTrustALL());
+                        }
                         connection = request.connect().getHttpConnection();
                     } finally {
                         if (this.isDebug()) {
@@ -1747,5 +1753,20 @@ public class Browser {
             selector = Browser.GLOBAL_PROXY;
         }
         return selector != null && selector.updateProxy(request, proxyRetryCounter);
+    }
+
+    /**
+     * @return the defaultSSLTrustALL
+     */
+    public Boolean getDefaultSSLTrustALL() {
+        return this.defaultSSLTrustALL;
+    }
+
+    /**
+     * @param defaultSSLTrustALL
+     *            the defaultSSLTrustALL to set
+     */
+    public void setDefaultSSLTrustALL(Boolean defaultSSLTrustALL) {
+        this.defaultSSLTrustALL = defaultSSLTrustALL;
     }
 }
