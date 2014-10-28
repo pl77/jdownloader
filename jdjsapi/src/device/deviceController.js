@@ -1,5 +1,10 @@
 define("deviceController",["device"], function(JDAPIDevice) {
 
+  /* Timeouts for direct connection mode detection */
+  var GET_DIRECT_CONNECTION_INFOS_TIMEOUT = 800;
+  var PING_TIMEOUT = 400;
+
+  /* Iterator http://stackoverflow.com/questions/12079417/javascript-iterators */
 	var Iterator = function(items) {
 		this.index = 0;
 		this.items = items || [];
@@ -59,7 +64,7 @@ define("deviceController",["device"], function(JDAPIDevice) {
 			//put device on device list
 			this.devices[dev.id] = new JDAPIDevice(this.jdAPICore, dev);
 			var self = this;
-			this.jdAPICore.deviceCall(dev.id, "/device/getDirectConnectionInfos", [], 3000).done(function(result) {
+			this.jdAPICore.deviceCall(dev.id, "/device/getDirectConnectionInfos", [], GET_DIRECT_CONNECTION_INFOS_TIMEOUT).done(function(result) {
 				if (!result || !result.data || !result.data.infos || !result.data.infos.length === 0) {
 					self._iterateAndCheckForLocalMode(iterator, finishedCallback);
 				} else {
@@ -78,7 +83,7 @@ define("deviceController",["device"], function(JDAPIDevice) {
 			var self = this;
 			var localURL = "http://" + deviceAddress.ip + ":" + deviceAddress.port;
 			//make test call
-			var pingCall = self.jdAPICore.localDeviceCall(localURL, deviceId, "/device/ping", [], 1000);
+			var pingCall = self.jdAPICore.localDeviceCall(localURL, deviceId, "/device/ping", [], PING_TIMEOUT);
 			pingCall.done(function(result) {
 				self.devices[deviceId].setLocalURL(localURL);
 			});

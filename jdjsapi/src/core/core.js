@@ -16,7 +16,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
 
 	/**
 	 * GLOBAL STATE VARIABLES
-	 * TODO: Not compatible with multiple JDAPICore instances.
+	 * TODO: Not compatible with multiple JDAPICore instances as it is global singleton
 	 */
 	var APIState = (function() {
 		// Private variables
@@ -143,7 +143,6 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
 					this._handleEnqueuedRequestsAndSetConnected();
 				}.bind(this));
 				reconnect.fail(function() {
-					console.log("FAIL FINALLY");
 					// FAIL FINALLY, TRIGGER LOGOUT ACTIONS ETC
 					this.disconnect();
 				}.bind(this));
