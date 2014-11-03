@@ -54,6 +54,14 @@ public class MyJDCaptchasClient<GenericType> {
         return this.api.callServer(url, re, sessionInfo, SuccessfulResponse.class).isSuccessful();
     }
     
+    public boolean isEnabled() throws MyJDownloaderException {
+        final SessionInfo sessionInfo = this.api.getSessionInfo();
+        final String url = "/my/captchas/isEnabled?sessiontoken=" + this.api.urlencode(sessionInfo.getSessionToken());
+        final JSonRequest re = new JSonRequest();
+        re.setUrl(url);
+        return this.api.callServer(url, re, sessionInfo, SuccessfulResponse.class).isSuccessful();
+    }
+    
     public MyCaptchaSolution solve(final MyCaptchaChallenge myCaptchaChallenge) throws MyJDownloaderException {
         final SessionInfo sessionInfo = this.api.getSessionInfo();
         final String url = "/my/captchas/solve?sessiontoken=" + this.api.urlencode(sessionInfo.getSessionToken());
