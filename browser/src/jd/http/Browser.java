@@ -975,8 +975,15 @@ public class Browser {
     }
 
     public void getDownload(final File file, final String urlString) throws IOException {
-        final URLConnectionAdapter con = this.openGetConnection(URLDecoder.decode(urlString, "UTF-8"));
-        Browser.download(file, con);
+        URLConnectionAdapter con = null;
+        try {
+            con = this.openGetConnection(URLDecoder.decode(urlString, "UTF-8"));
+            Browser.download(file, con);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
     }
 
     public Form getForm(final int i) {
