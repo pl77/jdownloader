@@ -639,7 +639,7 @@ public abstract class Request {
     }
 
     public void setProxy(final HTTPProxy proxy) {
-        if (proxy instanceof ClonedProxy) {
+        if (proxy == null || proxy instanceof ClonedProxy) {
             this.proxy = proxy;
         } else {
             this.proxy = new ClonedProxy(proxy);

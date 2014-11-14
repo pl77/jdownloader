@@ -1395,10 +1395,10 @@ public class Browser {
                     } catch (final InterruptedException e) {
                         throw new IOException("requestIntervalTime Exception");
                     }
-                    URLConnectionAdapter connection;
+                    final URLConnectionAdapter connection;
                     try {
                         if (request.getProxy() == null) {
-                            List<HTTPProxy> proxies = this.selectProxies(request.getUrl());
+                            final List<HTTPProxy> proxies = this.selectProxies(request.getUrl());
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
@@ -1511,7 +1511,7 @@ public class Browser {
             selector = Browser.GLOBAL_PROXY;
         }
         if (selector == null) {
-            ArrayList<HTTPProxy> ret = new ArrayList<HTTPProxy>();
+            final ArrayList<HTTPProxy> ret = new ArrayList<HTTPProxy>();
             ret.add(HTTPProxy.NONE);
             return ret;
         }
