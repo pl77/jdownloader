@@ -41,18 +41,25 @@ public class Encoding {
         return res;
     }
 
+    public static void main(String[] args) {
+        System.out.println(Encoding.Base64Decode("aHR0cDovL3VwbG9hZGVkLm5ldC9maWxlLzdjOXFoMWtl="));
+    }
+
     public static String Base64Decode(final String base64) {
         if (base64 == null) {
             return null;
         }
         try {
-
-            final byte[] plain = Base64.decode(base64);
-            if (Encoding.filterString(new String(plain, "UTF-8")).length() < plain.length / 1.5) {
+            byte[] plain = Base64.decode(base64);
+            if (plain == null || plain.length == 0) {
+                plain = Base64.decodeFast(base64);
+            }
+            if (plain != null && Encoding.filterString(new String(plain, "UTF-8")).length() < plain.length / 1.5) {
                 return base64;
             }
             return new String(plain, "UTF-8");
         } catch (final Exception e) {
+            e.printStackTrace();
             return base64;
         }
     }
@@ -212,11 +219,6 @@ public class Encoding {
         } catch (final Exception e) {
             return false;
         }
-    }
-
-    public static void main(final String[] args) {
-        final String test = "new encoding &#39";
-        System.out.println(test);
     }
 
     public static String unescape(String s) {
