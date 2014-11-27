@@ -808,6 +808,13 @@ public class Browser {
         return this.createPostRequest(url, Request.parseQuery(post));
     }
 
+    /**
+     * rfc2616
+     * 
+     * @param request
+     * @return
+     * @throws BrowserException
+     */
     public Request createRedirectFollowingRequest(final Request request) throws BrowserException {
         if (request == null) {
             throw new IllegalArgumentException("Request is null");
@@ -822,20 +829,27 @@ public class Browser {
         switch (responseCode) {
         case 200:
         case 201:
-            newRequest = new GetRequest(request);
+            if (request instanceof HeadRequest) {
+                newRequest = request.cloneRequest();
+            } else {
+                newRequest = new GetRequest(request);
+            }
             break;
         case 301:
-            if (!(request instanceof GetRequest)) {
-                /* it seems getRequest is expected although rfc says that post can be kept */
-                newRequest = new GetRequest(request);
-                // throw new IllegalStateException("ResponseCode 301 does not support postData redirect!");
+            if (request instanceof HeadRequest || request instanceof GetRequest) {
+                newRequest = request.cloneRequest();
             } else {
+                /* it seems getRequest is expected although rfc says that post can be kept */
                 newRequest = new GetRequest(request);
             }
             break;
         case 302:
         case 303:
-            newRequest = new GetRequest(request);
+            if (request instanceof HeadRequest) {
+                newRequest = request.cloneRequest();
+            } else {
+                newRequest = new GetRequest(request);
+            }
             break;
         case 307:
         case 308:
