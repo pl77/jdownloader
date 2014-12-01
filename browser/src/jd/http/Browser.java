@@ -897,9 +897,14 @@ public class Browser {
 
     public String followConnection() throws IOException {
         final Logger llogger = this.getLogger();
-        final Request lRequest = this.getRequest();
+        Request lRequest = this.getRequest();
         if (lRequest == null) {
             throw new IllegalStateException("Request is null");
+        }
+        // You can not follow connection of a head request since it doesn't have a InputStream. Re-request current URL get to over come this!
+        if (lRequest instanceof HeadRequest) {
+            this.getPage(lRequest.getUrl());
+            lRequest = this.getRequest();
         }
         if (lRequest.getHtmlCode() != null) {
             if (llogger != null) {
@@ -1593,6 +1598,41 @@ public class Browser {
         cookies.add(new Cookie(host, key, value));
     }
 
+    /**
+     * Adds given Cookies to current Cookies session for given host.
+     * 
+     * @author raztoki
+     * @since JD2
+     * @param url
+     * @param iCookies
+     * @param replace
+     */
+    public void setCookies(final String url, final Cookies iCookies) {
+        setCookies(url, iCookies, false);
+    }
+    
+    /**
+     * Adds given Cookies to current Cookies session for given host. replace when true will dump _all_ Cookies
+     * 
+     * @author raztoki
+     * @since JD2
+     * @param url
+     * @param iCookies
+     * @param replace
+     */
+    public void setCookies(final String url, final Cookies iCookies, final boolean replace) {
+        final String host = Browser.getHost(url);
+        Cookies cookies;
+        if (!this.getCookies().containsKey(host) || (cookies = this.getCookies().get(host)) == null) {
+            cookies = new Cookies();
+            this.getCookies().put(host, cookies);
+        }
+        if (replace) {
+            cookies.clear();
+        }
+        cookies.add(iCookies);
+    }
+    
     public void setCookiesExclusive(final boolean b) {
         if (this.cookiesExclusive == b) {
             return;
