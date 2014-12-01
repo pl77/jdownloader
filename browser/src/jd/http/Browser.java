@@ -901,11 +901,6 @@ public class Browser {
         if (lRequest == null) {
             throw new IllegalStateException("Request is null");
         }
-        // You can not follow connection of a head request since it doesn't have a InputStream. Re-request current URL get to over come this!
-        if (lRequest instanceof HeadRequest) {
-            this.getPage(lRequest.getUrl());
-            lRequest = this.getRequest();
-        }
         if (lRequest.getHtmlCode() != null) {
             if (llogger != null) {
                 llogger.warning("Request has already been read");
@@ -1608,9 +1603,9 @@ public class Browser {
      * @param replace
      */
     public void setCookies(final String url, final Cookies iCookies) {
-        setCookies(url, iCookies, false);
+        this.setCookies(url, iCookies, false);
     }
-    
+
     /**
      * Adds given Cookies to current Cookies session for given host. replace when true will dump _all_ Cookies
      * 
@@ -1632,7 +1627,7 @@ public class Browser {
         }
         cookies.add(iCookies);
     }
-    
+
     public void setCookiesExclusive(final boolean b) {
         if (this.cookiesExclusive == b) {
             return;
