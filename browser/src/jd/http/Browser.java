@@ -1319,6 +1319,20 @@ public class Browser {
             }
             final RequestHeader requestHeaders = request.getHeaders();
             for (final HTTPHeader header : lHeaders) {
+                if (header.getKey().equalsIgnoreCase(HTTPConstants.HEADER_REQUEST_REFERER)) {
+                    if (this.currentURL == null && this.getRequest() != null && this.getRequest().isRequested()) {
+                        // this.currentURL is a way to prevent referrer from bleeding (used in directhttp recaptcha) 
+                        // we need to make sure we remove all referer when nullified.
+                        requestHeaders.remove(HTTPConstants.HEADER_REQUEST_REFERER);
+                        // referer header should never be persistent!
+                        this.headers.remove(HTTPConstants.HEADER_REQUEST_REFERER);
+                        continue;
+                    } else if (this.currentURL != null && this.currentURL.equalsIgnoreCase(requestHeaders.get(HTTPConstants.HEADER_REQUEST_REFERER)) && this.getRedirectLocation() == null) {
+                        // variable header fix, for when referer header is set before first request has been made. lHeaders referer overwrites request referer for subsequent requests (ie. always has the same referer header over and over!)
+                        // we want to keep new requests referer and not original referer!
+                        continue;
+                    }
+                }
                 requestHeaders.put(header);
             }
         }
