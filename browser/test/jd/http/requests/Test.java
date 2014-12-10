@@ -6,6 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jd.http.Browser;
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
 
 public class Test {
 
@@ -20,6 +22,10 @@ public class Test {
         br.setLogger(logger);
         br.setVerbose(true);
         br.setDebug(true);
-        br.getPage("");
+        br.setFollowRedirects(true);
+
+        Request request = new HeadRequest("");
+        URLConnectionAdapter con = br.openRequestConnection(request);
+        con.disconnect();
     }
 }

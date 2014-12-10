@@ -21,18 +21,21 @@ import java.net.MalformedURLException;
 
 import jd.http.Request;
 
+import org.appwork.net.protocol.http.HTTPConstants;
+import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 
 /**
- * The HTTP/1.0 specification defined the GET, POST and HEAD methods and the HTTP/1.1 specification. The GET method requests a representation of the specified
- * resource. Requests using GET should only retrieve data and should have no other effect.
+ * The HTTP/1.0 specification defined the GET, POST and HEAD methods and the HTTP/1.1 specification. The GET method requests a
+ * representation of the specified resource. Requests using GET should only retrieve data and should have no other effect.
  */
 public class HeadRequest extends Request {
-    
+
     public HeadRequest(final Request cloneRequest) {
         super(cloneRequest);
     }
-    
+
     /**
      * constructor
      * 
@@ -45,22 +48,30 @@ public class HeadRequest extends Request {
     public HeadRequest(final String url) throws MalformedURLException {
         super(url);
     }
-    
+
+    @Override
+    protected boolean sendHTTPHeader(HTTPHeader header) {
+        /**
+         * HeadRequest does not have any postContent
+         */
+        return super.sendHTTPHeader(header) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_REQUEST_CONTENT_TYPE);
+    }
+
     @Override
     public HeadRequest cloneRequest() {
         return new HeadRequest(this);
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public long postRequest() throws IOException {
         return 0;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public void preRequest() throws IOException {
-        httpConnection.setRequestMethod(RequestMethod.HEAD);
+        this.httpConnection.setRequestMethod(RequestMethod.HEAD);
     }
-    
+
 }

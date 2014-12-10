@@ -49,7 +49,6 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogSource;
-import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
@@ -924,12 +923,11 @@ public class Browser {
             final String host = Browser.getHost(request.getUrl());
             final Cookies cookies = this.getCookies().get(host);
             if (cookies != null) {
+                final Cookies requestCookies = request.getCookies();
                 for (final Cookie cookie : cookies.getCookies()) {
-                    // Pfade sollten verarbeitet werden...TODO
-                    if (cookie.isExpired()) {
-                        continue;
+                    if (!cookie.isExpired()) {
+                        requestCookies.add(cookie);
                     }
-                    request.getCookies().add(cookie);
                 }
             }
         }
@@ -1082,10 +1080,12 @@ public class Browser {
     }
 
     public RequestHeader getHeaders() {
-        if (this.headers == null) {
-            this.headers = new RequestHeader();
+        RequestHeader lHeaders = this.headers;
+        if (lHeaders == null) {
+            lHeaders = new RequestHeader();
+            this.headers = lHeaders;
         }
-        return this.headers;
+        return lHeaders;
     }
 
     public String getHost() {
@@ -1314,27 +1314,11 @@ public class Browser {
     private void mergeHeaders(final Request request) {
         final RequestHeader lHeaders = this.headers;
         if (request != null && lHeaders != null) {
-            if (lHeaders.isDominant()) {
-                request.getHeaders().clear();
-            }
             final RequestHeader requestHeaders = request.getHeaders();
-            for (final HTTPHeader header : lHeaders) {
-                if (header.getKey().equalsIgnoreCase(HTTPConstants.HEADER_REQUEST_REFERER)) {
-                    if (this.currentURL == null && this.getRequest() != null && this.getRequest().isRequested()) {
-                        // this.currentURL is a way to prevent referrer from bleeding (used in directhttp recaptcha) 
-                        // we need to make sure we remove all referer when nullified.
-                        requestHeaders.remove(HTTPConstants.HEADER_REQUEST_REFERER);
-                        // referer header should never be persistent!
-                        this.headers.remove(HTTPConstants.HEADER_REQUEST_REFERER);
-                        continue;
-                    } else if (this.currentURL != null && this.currentURL.equalsIgnoreCase(requestHeaders.get(HTTPConstants.HEADER_REQUEST_REFERER)) && this.getRedirectLocation() == null) {
-                        // variable header fix, for when referer header is set before first request has been made. lHeaders referer overwrites request referer for subsequent requests (ie. always has the same referer header over and over!)
-                        // we want to keep new requests referer and not original referer!
-                        continue;
-                    }
-                }
-                requestHeaders.put(header);
+            if (lHeaders.isDominant()) {
+                requestHeaders.clear();
             }
+            requestHeaders.putAll(lHeaders);
         }
     }
 
@@ -1385,35 +1369,37 @@ public class Browser {
         return this.openPostConnection(url, Request.parseQuery(post));
     }
 
-    private void setRequestProperties(Request request) {
+    private void setRequestProperties(Request request, final String refererURL) {
         if (request != null) {
+            if (request.isSSLTrustALLSet() == null) {
+                request.setSSLTrustALL(this.getDefaultSSLTrustALL());
+            }
             this.forwardCookies(request);
-            request.setCustomCharset(this.customCharset);
-            request.getHeaders().put(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE, this.getAcceptLanguage());
+            if (request.getCustomCharset() == null) {
+                request.setCustomCharset(this.customCharset);
+            }
+            if (!request.getHeaders().contains(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE)) {
+                request.getHeaders().put(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE, this.getAcceptLanguage());
+            }
             request.setConnectTimeout(this.getConnectTimeout());
             request.setReadTimeout(this.getReadTimeout());
-            if (this.currentURL != null && this.getRedirectLocation() == null) {
-                // without this.getRedirectLocation() it messes with download core setting originalUrl code!
-                // @see jd.plugins.BrowserAdapter.openDownload(Browser br, Downloadable downloadable, Request request, boolean resume, int
-                // chunks)
-                // if (originalUrl != null) {
-                // request.getHeaders().put("Referer", originalUrl);
-                // }
-                request.getHeaders().put(HTTPConstants.HEADER_REQUEST_REFERER, this.currentURL);
+            if (refererURL != null && !request.getHeaders().contains(HTTPConstants.HEADER_REQUEST_REFERER)) {
+                request.getHeaders().put(HTTPConstants.HEADER_REQUEST_REFERER, refererURL);
             }
             this.mergeHeaders(request);
         }
     }
 
     public URLConnectionAdapter openRequestConnection(final Request request) throws IOException {
-        return this.openRequestConnection(request, this.doRedirects);
+        return this.openRequestConnection(request, this.isFollowingRedirects());
     }
 
     public URLConnectionAdapter openRequestConnection(Request request, final boolean followRedirects) throws IOException {
         int redirectLoopPrevention = 0;
         final Request originalRequest = request;
+        final String refererURL = this.getRefererURL();
         while (true) {
-            this.setRequestProperties(request);
+            this.setRequestProperties(request, refererURL);
             int proxyRetryCounter = 0;
             while (true) {
                 try {
@@ -1430,9 +1416,6 @@ public class Browser {
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
-                        if (request.isSSLTrustALLSet() == null) {
-                            request.setSSLTrustALL(this.getDefaultSSLTrustALL());
-                        }
                         connection = request.connect().getHttpConnection();
                     } finally {
                         if (this.isDebug()) {
@@ -1446,7 +1429,7 @@ public class Browser {
                             }
                         }
                     }
-                    this.setRequest(request);
+
                     if (connection != null) {
                         connection.setAllowedResponseCodes(this.getAllowedResponseCodes());
                         if (connection.getResponseCode() == 407) {
@@ -1457,6 +1440,7 @@ public class Browser {
                     }
                     break;
                 } catch (BrowserException e) {
+                    request.disconnect();
                     throw e;
                 } catch (IOException e) {
                     request.disconnect();
@@ -1476,17 +1460,23 @@ public class Browser {
             }
             final String redirect = request.getLocation();
             if (followRedirects && redirect != null) {
-                request.disconnect();
                 if (redirectLoopPrevention++ > 20) {
+                    request.disconnect();
                     throw new BrowserException("Too many redirects!", originalRequest);
                 }
+                /**
+                 * needs loadConnection fo keep-Alive
+                 */
+                this.loadConnection(request.getHttpConnection());
                 final Request redirectRequest = this.createRedirectFollowingRequest(request);
+                this.setRequest(request);
                 if (redirectRequest == null) {
                     return request.getHttpConnection();
                 } else {
                     request = redirectRequest;
                 }
             } else {
+                this.setRequest(request);
                 return request.getHttpConnection();
             }
         }
@@ -1673,6 +1663,17 @@ public class Browser {
         }
     }
 
+    private String getRefererURL() {
+        String refererURL = this.getHeaders().remove(HTTPConstants.HEADER_REQUEST_REFERER);
+        if (refererURL == null) {
+            refererURL = this.currentURL;
+        }
+        if (refererURL == null) {
+            refererURL = this.getURL();
+        }
+        return refererURL;
+    }
+
     public void setCustomCharset(final String charset) {
         this.customCharset = charset;
     }
@@ -1796,7 +1797,7 @@ public class Browser {
     }
 
     public void updateCookies(final Request request) {
-        if (request != null) {
+        if (request != null && request.hasCookies()) {
             final String host = Browser.getHost(request.getUrl());
             Cookies cookies = this.getCookies().get(host);
             if (cookies == null) {

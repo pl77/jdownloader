@@ -199,18 +199,24 @@ public abstract class Request {
     }
 
     protected Request(final Request cloneRequest) {
-        this.orgURL = cloneRequest.getUrl();
+        this.setURL(cloneRequest.getUrl());
         this.setCustomCharset(cloneRequest.getCustomCharset());
         this.setReadTimeout(cloneRequest.getReadTimeout());
         this.setConnectTimeout(cloneRequest.getConnectTimeout());
-        if (cloneRequest.hasCookies()) {
-            this.setCookies(new Cookies(cloneRequest.getCookies()));
-        }
         this.setReadLimit(cloneRequest.getReadLimit());
         this.setProxy(cloneRequest.getProxy());
         this.setContentDecoded(cloneRequest.isContentDecodedSet());
         if (cloneRequest.getHeaders() != null) {
-            this.setHeaders(new RequestHeader(cloneRequest.getHeaders()));
+            final RequestHeader headers = new RequestHeader(cloneRequest.getHeaders());
+            /**
+             * do not clone following headers
+             */
+            headers.remove(HTTPConstants.HEADER_REQUEST_REFERER);
+            this.setHeaders(headers);
+        }
+        final String basicAuth = Browser.getBasicAuthfromURL(this.getUrl());
+        if (basicAuth != null) {
+            this.getHeaders().put("Authorization", "Basic " + basicAuth);
         }
     }
 
@@ -235,14 +241,14 @@ public abstract class Request {
 
     private void collectCookiesFromConnection() {
         final List<String> cookieHeaders = this.httpConnection.getHeaderFields("Set-Cookie");
-        if (cookieHeaders == null || cookieHeaders.size() == 0) {
-            return;
-        }
-        final String date = this.httpConnection.getHeaderField("Date");
-        final String host = Browser.getHost(this.httpConnection.getURL());
-        for (int i = 0; i < cookieHeaders.size(); i++) {
-            final String header = cookieHeaders.get(i);
-            this.getCookies().add(Cookies.parseCookies(header, host, date, true));
+        if (cookieHeaders != null && cookieHeaders.size() > 0) {
+            final String date = this.httpConnection.getHeaderField("Date");
+            final String host = Browser.getHost(this.httpConnection.getURL());
+            final Cookies requestCookies = this.getCookies();
+            for (int i = 0; i < cookieHeaders.size(); i++) {
+                final String header = cookieHeaders.get(i);
+                requestCookies.add(Cookies.parseCookies(header, host, date, true));
+            }
         }
     }
 
@@ -554,6 +560,10 @@ public abstract class Request {
         return this.requested;
     }
 
+    protected boolean sendHTTPHeader(HTTPHeader header) {
+        return header != null && !StringUtils.isEmpty(header.getKey()) && !StringUtils.isEmpty(header.getValue());
+    }
+
     private void openConnection() throws IOException {
         this.httpConnection = HTTPConnectionFactory.createHTTPConnection(new URL(this.getUrl()), this.getProxy());
         this.httpConnection.setRequest(this);
@@ -567,10 +577,9 @@ public abstract class Request {
         final RequestHeader headers = this.getHeaders();
         if (headers != null) {
             for (final HTTPHeader header : headers) {
-                if (StringUtils.isEmpty(header.getValue())) {
-                    continue;
+                if (this.sendHTTPHeader(header)) {
+                    this.httpConnection.setRequestProperty(header.getKey(), header.getValue());
                 }
-                this.httpConnection.setRequestProperty(header.getKey(), header.getValue());
             }
         }
         if (this.httpConnection instanceof HTTPConnectionImpl) {

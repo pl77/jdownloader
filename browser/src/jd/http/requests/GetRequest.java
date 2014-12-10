@@ -21,6 +21,9 @@ import java.net.MalformedURLException;
 
 import jd.http.Request;
 
+import org.appwork.net.protocol.http.HTTPConstants;
+import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 
 /**
@@ -51,6 +54,14 @@ public class GetRequest extends Request {
         return new GetRequest(this);
     }
 
+    @Override
+    protected boolean sendHTTPHeader(HTTPHeader header) {
+        /**
+         * GETRequest does not have any postContent
+         */
+        return super.sendHTTPHeader(header) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_REQUEST_CONTENT_TYPE);
+    }
+
     /** {@inheritDoc} */
     @Override
     public long postRequest() throws IOException {
@@ -60,9 +71,7 @@ public class GetRequest extends Request {
     /** {@inheritDoc} */
     @Override
     public void preRequest() throws IOException {
-        httpConnection.setRequestMethod(RequestMethod.GET);
+        this.httpConnection.setRequestMethod(RequestMethod.GET);
     }
-
-   
 
 }
