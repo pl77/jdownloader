@@ -23,9 +23,12 @@ public class Test {
         br.setVerbose(true);
         br.setDebug(true);
         br.setFollowRedirects(true);
-
-        Request request = new HeadRequest("");
-        URLConnectionAdapter con = br.openRequestConnection(request);
-        con.disconnect();
+        
+        br.getHeaders().put("Referer", "http://facebook.com/pages/");
+        br.getPage("http://uploadboy.com/");
+        // prevent referrer (see directhttp/recaptcha)
+        br.setCurrentURL(null);
+        br.getPage("http://api.recaptcha.net/challenge?k=" + "6Lcu6f4SAAAAABuG2JGXfAszg3j5uYZFHwIRAr6u");
+        // as you can see referrer sent!
     }
 }
