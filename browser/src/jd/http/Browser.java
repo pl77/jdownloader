@@ -1650,19 +1650,39 @@ public class Browser {
     }
 
     /**
-     * sets current URL, if null we don't send referer!
+     * 
+     * sets CurrentURL (used for referer)
+     * 
+     * null -> null
+     * 
+     * empty -> do not set referer for next request
+     * 
+     * other -> use given referer for next request
      * 
      * @param string
      * @since JD2
      * */
     public void setCurrentURL(final String url) throws MalformedURLException {
-        if (StringUtils.isEmpty(url)) {
+        if (url == null) {
             this.currentURL = null;
+        } else if (StringUtils.isEmpty(url)) {
+            this.currentURL = "";
         } else {
             this.currentURL = url;
         }
     }
 
+    /**
+     * returns referer for next request
+     * 
+     * 1.) getAndClear referer from browser.getHeaders
+     * 
+     * 2.) if 1==null, get currentURL (String)
+     * 
+     * 3.) if 2==null, get url from getURL(returns url from last request)
+     * 
+     * @return
+     */
     private String getRefererURL() {
         String refererURL = this.getHeaders().remove(HTTPConstants.HEADER_REQUEST_REFERER);
         if (refererURL == null) {
