@@ -56,11 +56,13 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
             if (req instanceof PostRequest) {
                 final String log = ((PostRequest) req).log();
                 if (log != null) {
+                    sb.append(URLConnectionAdapter.CRLF);
                     sb.append(log);
                 }
             } else if (req instanceof PostFormDataRequest) {
                 final String postDataString = ((PostFormDataRequest) req).getPostDataString();
                 if (postDataString != null) {
+                    sb.append(URLConnectionAdapter.CRLF);
                     sb.append(postDataString);
                 }
             }
