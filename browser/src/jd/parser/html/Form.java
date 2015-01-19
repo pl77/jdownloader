@@ -20,8 +20,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +32,7 @@ import jd.http.requests.RequestVariable;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
 
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging.Log;
 
 public class Form {
@@ -41,7 +44,7 @@ public class Form {
     }
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5837247484638868257L;
 
@@ -104,7 +107,7 @@ public class Form {
 
     /**
      * Gibt zurÃ¼ck ob der gesuchte needle String im html Text bgefunden wurde
-     * 
+     *
      * @param fileNotFound
      * @return
      */
@@ -136,10 +139,14 @@ public class Form {
         final boolean actionIsHTTPs = ret != null && ret.startsWith("https://");
         final boolean actionIsHTTP = ret != null && ret.startsWith("http://");
         if (this.action == null || this.action.matches("[\\s]*")) {
-            if (baseurl == null) { return null; }
+            if (baseurl == null) {
+                return null;
+            }
             ret = baseurl.toString();
         } else if (!ret.matches("https?://.*")) {
-            if (baseurl == null) { return null; }
+            if (baseurl == null) {
+                return null;
+            }
             if (ret.charAt(0) == '/') {
                 if (baseurl.getPort() > 0 && baseurl.getPort() != 80) {
                     ret = "http://" + baseurl.getHost() + ":" + baseurl.getPort() + ret;
@@ -187,7 +194,7 @@ public class Form {
 
     /**
      * Gibt den variablennamen der am besten zu varname passt zurÃ¼ck.
-     * 
+     *
      * @param varname
      * @return
      */
@@ -215,13 +222,15 @@ public class Form {
 
     /**
      * Gets the first inputfiled with this key. REMEMBER. There can be more than one file with this key
-     * 
+     *
      * @param key
      * @return
      */
     public InputField getInputField(final String key) {
         for (final InputField ipf : this.inputfields) {
-            if (ipf.getKey() != null && ipf.getKey().equalsIgnoreCase(key)) { return ipf; }
+            if (ipf.getKey() != null && ipf.getKey().equalsIgnoreCase(key)) {
+                return ipf;
+            }
         }
         return null;
     }
@@ -242,7 +251,9 @@ public class Form {
 
     public InputField getInputFieldByName(final String name) {
         for (final InputField ipf : this.inputfields) {
-            if (ipf.getKey() != null && ipf.getKey().equalsIgnoreCase(name)) { return ipf; }
+            if (ipf.getKey() != null && ipf.getKey().equalsIgnoreCase(name)) {
+                return ipf;
+            }
         }
         return null;
 
@@ -250,7 +261,9 @@ public class Form {
 
     public InputField getInputFieldByProperty(final String key) {
         for (final InputField ipf : this.inputfields) {
-            if (ipf.get(key) != null && ipf.get(key).equalsIgnoreCase(key)) { return ipf; }
+            if (ipf.get(key) != null && ipf.get(key).equalsIgnoreCase(key)) {
+                return ipf;
+            }
         }
         return null;
 
@@ -258,7 +271,9 @@ public class Form {
 
     public InputField getInputFieldByType(final String type) {
         for (final InputField ipf : this.inputfields) {
-            if (ipf.getType() != null && ipf.getType().equalsIgnoreCase(type)) { return ipf; }
+            if (ipf.getType() != null && ipf.getType().equalsIgnoreCase(type)) {
+                return ipf;
+            }
         }
         return null;
 
@@ -289,7 +304,7 @@ public class Form {
 
     /**
      * GIbt alle variablen als propertyString zurÃ¼ck
-     * 
+     *
      * @return
      */
     public String getPropertyString() {
@@ -315,7 +330,7 @@ public class Form {
 
     /**
      * Gibt ein RegexObject bezÃ¼glich des Form htmltextes zurÃ¼ck
-     * 
+     *
      * @param compile
      * @return
      */
@@ -325,7 +340,7 @@ public class Form {
 
     /**
      * Gibt ein RegexObject bezÃ¼glich des Form htmltextes zurÃ¼ck
-     * 
+     *
      * @param compile
      * @return
      */
@@ -335,29 +350,38 @@ public class Form {
 
     /**
      * Returns a list of requestvariables
-     * 
+     *
      * @return
      */
     public java.util.List<RequestVariable> getRequestVariables() {
-        final java.util.List<RequestVariable> ret = new ArrayList<RequestVariable>();
+        final List<RequestVariable> ret = new ArrayList<RequestVariable>();
+        final HashSet<String> keys = new HashSet<String>();
+        final HashSet<InputField> images = new HashSet<InputField>();
         for (final InputField ipf : this.inputfields) {
             // Do not send not prefered Submit types
             if (this.getPreferredSubmit() != null && ipf.getType() != null && ipf.getType().equalsIgnoreCase("submit") && this.getPreferredSubmit() != ipf) {
                 continue;
             }
-            if (ipf.getKey() == null) {
-                continue;/*
-                          * nameless key-value are not being sent, see firefox
-                          */
-            }
-            if (ipf.getValue() == null) {
+            if (ipf.getKey() == null || ipf.getValue() == null) {
+                /*
+                 * nameless key-value are not being sent, see firefox
+                 */
                 continue;
             }
-            if (ipf.getType() != null && ipf.getType().equalsIgnoreCase("image")) {
+            if (keys.add(ipf.getKey())) {
+                if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
+                    images.add(ipf);
+                } else {
+                    ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
+                }
+            }
+        }
+        for (final InputField ipf : images) {
+            if (keys.add(ipf.getKey() + ".x")) {
                 ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
+            }
+            if (keys.add(ipf.getKey() + ".y")) {
                 ret.add(new RequestVariable(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
-            } else {
-                ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
             }
         }
         return ret;
@@ -451,7 +475,7 @@ public class Form {
 
     /**
      * Changes the value of the first filed with the key key to value. if no field exists, a new one is created.
-     * 
+     *
      * @param key
      * @param value
      */
@@ -466,7 +490,7 @@ public class Form {
 
     /**
      * Removes the first inputfiled with this key. REMEMBER. There can be more than one file with this key
-     * 
+     *
      * @param key
      * @return
      */
@@ -502,7 +526,7 @@ public class Form {
 
     /**
      * Us the i-th submit field when submitted
-     * 
+     *
      * @param i
      */
     public void setPreferredSubmit(int i) {
@@ -518,7 +542,7 @@ public class Form {
 
     /**
      * Tell the form which submit field to use
-     * 
+     *
      * @param preferredSubmit
      */
     public void setPreferredSubmit(final String preferredSubmit) {
