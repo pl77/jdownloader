@@ -80,4 +80,6 @@ public interface DownloadsListInterface extends Linkable {
 
     void setDownloadDirectory(String directory, long[] pkgIds);
 
+    DownloadLinkStorable getStopMarkedLink();
+
 }
