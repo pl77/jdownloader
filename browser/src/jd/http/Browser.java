@@ -781,7 +781,7 @@ public class Browser {
         String requestContentType = encoding;
         final RequestHeader lHeaders = this.headers;
         if (lHeaders != null) {
-            final String browserContentType = lHeaders.remove(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE);
+            final String browserContentType = lHeaders.remove(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE);
             if (requestContentType == null) {
                 requestContentType = browserContentType;
             }

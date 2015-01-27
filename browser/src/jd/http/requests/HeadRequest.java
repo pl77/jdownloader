@@ -54,7 +54,7 @@ public class HeadRequest extends Request {
         /**
          * HeadRequest does not have any postContent
          */
-        return super.sendHTTPHeader(header) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_REQUEST_CONTENT_TYPE);
+        return super.sendHTTPHeader(header) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH) && !StringUtils.equalsIgnoreCase(header.getKey(), HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE);
     }
 
     @Override
