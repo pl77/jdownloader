@@ -38,7 +38,7 @@ public class HeadRequest extends Request {
 
     /**
      * constructor
-     * 
+     *
      * @param url
      *            the url - will be corrected
      * @see jd.http.Browser.correctURL(String)

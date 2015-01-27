@@ -38,7 +38,7 @@ public class GetRequest extends Request {
 
     /**
      * constructor
-     * 
+     *
      * @param url
      *            the url - will be corrected
      * @see jd.http.Browser.correctURL(String)
