@@ -72,15 +72,16 @@ public class InputField extends HashMap<String, String> {
         // end of a " or ' (we corrected above so they are all ") is end of value of key, space before next key name isn't required. 
         input.add("[\"']{0,1}\\s*(\\w+)\\s*=\\s*\"(.*?)\"");
         // for key and value without use of " or ', the delimiter needs to be: whitespace, end of inputfield >, and NOT ' or " since they shouldn't be present. Rhetorically should not contain empty value
-        input.add("[\"']{0,1}\\s*(\\w+)\\s*=\\s*([^\\s\"'>]+)");
+        // need to exclude values found in URLS, as inputfields!. Also do not overwrite a set entry with secondary regex findings. - raztoki 20150128
+        input.add("(?!(?:https?://)?[^\\s]+[/\\w\\-\\.\\?&=]+)[\"']{0,1}\\s*(\\w+)\\s*=\\s*([^\\s\"'>]+)");
         for (String reg : input) {
             String[][] results = new Regex(data, reg).getMatches();
             for (final String[] match : results) {
-                if (match[0].equalsIgnoreCase("type")) {
+                if (match[0].equalsIgnoreCase("type") && ret.getType() == null) {
                     ret.setType(match[1]);
-                } else if (match[0].equalsIgnoreCase("name")) {
+                } else if (match[0].equalsIgnoreCase("name") && ret.key == null) {
                     ret.setKey(Encoding.formEncoding(match[1]));
-                } else if (match[0].equalsIgnoreCase("value")) {
+                } else if (match[0].equalsIgnoreCase("value") && ret.value == null) {
                     ret.setValue(Encoding.formEncoding(match[1]));
                     if (cbr) {
                             if (checked) {
