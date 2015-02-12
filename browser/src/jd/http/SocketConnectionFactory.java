@@ -4,15 +4,16 @@ import java.net.Socket;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
-import org.appwork.utils.net.socketconnection.DirectSocket;
-import org.appwork.utils.net.socketconnection.Socks4Socket;
-import org.appwork.utils.net.socketconnection.Socks5Socket;
+import org.appwork.utils.net.socketconnection.DirectSocketConnection;
+import org.appwork.utils.net.socketconnection.HTTPProxySocketConnection;
+import org.appwork.utils.net.socketconnection.Socks4SocketConnection;
+import org.appwork.utils.net.socketconnection.Socks5SocketConnection;
 
 public class SocketConnectionFactory {
 
     public static Socket createSocket(final HTTPProxy proxy) {
         if (proxy == null) {
-            return new DirectSocket();
+            return new DirectSocketConnection();
         } else {
             if (proxy.isPreferNativeImplementation()) {
                 /* TODO */
@@ -20,16 +21,15 @@ public class SocketConnectionFactory {
             } else {
                 switch (proxy.getType()) {
                 case DIRECT:
-                    return new DirectSocket(proxy);
+                    return new DirectSocketConnection(proxy);
                 case HTTP:
-                    /* TODO */
-                    return new Socket();
+                    return new HTTPProxySocketConnection(proxy);
                 case NONE:
-                    return new DirectSocket();
+                    return new DirectSocketConnection();
                 case SOCKS4:
-                    return new Socks4Socket(proxy, DESTTYPE.DOMAIN);
+                    return new Socks4SocketConnection(proxy, DESTTYPE.DOMAIN);
                 case SOCKS5:
-                    return new Socks5Socket(proxy, DESTTYPE.DOMAIN);
+                    return new Socks5SocketConnection(proxy, DESTTYPE.DOMAIN);
                 default:
                     throw new RuntimeException("unsupported proxy type: " + proxy.getType().name());
                 }
