@@ -22,7 +22,8 @@ public class SocketConnectionFactory {
                 case DIRECT:
                     return new DirectSocket(proxy);
                 case HTTP:
-                    return null;
+                    /* TODO */
+                    return new Socket();
                 case NONE:
                     return new DirectSocket();
                 case SOCKS4:
