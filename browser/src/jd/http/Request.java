@@ -357,19 +357,16 @@ public abstract class Request {
     }
 
     public String getHtmlCode() throws CharacterCodingException {
-        if (this.htmlCode != null) {
-            return this.htmlCode;
-        }
-        String ct = null;
-        if (this.httpConnection != null) {
-            ct = this.httpConnection.getContentType();
-        }
-        final boolean keepBytes = this.isKeepByteArray();
-        /* check for image content type */
-        if (ct != null && Pattern.compile("images?/\\w*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(ct).matches()) {
-            throw new IllegalStateException("Content-Type: " + ct);
-        }
         if (this.htmlCode == null && this.byteArray != null) {
+            final boolean keepBytes = this.isKeepByteArray();
+            String ct = null;
+            if (this.httpConnection != null) {
+                ct = this.httpConnection.getContentType();
+            }
+            /* check for image content type */
+            if (ct != null && Pattern.compile("images?/\\w*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(ct).matches()) {
+                throw new IllegalStateException("Content-Type: " + ct);
+            }
             /* use custom charset or charset from httpconnection */
             String useCS = this.customCharset;
             if (StringUtils.isEmpty(useCS)) {
