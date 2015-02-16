@@ -68,7 +68,7 @@ public class FormData {
         this.type = Type.VARIABLE;
         this.name = name;
         this.value = value;
-    }
+    } 
 
     /**
      * constructor

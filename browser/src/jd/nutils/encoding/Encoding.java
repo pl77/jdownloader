@@ -430,7 +430,7 @@ public class Encoding {
         } catch (final UnsupportedEncodingException e) {
             Log.exception(e);
             return str;
-        }
+        } 
     }
 
     /**

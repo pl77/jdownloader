@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import jd.http.requests.HeadRequest;
 import jd.nutils.encoding.Encoding;
 
 import org.appwork.exceptions.WTFException;
@@ -36,7 +37,9 @@ import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.HTTPHeader;
+import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
@@ -100,48 +103,52 @@ public abstract class Request {
     public static byte[] read(final URLConnectionAdapter con, int readLimit) throws IOException {
         readLimit = Math.max(0, readLimit);
         final InputStream is = con.getInputStream();
-        byte[] ret = null;
         if (is == null) {
             // TODO: check if we have to close con here
             return null;
         }
-        ByteArrayOutputStream tmpOut = null;
-        final long contentLength = con.getLongContentLength();
-        if (contentLength >= 0) {
-            final int length = contentLength > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) contentLength;
-            tmpOut = new ByteArrayOutputStream(length);
-        } else {
-            tmpOut = new ByteArrayOutputStream(32767);
-        }
-        boolean okay = false;
         /* added "Corrupt GZIP trailer" for CamWinsCom */
         try {
-            int len;
-            final byte[] buffer = new byte[32767];
-            while ((len = is.read(buffer)) != -1) {
-                if (len > 0) {
-                    if (tmpOut.size() + len > readLimit) {
-                        throw new IOException("Content-length too big " + tmpOut.size() + len + " >= " + readLimit);
-                    }
-                    tmpOut.write(buffer, 0, len);
-                }
-            }
-            final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
-            final String contentEncoding = con.getHeaderField("Content-Encoding");
             if (HTTPConnection.RequestMethod.HEAD.equals(con.getRequestMethod())) {
-                if (tmpOut.size() > 0) {
-                    throw new IOException("HeadRequest with content!? Content-Length: " + contentLength + " does not match Read-Length: " + tmpOut.size());
+                if (is.read() != -1) {
+                    throw new IOException("HeadRequest with content!?");
                 }
-            } else if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && tmpOut.size() != contentLength) {
-                throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + tmpOut.size());
-            }
-            okay = true;
-        } catch (final IOException e) {
-            if (e.toString().contains("end of ZLIB") || e.toString().contains("Premature") || e.toString().contains("Corrupt GZIP trailer")) {
-                System.out.println("Try workaround for " + e);
-                okay = true;
+                return null;
             } else {
-                throw e;
+                final long contentLength = con.getLongContentLength();
+                final ByteArrayOutputStream bos;
+                if (contentLength >= 0) {
+                    final int length = contentLength > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) contentLength;
+                    bos = new ByteArrayOutputStream(length);
+                } else {
+                    bos = new ByteArrayOutputStream(32767);
+                }
+                try {
+                    int len = -1;
+                    final byte[] buffer = new byte[32767];
+                    while ((len = is.read(buffer)) != -1) {
+                        if (len > 0) {
+                            if (bos.size() + len > readLimit) {
+                                throw new IOException("Content-length too big " + bos.size() + len + " >= " + readLimit);
+                            }
+                            bos.write(buffer, 0, len);
+                        }
+                    }
+                    final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
+                    final String contentEncoding = con.getHeaderField("Content-Encoding");
+                    if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && bos.size() != contentLength) {
+                        throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + bos.size());
+                    }
+                    return bos.toByteArray();
+                } catch (final IOException e) {
+                    final String ioMessage = e.toString();
+                    if (ioMessage != null && (ioMessage.contains("end of ZLIB") || ioMessage.contains("Premature") || ioMessage.contains("Corrupt GZIP trailer"))) {
+                        System.out.println("Try workaround for " + e);
+                        return bos.toByteArray();
+                    } else {
+                        throw e;
+                    }
+                }
             }
         } finally {
             try {
@@ -153,11 +160,7 @@ public abstract class Request {
                 con.disconnect();
             } catch (final Exception e) {
             }
-            if (okay) {
-                ret = tmpOut.toByteArray();
-            }
         }
-        return ret;
     }
 
     /*
