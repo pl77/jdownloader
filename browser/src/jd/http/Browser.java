@@ -158,7 +158,7 @@ public class Browser {
 
     /**
      * Returns a corrected url, where multiple / and ../. are removed
-     * 
+     *
      * @param url
      * @return
      */
@@ -288,8 +288,8 @@ public class Browser {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param url
      * @return
      * @throws MalformedURLException
@@ -301,7 +301,7 @@ public class Browser {
 
     /**
      * Sets the global connect timeout
-     * 
+     *
      * @param valueMS
      */
     public static void setGlobalConnectTimeout(final int valueMS) {
@@ -318,7 +318,7 @@ public class Browser {
 
     /**
      * Sets the global readtimeout in ms
-     * 
+     *
      * @param valueMS
      */
     public static void setGlobalReadTimeout(final int valueMS) {
@@ -341,7 +341,7 @@ public class Browser {
 
     /**
      * Lädt über eine URLConnection eine Datei herunter. Zieldatei ist file.
-     * 
+     *
      * @param file
      * @param con
      * @return Erfolg true/false
@@ -420,7 +420,7 @@ public class Browser {
     /**
      * sets request thresholds based on upper burstable limit. eg. 20(x) requests over 60000(y)[=1min]. Then on after it sets limit between
      * interval.
-     * 
+     *
      * @author raztoki
      * @since JD2
      * @param host
@@ -567,7 +567,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
@@ -610,12 +610,12 @@ public class Browser {
 
     /**
      * Assures that the browser does not download any binary files in textmode
-     * 
+     *
      * @param request
      * @throws BrowserException
      */
     private void checkContentLengthLimit(final Request request) throws BrowserException {
-        if (request != null && request.getHttpConnection() != null) {
+        if (request != null && request.getHttpConnection() != null && !(request instanceof HeadRequest)) {
             long length = -1;
             final int limit = this.getLoadLimit();
             request.setReadLimit(limit);
@@ -629,7 +629,7 @@ public class Browser {
 
     /**
      * Clears all cookies for the given URL. URL has to be a valid. if (url == null), all cookies are cleared.
-     * 
+     *
      * @param url
      */
     public void clearCookies(final String url) {
@@ -681,7 +681,7 @@ public class Browser {
 
     /**
      * Creates a new Request object based on a form
-     * 
+     *
      * @param form
      * @return
      * @throws Exception
@@ -809,7 +809,7 @@ public class Browser {
 
     /**
      * rfc2616
-     * 
+     *
      * @param request
      * @return
      * @throws BrowserException
@@ -882,7 +882,7 @@ public class Browser {
 
     /**
      * Downloads the contents behind con to file. if(con ==null), the latest request is downloaded. Useful for redirects
-     * 
+     *
      * @param file
      * @param con
      * @throws IOException
@@ -911,7 +911,7 @@ public class Browser {
 
     /**
      * Zeigt debuginformationen auch im Hauptprogramm an
-     * 
+     *
      * @param b
      */
     public void forceDebug(final boolean b) {
@@ -959,7 +959,7 @@ public class Browser {
 
     /**
      * returns current ConnectTimeout
-     * 
+     *
      * @return
      */
     public int getConnectTimeout() {
@@ -1005,7 +1005,7 @@ public class Browser {
 
     /**
      * Returns the first form that has an input filed with name key
-     * 
+     *
      * @param key
      * @return
      */
@@ -1020,7 +1020,7 @@ public class Browser {
 
     /**
      * Returns the first form that has input field with 'key' that equals 'value'.
-     * 
+     *
      * @since JD2
      * @param key
      * @param value
@@ -1054,8 +1054,8 @@ public class Browser {
     /**
      * Returns the first form with an Submitvalue of name<br />
      * Note: String needs to be urlEncoded as values it's comparing against are!
-     * 
-     * 
+     *
+     *
      * @param name
      * @return
      */
@@ -1103,7 +1103,7 @@ public class Browser {
 
     /**
      * Gets Browser upper page load limit Byte value.
-     * 
+     *
      * @since JD2
      * @param i
      */
@@ -1137,7 +1137,7 @@ public class Browser {
 
     /**
      * returns current ReadTimeout
-     * 
+     *
      * @return
      */
     public int getReadTimeout() {
@@ -1146,7 +1146,7 @@ public class Browser {
 
     /**
      * If automatic redirectfollowing is disabled, you can get the redirect URL if there is any.
-     * 
+     *
      * @return
      */
     public String getRedirectLocation() {
@@ -1167,7 +1167,7 @@ public class Browser {
 
     /**
      * Gets the latest request
-     * 
+     *
      * @return
      */
     public Request getRequest() {
@@ -1193,7 +1193,7 @@ public class Browser {
 
     /**
      * Tries to get a full URL out of string
-     * 
+     *
      * @throws BrowserException
      */
     public String getURL(String string) {
@@ -1266,7 +1266,7 @@ public class Browser {
     /**
      * Reads the content behind a con and returns them. Note: if con==null, the current request is read. This is useful for redirects. Note
      * #2: if a connection is loaded, data is not stored in the browser instance.
-     * 
+     *
      * @param con
      * @return
      * @throws IOException
@@ -1324,7 +1324,7 @@ public class Browser {
 
     /**
      * Opens a new connection based on a Form
-     * 
+     *
      * @param form
      * @return
      * @throws Exception
@@ -1339,7 +1339,7 @@ public class Browser {
 
     /**
      * Opens a new get connection
-     * 
+     *
      * @param string
      * @return
      * @throws IOException
@@ -1561,7 +1561,7 @@ public class Browser {
 
     /**
      * Adds input to existing response codes. This solves the issue were setAllowedResponseCodes(int...) destroys old with new.
-     * 
+     *
      * @param input
      * @author raztoki
      * @since JD2
@@ -1599,7 +1599,7 @@ public class Browser {
 
     /**
      * Adds given Cookies to current Cookies session for given host.
-     * 
+     *
      * @author raztoki
      * @since JD2
      * @param url
@@ -1612,7 +1612,7 @@ public class Browser {
 
     /**
      * Adds given Cookies to current Cookies session for given host. replace when true will dump _all_ Cookies
-     * 
+     *
      * @author raztoki
      * @since JD2
      * @param url
@@ -1650,15 +1650,15 @@ public class Browser {
     }
 
     /**
-     * 
+     *
      * sets CurrentURL (used for referer)
-     * 
+     *
      * null -> null
-     * 
+     *
      * empty -> do not set referer for next request
-     * 
+     *
      * other -> use given referer for next request
-     * 
+     *
      * @param string
      * @since JD2
      * */
@@ -1674,13 +1674,13 @@ public class Browser {
 
     /**
      * returns referer for next request
-     * 
+     *
      * 1.) getAndClear referer from browser.getHeaders
-     * 
+     *
      * 2.) if 1==null, get currentURL (String)
-     * 
+     *
      * 3.) if 2==null, get url from getURL(returns url from last request)
-     * 
+     *
      * @return
      */
     private String getRefererURL() {
@@ -1708,7 +1708,7 @@ public class Browser {
 
     /**
      * do not below revision 10000
-     * 
+     *
      * @since JD2
      * */
     public void setHeader(final String field, final String value) {
@@ -1725,7 +1725,7 @@ public class Browser {
 
     /**
      * Sets Browser upper page load limit Byte value.
-     * 
+     *
      * @since JD2
      * @param i
      */
@@ -1830,10 +1830,10 @@ public class Browser {
 
     /**
      * can update the connection information - for example ask for proxy auth.
-     * 
+     *
      * @param request
      * @param proxyRetryCounter
-     * 
+     *
      * @return true if a failed request should be done again.
      */
     protected boolean updateProxy(final int proxyRetryCounter, final Request request) {
