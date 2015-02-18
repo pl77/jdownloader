@@ -7,6 +7,7 @@ public abstract class AbstractQuery extends AbstractJsonData {
     private boolean bytesTotal = false;
     private boolean comment    = false;
     private boolean status     = false;
+    private boolean priority   = false;
 
     public boolean isStatus() {
         return status;
@@ -25,6 +26,14 @@ public abstract class AbstractQuery extends AbstractJsonData {
     private int    maxResults = -1;
     private int    startAt    = 0;
     private long[] packageUUIDs;
+
+    public boolean isPriority() {
+        return priority;
+    }
+
+    public void setPriority(boolean priority) {
+        this.priority = priority;
+    }
 
     public int getMaxResults() {
         return maxResults;

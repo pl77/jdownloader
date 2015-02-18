@@ -4,15 +4,6 @@ public abstract class AbstractLinkStorable extends AbstractNodeStorable implemen
 
     private String   host        = null;
     private long     packageUUID = -1;
-    private PriorityStorable priority    = PriorityStorable.DEFAULT;
-
-    public PriorityStorable getPriority() {
-        return priority;
-    }
-
-    public void setPriority(PriorityStorable priority) {
-        this.priority = priority;
-    }
 
     private String url = null;
 

@@ -72,14 +72,4 @@ public class CrawledLinkQuery extends AbstractLinkQuery {
     @Deprecated
     private boolean variants = false;
 
-    private boolean priority = false;
-
-    public boolean isPriority() {
-        return priority;
-    }
-
-    public void setPriority(boolean priority) {
-        this.priority = priority;
-    }
-
 }

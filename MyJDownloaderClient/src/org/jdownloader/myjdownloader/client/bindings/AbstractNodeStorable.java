@@ -9,6 +9,16 @@ public abstract class AbstractNodeStorable extends AbstractJsonData implements N
     private boolean enabled    = false;
     private String  name       = null;
     private long    uuid       = -1;
+    
+    private PriorityStorable priority    = PriorityStorable.DEFAULT;
+
+    public PriorityStorable getPriority() {
+        return priority;
+    }
+
+    public void setPriority(PriorityStorable priority) {
+        this.priority = priority;
+    }
 
     public long getBytesTotal() {
         return bytesTotal;

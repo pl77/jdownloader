@@ -63,7 +63,7 @@ public class DownloadLinkQuery extends AbstractLinkQuery {
     private boolean speed       = false;
     private boolean eta         = false;
     private boolean finished    = false;
-    private boolean priority    = false;
+
     private boolean status      = false;
 
     public boolean isStatus() {
@@ -72,14 +72,6 @@ public class DownloadLinkQuery extends AbstractLinkQuery {
 
     public void setStatus(boolean status) {
         this.status = status;
-    }
-
-    public boolean isPriority() {
-        return priority;
-    }
-
-    public void setPriority(boolean priority) {
-        this.priority = priority;
     }
 
     private boolean running          = false;
