@@ -11,6 +11,10 @@ public class GetHostTest {
         for (String append : appends) {
             for (String add : adds) {
                 for (String domain : domains) {
+                    System.out.println(Browser.getHost(append + domain + add, true));
+                    System.out.println(Browser.getHost(append + domain + add, false));
+                }
+                for (String domain : domains) {
                     System.out.println(Browser.getHost(append + "http://" + domain + add, true));
                     System.out.println(Browser.getHost(append + "http://" + domain + add, false));
                 }
