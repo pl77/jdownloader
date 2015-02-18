@@ -29,6 +29,7 @@ public class AddLinksQuery extends AbstractJsonData {
     private String  links           = null;
     private String  packageName     = null;
     private String  extractPassword = null;
+    private String  sourceUrl       = null;
 
     public boolean isAutostart() {
         return autostart;
@@ -86,6 +87,14 @@ public class AddLinksQuery extends AbstractJsonData {
 
     public void setPriority(PriorityStorable priority) {
         this.priority = priority;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
     }
 
     private String downloadPassword  = null;
