@@ -134,7 +134,7 @@ public class InputField extends HashMap<String, String> {
 
     public String getProperty(final String key, final String defValue) {
         final String ret = get(key);
-        return ret == null ? ret : defValue;
+        return ret != null ? ret : defValue;
     }
 
     public String getType() {
