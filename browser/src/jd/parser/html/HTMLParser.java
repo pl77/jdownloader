@@ -886,10 +886,6 @@ public class HTMLParser {
         return input.replaceAll(HTMLParser.singleSpacePattern, "%20");
     }
 
-    private static HtmlParserCharSequence correctURL(final String input) {
-        return HTMLParser.correctURL(new HtmlParserCharSequence(input));
-    }
-
     private final static LinkedHashMap<Pattern, String> URLDECODE = new LinkedHashMap<Pattern, String>();
     static {
         // has to be first. to allow for multiple double encode of % eg. %253A%252F%252F
