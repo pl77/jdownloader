@@ -46,18 +46,27 @@ public class Encoding {
     }
 
     public static String Base64Decode(final String base64) {
+        return Encoding.Base64Decode((CharSequence) base64).toString();
+    }
+
+    public static CharSequence Base64Decode(final CharSequence base64) {
         if (base64 == null) {
             return null;
         }
         try {
-            byte[] plain = Base64.decode(base64);
+            byte[] plain = org.appwork.utils.encoding.Base64.decode(base64);
             if (plain == null || plain.length == 0) {
-                plain = Base64.decodeFast(base64);
+                plain = org.appwork.utils.encoding.Base64.decodeFast(base64);
             }
-            if (plain != null && Encoding.filterString(new String(plain, "UTF-8")).length() < plain.length / 1.5) {
-                return base64;
+            if (plain != null) {
+                final String ret = new String(plain, "UTF-8");
+                if (Encoding.filterString(ret).length() < plain.length / 1.5) {
+                    return base64;
+                } else {
+                    return ret;
+                }
             }
-            return new String(plain, "UTF-8");
+            return base64;
         } catch (final Exception e) {
             e.printStackTrace();
             return base64;
@@ -73,18 +82,18 @@ public class Encoding {
         // String base64 = new BASE64Encoder().encode(plain.getBytes());
         String base64;
         try {
-            base64 = new String(Base64.encodeToByte(plain.getBytes("UTF-8"), false));
+            base64 = new String(org.appwork.utils.encoding.Base64.encodeToByte(plain.getBytes("UTF-8"), false));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            base64 = new String(Base64.encodeToByte(plain.getBytes(), false));
+            base64 = new String(org.appwork.utils.encoding.Base64.encodeToByte(plain.getBytes(), false));
         }
         return base64;
     }
 
     /**
-     * 
+     *
      * Wandelt HTML in CDATA um
-     * 
+     *
      * @param str
      * @return decoded string
      */
@@ -99,7 +108,7 @@ public class Encoding {
 
     /**
      * Wendet htmlDecode an, bis es keine Änderungen mehr gibt. Aber max 50 mal!
-     * 
+     *
      * @param string
      * @return
      */
@@ -119,7 +128,7 @@ public class Encoding {
 
     /**
      * Filtert alle nicht lesbaren Zeichen aus str
-     * 
+     *
      * @param str
      * @return
      */
@@ -130,7 +139,7 @@ public class Encoding {
 
     /**
      * Filtert alle Zeichen aus str die in filter nicht auftauchen
-     * 
+     *
      * @param str
      * @param filter
      * @return
@@ -176,7 +185,7 @@ public class Encoding {
     /**
      * "http://rapidshare.com&#x2F;&#x66;&#x69;&#x6C;&#x65;&#x73;&#x2F;&#x35;&#x34;&#x35;&#x34;&#x31;&#x34;&#x38;&#x35;&#x2F;&#x63;&#x63;&#x66;&#x32;&#x72;&#x73;&#x64;&#x66;&#x2E;&#x72;&#x61;&#x72;"
      * ; Wandelt alle hexkodierten zeichen in diesem Format in normalen text um
-     * 
+     *
      * @param str
      * @return decoded string
      */
@@ -382,7 +391,7 @@ public class Encoding {
     /**
      * Wandelt String in 'HTML URL Encode' um. Es werden alle Zeichen, nicht nur Sonderzeichen oder Umlaute kodiert. Beispielsweise wird "ä"
      * zu "%E4" und "(auto)" zu "%28%61%75%74%6F%29".
-     * 
+     *
      * @see http://www.w3schools.com/tags/ref_urlencode.asp
      * @param string
      * @return ein nach w3c 'HTML URL Encode' kodierter String.
@@ -430,7 +439,7 @@ public class Encoding {
         } catch (final UnsupportedEncodingException e) {
             Log.exception(e);
             return str;
-        } 
+        }
     }
 
     /**
