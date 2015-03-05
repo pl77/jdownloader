@@ -1068,10 +1068,17 @@ public class HTMLParser {
         // data = data.replaceAll("(?i)</span.*?>", "");
         data = data.replaceAll(Pattern.compile("(?s)\\[(url|link)\\](.*?)\\[/(\\2)\\]"), "<$2>");
         final HtmlParserResultSet results = new HtmlParserResultSet();
-        final HtmlParserCharSequence baseURL = new HtmlParserCharSequence(baseURLString);
+        final HtmlParserCharSequence baseURL;
+        if (baseURLString != null) {
+            baseURL = new HtmlParserCharSequence(baseURLString);
+        } else {
+            baseURL = null;
+        }
         HTMLParser._getHttpLinksWalker(data, baseURL, results, null);
         /* we don't want baseurl to be included in result set */
-        results.remove(baseURL);
+        if (baseURL != null) {
+            results.remove(baseURL);
+        }
         // System.out.println("Walker:" + results.getWalkerCounter() + "|DeepWalker:" + results.getDeepWalkerCounter() + "|Finder:" +
         // results.getFinderCounter() + "|Found:" + results.size());
         if (results.getResults().size() == 0) {
