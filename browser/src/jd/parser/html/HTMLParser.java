@@ -1232,6 +1232,12 @@ public class HTMLParser {
                 }
             }
         }
-        return new HtmlParserCharSequence(Browser.correctURL(merged.toString(), true));
+        if (merged != null) {
+            final String mergedResult = Browser.correctURL(merged.toString(), true);
+            if (mergedResult != null) {
+                return new HtmlParserCharSequence(mergedResult);
+            }
+        }
+        return null;
     }
 }
