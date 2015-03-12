@@ -29,17 +29,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jd.http.requests.HeadRequest;
 import jd.nutils.encoding.Encoding;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.HTTPHeader;
-import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
@@ -71,7 +69,7 @@ public abstract class Request {
 
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
-     * 
+     *
      * @param query
      *            kann ein reines query ein (&key=value) oder eine url mit query
      * @return
@@ -123,6 +121,7 @@ public abstract class Request {
                 } else {
                     bos = new ByteArrayOutputStream(32767);
                 }
+                final String contentEncoding = con.getHeaderField("Content-Encoding");
                 try {
                     int len = -1;
                     final byte[] buffer = new byte[32767];
@@ -135,19 +134,23 @@ public abstract class Request {
                         }
                     }
                     final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
-                    final String contentEncoding = con.getHeaderField("Content-Encoding");
                     if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && bos.size() != contentLength) {
                         throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + bos.size());
                     }
                     return bos.toByteArray();
                 } catch (final IOException e) {
-                    final String ioMessage = e.toString();
-                    if (ioMessage != null && (ioMessage.contains("end of ZLIB") || ioMessage.contains("Premature") || ioMessage.contains("Corrupt GZIP trailer"))) {
-                        System.out.println("Try workaround for " + e);
-                        return bos.toByteArray();
-                    } else {
-                        throw e;
+                    if (bos.size() > 0) {
+                        if (e instanceof EOFException && "gzip".equalsIgnoreCase(contentEncoding)) {
+                            System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
+                            return bos.toByteArray();
+                        }
+                        final String ioMessage = e.toString();
+                        if (ioMessage != null && (ioMessage.contains("end of ZLIB") || ioMessage.contains("Premature") || ioMessage.contains("Corrupt GZIP trailer"))) {
+                            System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
+                            return bos.toByteArray();
+                        }
                     }
+                    throw e;
                 }
             }
         } finally {
