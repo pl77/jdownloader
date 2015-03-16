@@ -105,7 +105,6 @@ public abstract class Request {
             // TODO: check if we have to close con here
             return null;
         }
-        /* added "Corrupt GZIP trailer" for CamWinsCom */
         try {
             if (HTTPConnection.RequestMethod.HEAD.equals(con.getRequestMethod())) {
                 if (is.read() != -1) {
@@ -135,7 +134,7 @@ public abstract class Request {
                     }
                     final String transferEncoding = con.getHeaderField("Content-Transfer-Encoding");
                     if ((con.isContentDecoded() == false || !"base64".equalsIgnoreCase(transferEncoding) && !"gzip".equalsIgnoreCase(contentEncoding) && !"deflate".equalsIgnoreCase(contentEncoding)) && contentLength >= 0 && bos.size() != contentLength) {
-                        throw new EOFException("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + bos.size());
+                        System.out.println("Incomplete content received! Content-Length: " + contentLength + " does not match Read-Length: " + bos.size());
                     }
                     return bos.toByteArray();
                 } catch (final IOException e) {
