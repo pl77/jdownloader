@@ -622,7 +622,7 @@ public class HTMLParser {
             return results;
         }
         if (!data.matches(HTMLParser.tagsPattern)) {
-            final int c = data.count(HTMLParser.pat1, 1);
+            final int c = data.count(HTMLParser.pat1, 2);
             HtmlParserCharSequence protocol = null;
             if (c == 0) {
                 if (!data.matches(HTMLParser.checkPatternHREFSRC)) {
@@ -1032,7 +1032,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString) {
