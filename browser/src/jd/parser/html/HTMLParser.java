@@ -413,12 +413,12 @@ public class HTMLParser {
             while (st < len && this.charAt(st) <= ' ') {
                 st++;
             }
-            while (st < len && this.charAt(st) <= ' ') {
+            while (st < len && this.charAt(len - 1) <= ' ') {
                 len--;
             }
             return st > 0 || len < this.length() ? this.subSequence(st, len) : this;
-        }
 
+        }
     }
 
     private static class HtmlParserResultSet {
@@ -428,7 +428,7 @@ public class HTMLParser {
         private final Pattern                             replace1  = Pattern.compile("\"");
 
         public boolean add(HtmlParserCharSequence e) {
-            if (e != null) {
+            if (e != null && false) {
                 int index = e.indexOf("\r");
                 if (index < 0) {
                     index = e.indexOf("\n");
@@ -601,13 +601,6 @@ public class HTMLParser {
             /* no changes in results size, and data contains urlcoded http://, so lets urldecode it */
             HTMLParser._getHttpLinksFinder(urlDecoded, url, results);
         }
-        if (HTMLParser.deepWalkCheck(results, indexBefore) && data.contains(":\\/\\/")) {
-            /**
-             * \\ escaped urls, eg JSON
-             */
-            data = data.replaceAll(Pattern.compile("\\\\"), "");
-            HTMLParser._getHttpLinksFinder(data, url, results);
-        }
         return results;
     }
 
@@ -621,31 +614,35 @@ public class HTMLParser {
         if (data == null || data.length() == 0) {
             return results;
         }
+        if (data.contains(":\\/\\/")) {
+            /**
+             * \\ escaped urls, eg JSON
+             */
+            data = data.replaceAll(Pattern.compile("\\\\"), "");
+        }
         if (!data.matches(HTMLParser.tagsPattern)) {
             final int c = data.count(HTMLParser.pat1, 2);
-            HtmlParserCharSequence protocol = null;
             if (c == 0) {
                 if (!data.matches(HTMLParser.checkPatternHREFSRC)) {
                     /* no href inside */
                     return results;
                 }
             } else if (c == 1 && data.length() < 256) {
-                if ((protocol = HTMLParser.getProtocol(data)) != null) {
+                HtmlParserCharSequence protocol = null;
+                HtmlParserCharSequence link = data;
+                if ((protocol = HTMLParser.getProtocol(link)) == null) {
+                    link = data.replaceFirst(HTMLParser.hdotsPattern, "http://").replaceFirst(HTMLParser.missingHTTPPattern, "http://www.");
+                }
+                if ((protocol = HTMLParser.getProtocol(link)) != null) {
                     if (protocol.startsWith("file://")) {
-                        results.add(data.replaceAll(HTMLParser.spacePattern, "%20"));
+                        results.add(link.replaceAll(HTMLParser.spacePattern, "%20"));
                         return results;
                     } else {
-                        final HtmlParserCharSequence link = data.replaceAll(HTMLParser.removeTagsPattern, "");
+                        link = link.replaceAll(HTMLParser.removeTagsPattern, "");
                         if (!link.matches(HTMLParser.space2Pattern)) {
                             results.add(HTMLParser.correctURL(link));
                             return results;
                         }
-                    }
-                } else {
-                    final HtmlParserCharSequence link = data.replaceFirst(HTMLParser.hdotsPattern, "http://").replaceFirst(HTMLParser.missingHTTPPattern, "http://www.").replaceAll(HTMLParser.removeTagsPattern, "");
-                    if (!link.matches(HTMLParser.space2Pattern)) {
-                        results.add(HTMLParser.correctURL(link));
-                        return results;
                     }
                 }
             }
@@ -668,8 +665,8 @@ public class HTMLParser {
                 break;
             }
         }
-
-        if (HTMLParser.getProtocol(url) == null) {
+        HtmlParserCharSequence protocol = HTMLParser.getProtocol(url);
+        if (protocol == null) {
             if (baseURL != null && url != null) {
                 url = HTMLParser.mergeUrl(baseURL, url);
             } else {
@@ -677,9 +674,12 @@ public class HTMLParser {
                 url = null;
             }
         }
-        if (HTMLParser.getProtocol(url) != null) {
+        if (protocol != null || (protocol = HTMLParser.getProtocol(url)) != null) {
             /* found a valid url with recognized protocol */
             results.add(HTMLParser.correctURL(url));
+            if (data.equals(url)) {
+                return results;
+            }
         }
 
         for (final Httppattern element : HTMLParser.linkAndFormPattern) {
@@ -689,18 +689,18 @@ public class HTMLParser {
                 if (link == null) {
                     break;
                 }
-                if (HTMLParser.getProtocol(link) == null) {
+                protocol = HTMLParser.getProtocol(link);
+                if (protocol == null) {
                     link = link.replaceAll(HTMLParser.httpRescue, "http://");
-                    if (HTMLParser.getProtocol(link) != null) {
-                        results.add(HTMLParser.correctURL(link));
-                    } else if (baseURL != null) {
-                        link = HTMLParser.mergeUrl(baseURL, link);
-                        if (HTMLParser.getProtocol(link) != null) {
-                            results.add(HTMLParser.correctURL(link));
-                        }
-                    }
-                } else {
+                }
+                if (protocol == null && baseURL != null && (protocol = HTMLParser.getProtocol(link)) == null) {
+                    link = HTMLParser.mergeUrl(baseURL, link);
+                }
+                if (protocol != null || (protocol = HTMLParser.getProtocol(link)) != null) {
                     results.add(HTMLParser.correctURL(link));
+                    if (data.equals(link)) {
+                        return results;
+                    }
                 }
             }
         }
@@ -729,11 +729,11 @@ public class HTMLParser {
                     }
                 }
                 if (start != -1) {
-                    final HtmlParserCharSequence check = link.subSequence(start);
-                    results.add(HTMLParser.correctURL(check));
-                    if (data.equals(check)) {
+                    link = link.subSequence(start);
+                    results.add(HTMLParser.correctURL(link));
+                    if (data.equals(link)) {
                         /* data equals check, so we can leave this loop */
-                        break;
+                        return results;
                     }
                 }
             }
