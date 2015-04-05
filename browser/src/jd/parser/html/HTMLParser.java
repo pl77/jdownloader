@@ -486,7 +486,8 @@ public class HTMLParser {
     }
 
     final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
-    final private static String                 protocolPattern             = "(mega://|directhttp://https?://|flashget://|https?viajd://|https?://|ccf://|dlc://|ftp://|jd://|rsdf://|jdlist://|file://)";
+    final private static String                 protocolPrefixes = "(mega|directhttp://https?|flashget|https?viajd|https?|ccf|dlc|ftp|jd|rsdf|jdlist|file)";
+    final private static String                 protocolPattern             = protocolPrefixes + "://";
     final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("(?s)<[ ]?base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("(?s)<[ ]?base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPattern + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                protocols                   = Pattern.compile("(" + HTMLParser.protocolPattern + ")");
@@ -539,7 +540,7 @@ public class HTMLParser {
 
     // full | double full | partial | partial | partial | partial | partial | partial
     final private static Pattern                urlEncodedProtocol          = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
+    
     private static HtmlParserResultSet _getHttpLinksDeepWalker(HtmlParserCharSequence data, final HtmlParserCharSequence url, HtmlParserResultSet results) {
         if (results == null) {
             results = new HtmlParserResultSet();
@@ -1067,6 +1068,11 @@ public class HTMLParser {
         // data = data.replaceAll("(?i)<span.*?>", "");
         // data = data.replaceAll("(?i)</span.*?>", "");
         data = data.replaceAll(Pattern.compile("(?s)\\[(url|link)\\](.*?)\\[/(\\2)\\]"), "<$2>");
+        // dlc and other containers can be encoded, we need to do corrections here, otherwise protocol correction can be nuked else where, or links just do not add!
+        if (data.toString().matches(protocolPrefixes +  urlEncodedProtocol.toString() + ".+")) {
+            data = HTMLParser.decodeURLParamEncodedURL(data);
+        }
+            
         final HtmlParserResultSet results = new HtmlParserResultSet();
         final HtmlParserCharSequence baseURL;
         if (baseURLString != null) {
