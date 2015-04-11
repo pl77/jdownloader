@@ -1361,14 +1361,14 @@ public class Browser {
     }
 
     /**
-     * Opens a Post COnnection based on a variable HashMap
+     * Opens a Post Connection based on a variable HashMap
      */
     public URLConnectionAdapter openPostConnection(final String url, final LinkedHashMap<String, String> post) throws IOException {
         return this.openRequestConnection(this.createPostRequest(url, post));
     }
 
     /**
-     * OPens a new POst connection based on a query string
+     * OPens a new Post connection based on a query string
      */
     public URLConnectionAdapter openPostConnection(final String url, final String post) throws IOException {
         return this.openPostConnection(url, Request.parseQuery(post));
@@ -1470,7 +1470,7 @@ public class Browser {
                     throw new BrowserException("Too many redirects!", originalRequest);
                 }
                 /**
-                 * needs loadConnection fo keep-Alive
+                 * needs loadConnection for keep-Alive
                  */
                 this.loadConnection(request.getHttpConnection());
                 final Request redirectRequest = this.createRedirectFollowingRequest(request);

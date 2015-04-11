@@ -55,7 +55,7 @@ public class Form {
     public static Form[] getForms(final Object requestInfo) {
         final LinkedList<Form> forms = new LinkedList<Form>();
 
-        final Pattern pattern = Pattern.compile("<[\\s]*form(.*?)>(.*?)<[\\s]*/[\\s]*form[\\s]*>|<[\\s]*form(.*?)>(.+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        final Pattern pattern = Pattern.compile("<\\s*form ([^>]+)/\\s*>|<\\s*form.*?>(.*?)<\\s*/\\s*form\\s*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         final Matcher formmatcher = pattern.matcher(requestInfo.toString().replaceAll("(?s)<!--.*?-->", ""));
         while (formmatcher.find()) {
             final String total = formmatcher.group(0);
@@ -349,7 +349,7 @@ public class Form {
     }
 
     /**
-     * Returns a list of requestvariables
+     * Returns a list of request variables
      *
      * @return
      */
@@ -460,17 +460,15 @@ public class Form {
 
     }
 
-    private void parseInputFields() {
+    private final void parseInputFields() {
         this.inputfields = new ArrayList<InputField>();
-        final Matcher matcher = Pattern.compile("(?s)(<[\\s]*(input|textarea|select).*?>)", Pattern.CASE_INSENSITIVE).matcher(this.htmlcode);
+        final Matcher matcher = Pattern.compile("(?s)(<\\s*(input|textarea|select).*?>)", Pattern.CASE_INSENSITIVE).matcher(this.htmlcode);
         while (matcher.find()) {
             final InputField nv = InputField.parse(matcher.group(1));
             if (nv != null) {
                 this.addInputField(nv);
-
             }
         }
-
     }
 
     /**
