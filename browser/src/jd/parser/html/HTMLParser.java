@@ -646,7 +646,7 @@ public class HTMLParser {
             } else if (c == 1 && data.length() < 256) {
                 HtmlParserCharSequence protocol = null;
                 HtmlParserCharSequence link = data;
-                if ((protocol = HTMLParser.getProtocol(link)) == null) {
+                if ((protocol = HTMLParser.getProtocol(link)) == null && !link.contains("%2F")) {
                     link = data.replaceFirst(HTMLParser.hdotsPattern, "http://").replaceFirst(HTMLParser.missingHTTPPattern, "http://www.");
                 }
                 if ((protocol = HTMLParser.getProtocol(link)) != null) {
@@ -728,8 +728,8 @@ public class HTMLParser {
                     break;
                 }
                 link = link.trim();
-                if (HTMLParser.getProtocol(link) == null) {
-                    link = link.replaceFirst(Pattern.compile("^www\\."), "http://www\\.");
+                if (HTMLParser.getProtocol(link) == null && !link.contains("%2F")) {
+                    link = link.replaceFirst(HTMLParser.missingHTTPPattern, "http://www\\.");
                 }
                 final Matcher mlinks = HTMLParser.protocols.matcher(link);
                 int start = -1;
@@ -1048,7 +1048,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString) {
@@ -1083,11 +1083,6 @@ public class HTMLParser {
         // data = data.replaceAll("(?i)<span.*?>", "");
         // data = data.replaceAll("(?i)</span.*?>", "");
         data = data.replaceAll(Pattern.compile("(?s)\\[(url|link)\\](.*?)\\[/(\\2)\\]"), "<$2>");
-        // dlc and other containers can be encoded, we need to do corrections here, otherwise protocol correction can be nuked else where,
-        // or links just do not add!
-        if (data.toString().matches(HTMLParser.protocolPrefixes + HTMLParser.urlEncodedProtocol.toString() + ".+")) {
-            data = HTMLParser.decodeURLParamEncodedURL(data);
-        }
 
         final HtmlParserResultSet results = new HtmlParserResultSet();
         final HtmlParserCharSequence baseURL;
