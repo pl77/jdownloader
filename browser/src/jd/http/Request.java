@@ -127,7 +127,7 @@ public abstract class Request {
                     while ((len = is.read(buffer)) != -1) {
                         if (len > 0) {
                             if (bos.size() + len > readLimit) {
-                                throw new IOException("Content-length too big " + bos.size() + len + " >= " + readLimit);
+                                throw new IOException("Content-length too big " + (bos.size() + len) + " >= " + readLimit);
                             }
                             bos.write(buffer, 0, len);
                         }
