@@ -69,7 +69,7 @@ public abstract class Request {
 
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
-     *
+     * 
      * @param query
      *            kann ein reines query ein (&key=value) oder eine url mit query
      * @return
@@ -350,7 +350,7 @@ public abstract class Request {
             headers.put("Accept-Encoding", "gzip");
         }
         headers.put("Cache-Control", "no-cache");
-        headers.put("Pragma", "no-cache");
+        // headers.put("Pragma", "no-cache");
         return headers;
     }
 
