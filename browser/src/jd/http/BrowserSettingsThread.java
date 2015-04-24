@@ -10,7 +10,6 @@ public class BrowserSettingsThread extends Thread implements BrowserSettings {
     protected Logger               logger;
 
     public BrowserSettingsThread() {
-
         this.copySettings();
     }
 
