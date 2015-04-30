@@ -368,12 +368,10 @@ public class Form {
                  */
                 continue;
             }
-            if (keys.add(ipf.getKey())) {
                 if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
                     images.add(ipf);
                 } else {
                     ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
-                }
             }
         }
         for (final InputField ipf : images) {
