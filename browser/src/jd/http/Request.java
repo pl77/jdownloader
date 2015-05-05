@@ -339,18 +339,17 @@ public abstract class Request {
 
     protected RequestHeader getDefaultRequestHeader() {
         final RequestHeader headers = new RequestHeader();
-        headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:33.0) Gecko/20100101 Firefox/33.0");
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
-
         if (Application.getJavaVersion() >= Application.JAVA16) {
             /* deflate only java >=1.6 */
             headers.put("Accept-Encoding", "gzip,deflate");
         } else {
             headers.put("Accept-Encoding", "gzip");
         }
+        headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         headers.put("Cache-Control", "no-cache");
         // headers.put("Pragma", "no-cache");
+        headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:33.0) Gecko/20100101 Firefox/33.0");
         return headers;
     }
 
@@ -451,47 +450,66 @@ public abstract class Request {
                 location = new Regex(refresh, "url=(.+);?").getMatch(0);
             }
         }
+        return getLocation(location, this);
+    }
+    
+    /** 
+     * 
+     * @since JD2
+     * @param locationn
+     * @param request
+     * @return
+     */
+    public static String getLocation(final String locationn, final Request request) {
+        String location = locationn;
         if (StringUtils.isEmpty(location)) {
             return null;
         }
-        final String contentType = this.httpConnection.getHeaderField("Content-Type");
+        final String contentType = request.httpConnection.getHeaderField("Content-Type");
         if (contentType != null && contentType.contains("UTF-8")) {
             location = Encoding.UTF8Decode(location, "ISO-8859-1");
         }
         try {
             new URL(location);
         } catch (final Exception e) {
-            final URL url = this.getHttpConnection().getURL();
+            final URL url = request.getHttpConnection().getURL();
             if (location.startsWith("//") && Browser.getHost("http:" + location, false) != null) {
                 location = url.getProtocol() + ":" + location;
             } else if (location.startsWith("/")) {
                 location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + location;
             } else if (location.startsWith("?")) {
                 final String path = url.getPath();
-                if (path == null) {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + "/" + location;
-                } else if (path.endsWith("/")) {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
-                } else {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
-                }
+                location = getLocation(location, url, path);
             } else {
                 String path = url.getPath();
                 if (path != null) {
                     path = new Regex(path, "^(/.+)/").getMatch(0);
                 }
-                if (path == null) {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + "/" + location;
-                } else if (path.endsWith("/")) {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
-                } else {
-                    location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + "/" + location;
-                }
+                location = getLocation(location, url, path);
             }
         }
         return Browser.correctURL(location);
     }
 
+    /**
+     * @since JD2
+     * @param location
+     * @param url
+     * @param path
+     * @return
+     */
+    private static String getLocation(final String location, final URL url, final String path) {
+        String tmp = null;
+        if (path == null) {
+            tmp = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + "/" + location;
+        } else if (path.endsWith("/")) {
+            tmp = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
+        } else {
+            tmp = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + "/" + location;
+        }
+        return tmp;
+    }
+        
     public HTTPProxy getProxy() {
         return this.proxy;
     }
