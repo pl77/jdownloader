@@ -31,6 +31,7 @@ import jd.http.Browser;
 import jd.nutils.encoding.Encoding;
 import jd.parser.Regex;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.encoding.Hex;
 import org.appwork.utils.logging.Log;
 
@@ -501,7 +502,7 @@ public class HTMLParser {
     }
 
     final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
-    final private static String                 protocolPrefixes            = "(mega|directhttp://https?|flashget|https?viajd|https?|ccf|dlc|ftp|jd|rsdf|jdlist|file)";
+    final private static String                 protocolPrefixes            = "(mega|directhttp://https?|flashget|https?viajd|https?|ccf|dlc|ftp|jd|rsdf|jdlist|file" + (!Application.isJared(null) ? "|jdlog" : "")+ ")";
     final private static String                 protocolPattern             = HTMLParser.protocolPrefixes + "://";
     final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("(?s)base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("(?s)base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE), };
