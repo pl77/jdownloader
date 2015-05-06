@@ -23,12 +23,13 @@ import java.util.HashMap;
 import jd.nutils.encoding.Encoding;
 import jd.parser.Regex;
 
-public class InputField extends HashMap<String, String> {
+import org.appwork.utils.StringUtils;
 
-    private static final long serialVersionUID = 7859094911920903660L;
+public class InputField {
 
     public static InputField parse(String data) {
-       // lets make all quotation marks within 'data' the same. As it's hard to make consistent regex 'matches' when quote marks are not the same, without using lazy regex!.
+        // lets make all quotation marks within 'data' the same. As it's hard to make consistent regex 'matches' when quote marks are not
+        // the same, without using lazy regex!.
         ArrayList<String> cleanupRegex = new ArrayList<String>();
         cleanupRegex.add("(\\w+\\s*=\\s*\"[^\"]+\")");
         cleanupRegex.add("(\\w+\\s*=\\s*'[^']+')");
@@ -43,137 +44,186 @@ public class InputField extends HashMap<String, String> {
             }
         }
         // no longer have to worry about 'data' with miss matched quotation marks!
-        
+
         // Note: input form correction for 'checked' and 'disabled' fields.
         // 'disabled' can be for any input field type. Can not be changed! Value shouldn't been submitted with form, .:. null value.
         // 'checked' states current value, can can be re-sent with current request. .:. null value.
-        //  when 'checked' not present value shouldn't be sent/set within forms input field.
+        // when 'checked' not present value shouldn't be sent/set within forms input field.
         boolean cbr = false;
         boolean checked = false;
         boolean disabled = false;
-        
+
         ArrayList<String> matches = new ArrayList<String>();
         matches.add("\\s?+type\\s?+=\\s?+\"?(checkbox|radio)?\"");
         matches.add("\\s+(checked)\\s?+");
         matches.add("\\s+(disabled)\\s?+");
         for (String reg : matches) {
             String result = new Regex(data, reg).getMatch(0);
-            if (result != null && result.matches("(?i)disabled"))  
+            if (result != null && result.matches("(?i)disabled")) {
                 disabled = true;
-            if (result != null && result.matches("(?i)checked"))
+            }
+            if (result != null && result.matches("(?i)checked")) {
                 checked = true;
-            if (result != null && result.matches("(?i)checkbox|radio"))
-               cbr = true;
+            }
+            if (result != null && result.matches("(?i)checkbox|radio")) {
+                cbr = true;
+            }
         }
 
-        final InputField ret = new InputField();
-        
         ArrayList<String> input = new ArrayList<String>();
-        // end of a " or ' (we corrected above so they are all ") is end of value of key, space before next key name isn't required. 
+        // end of a " or ' (we corrected above so they are all ") is end of value of key, space before next key name isn't required.
         input.add("[\"']{0,1}\\s*(\\w+)\\s*=\\s*\"(.*?)\"");
-        // for key and value without use of " or ', the delimiter needs to be: whitespace, end of inputfield >, and NOT ' or " since they shouldn't be present. Rhetorically should not contain empty value
-        // need to exclude values found in URLS, as inputfields!. Also do not overwrite a set entry with secondary regex findings. - raztoki 20150128
+        // for key and value without use of " or ', the delimiter needs to be: whitespace, end of inputfield >, and NOT ' or " since they
+        // shouldn't be present. Rhetorically should not contain empty value
+        // need to exclude values found in URLS, as inputfields!. Also do not overwrite a set entry with secondary regex findings. - raztoki
+        // 20150128
         input.add("(?!(?:https?://)?[^\\s]+[/\\w\\-\\.\\?&=]+)[\"']{0,1}\\s*(\\w+)\\s*=\\s*([^\\s\"'>]+)");
+        String type = null;
+        String key = null;
+        String value = null;
+        final HashMap<String, String> properties = new HashMap<String, String>();
         for (String reg : input) {
             String[][] results = new Regex(data, reg).getMatches();
             for (final String[] match : results) {
-                if (match[0].equalsIgnoreCase("type") && ret.getType() == null) {
-                    ret.setType(match[1]);
-                } else if (match[0].equalsIgnoreCase("name") && ret.key == null) {
-                    ret.setKey(Encoding.formEncoding(match[1]));
-                } else if (match[0].equalsIgnoreCase("value") && ret.value == null) {
-                    ret.setValue(Encoding.formEncoding(match[1]));
+                if (match[0].equalsIgnoreCase("type") && type == null) {
+                    type = match[1];
+                } else if (match[0].equalsIgnoreCase("name") && key == null) {
+                    key = Encoding.formEncoding(match[1]);
+                } else if (match[0].equalsIgnoreCase("value") && value == null) {
+                    value = Encoding.formEncoding(match[1]);
                     if (cbr) {
-                            if (checked) {
-                                //ret.put("<INPUTFIELD:CHECKED>", "true");
-                            } else {
-                                ret.put("<INPUTFIELD:CHECKED>", "false");
-                                ret.put("<INPUTFIELD:TYPEVALUE>", Encoding.formEncoding(match[1]));
-                                ret.setValue(Encoding.formEncoding(null));
-                            }
+                        if (checked) {
+                            // ret.put("<INPUTFIELD:CHECKED>", "true");
+                        } else {
+                            properties.put("<INPUTFIELD:CHECKED>", "false");
+                            properties.put("<INPUTFIELD:TYPEVALUE>", Encoding.formEncoding(match[1]));
+                            value = Encoding.formEncoding(null);
                         }
+                    }
                     if (!disabled) {
-                        //ret.put("CKBOX_RADIO_DISABLED", "false");
+                        // ret.put("CKBOX_RADIO_DISABLED", "false");
                     } else {
-                        ret.put("<INPUTFIELD:DISABLED>", "true");
-                        ret.put("<INPUTFIELD:TYPEVALUE>", Encoding.formEncoding(match[1]));
-                        ret.setValue(Encoding.formEncoding(null));
+                        properties.put("<INPUTFIELD:DISABLED>", "true");
+                        properties.put("<INPUTFIELD:TYPEVALUE>", Encoding.formEncoding(match[1]));
+                        value = Encoding.formEncoding(null);
                     }
                 } else {
-                    ret.put(Encoding.formEncoding(match[0]), Encoding.formEncoding(match[1]));
+                    properties.put(Encoding.formEncoding(match[0]), Encoding.formEncoding(match[1]));
                 }
             }
         }
-        
+        final InputField ret = new InputField(key, value, type);
+        if (properties.size() > 0) {
+            ret.setProperties(properties);
+        }
         return ret;
     }
 
-    private String key = null;
-    private String value = null;
-    
-    private String type = null;
+    private final String            key;
+    private String                  value      = null;
+    private HashMap<String, String> properties = null;
 
-    public InputField() {
-        // TODO Auto-generated constructor stub
+    private final String            type;
+
+    private void setProperties(HashMap<String, String> properties) {
+        this.properties = properties;
     }
 
     public InputField(final String key, final String value) {
+        this(key, value, null);
+    }
+
+    public InputField(final String key, final String value, final String type) {
         this.key = key;
         this.value = value;
+        this.type = type;
     }
-    
-    public File getFileToPost() {
-        if (!type.equalsIgnoreCase("file")) { throw new IllegalStateException("No file post field"); }
 
-        return new File(value);
+    public File getFileToPost() {
+        if (this.type == null || !this.type.equalsIgnoreCase("file")) {
+            throw new IllegalStateException("No file post field");
+        }
+        return new File(this.value);
     }
 
     public String getKey() {
-        return key;
+        return this.key;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj != null && obj instanceof InputField) {
+            final InputField o = (InputField) obj;
+            return StringUtils.equals(this.getKey(), o.getKey()) && StringUtils.equals(this.getValue(), o.getValue()) && StringUtils.equals(this.getType(), o.getType());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.key != null) {
+            return this.key.hashCode();
+        } else {
+            return this.getClass().hashCode();
+        }
     }
 
     public String getProperty(final String key, final String defValue) {
-        final String ret = get(key);
+        final String ret;
+        if (this.properties != null) {
+            ret = this.properties.get(key);
+        } else {
+            ret = null;
+        }
         return ret != null ? ret : defValue;
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     public void setFileToPost(final File file) {
-        if (!type.equalsIgnoreCase("file")) { throw new IllegalStateException("No file post field"); }
-        value = file.getAbsolutePath();
-    }
-
-    public void setKey(String string) {
-        if (string != null) {
-            string = string.trim();
+        if (this.type == null || !this.type.equalsIgnoreCase("file")) {
+            throw new IllegalStateException("No file post field");
         }
-        key = string;
-    }
-
-    public void setType(String string) {
-        if (string != null) {
-            string = string.trim();
-        }
-        type = string;
-    }
-
-    public void setValue(String value) {
-        if (value != null) {
-            value = value.trim();
-        }
-        this.value = value;
+        this.value = file.getAbsolutePath();
     }
 
     @Override
     public String toString() {
-        return "Field: " + key + "(" + type + ")" + " = " + value + " [" + super.toString() + "]";
+        if (this.properties != null) {
+            return "Field: " + this.key + "(" + this.type + ")" + " = " + this.value + " [" + this.properties.toString() + "]";
+        } else {
+            return "Field: " + this.key + "(" + this.type + ")" + " = " + this.value + " []";
+        }
     }
 
+    public void setValue(String value2) {
+        if (value2 != null) {
+            this.value = value2.trim();
+        } else {
+            this.value = null;
+        }
+    }
+
+    public boolean containsProperty(String key) {
+        if (this.properties != null) {
+            return this.properties.containsKey(key);
+        }
+        return false;
+    }
+
+    public void putProperty(String key, String value) {
+        if (this.properties == null) {
+            this.properties = new HashMap<String, String>();
+        }
+        this.properties.put(key, value);
+    }
 }

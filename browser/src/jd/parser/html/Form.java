@@ -235,33 +235,9 @@ public class Form {
         return null;
     }
 
-    // public boolean hasSubmitValue(String value) {
-    // for (String submit : this.submitValues) {
-    // try {
-    // if (submit == value || submit.equalsIgnoreCase(value)) return true;
-    // } catch (NullPointerException e) {
-    // //
-    // jd.controlling.JDLogger.getLogger().log(java.util.logging.Level.SEVERE,
-    // "Exception occurred",e);
-    // }
-    // }
-    // return false;
-    //
-    // }
-
     public InputField getInputFieldByName(final String name) {
         for (final InputField ipf : this.inputfields) {
-            if (ipf.getKey() != null && ipf.getKey().equalsIgnoreCase(name)) {
-                return ipf;
-            }
-        }
-        return null;
-
-    }
-
-    public InputField getInputFieldByProperty(final String key) {
-        for (final InputField ipf : this.inputfields) {
-            if (ipf.get(key) != null && ipf.get(key).equalsIgnoreCase(key)) {
+            if (StringUtils.equalsIgnoreCase(ipf.getKey(), name)) {
                 return ipf;
             }
         }
@@ -271,7 +247,7 @@ public class Form {
 
     public InputField getInputFieldByType(final String type) {
         for (final InputField ipf : this.inputfields) {
-            if (ipf.getType() != null && ipf.getType().equalsIgnoreCase(type)) {
+            if (StringUtils.equalsIgnoreCase(ipf.getType(), type)) {
                 return ipf;
             }
         }
@@ -298,7 +274,6 @@ public class Form {
     }
 
     public InputField getPreferredSubmit() {
-
         return this.preferredSubmit;
     }
 
@@ -368,10 +343,10 @@ public class Form {
                  */
                 continue;
             }
-                if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
-                    images.add(ipf);
-                } else {
-                    ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
+            if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
+                images.add(ipf);
+            } else {
+                ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
             }
         }
         for (final InputField ipf : images) {
@@ -584,6 +559,10 @@ public class Form {
 
         ret.append(this.keyValueMap.toString());
         return ret.toString();
+    }
+
+    public boolean remove(InputField f) {
+        return this.inputfields.remove(f);
     }
 
 }
