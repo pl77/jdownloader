@@ -561,7 +561,7 @@ public class Form {
         return ret.toString();
     }
 
-    public boolean remove(InputField f) {
+    public boolean removeInputField(InputField f) {
         return this.inputfields.remove(f);
     }
 
