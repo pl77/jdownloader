@@ -465,13 +465,16 @@ public abstract class Request {
         if (StringUtils.isEmpty(location)) {
             return null;
         }
-        final String contentType = request.httpConnection.getHeaderField("Content-Type");
+        final String contentType = request == null ? null : request.httpConnection.getHeaderField("Content-Type");
         if (contentType != null && contentType.contains("UTF-8")) {
             location = Encoding.UTF8Decode(location, "ISO-8859-1");
         }
         try {
             new URL(location);
         } catch (final Exception e) {
+            if (request == null) {
+                return null;
+            }
             final URL url = request.getHttpConnection().getURL();
             if (location.startsWith("//") && Browser.getHost("http:" + location, false) != null) {
                 location = url.getProtocol() + ":" + location;
