@@ -41,10 +41,6 @@ public class Encoding {
         return res;
     }
 
-    public static void main(String[] args) {
-        System.out.println(Encoding.Base64Decode("aHR0cDovL3VwbG9hZGVkLm5ldC9maWxlLzdjOXFoMWtl="));
-    }
-
     public static String Base64Decode(final String base64) {
         return Encoding.Base64Decode((CharSequence) base64).toString();
     }
@@ -58,19 +54,13 @@ public class Encoding {
             if (plain == null || plain.length == 0) {
                 plain = org.appwork.utils.encoding.Base64.decodeFast(base64);
             }
-            if (plain != null) {
-                final String ret = new String(plain, "UTF-8");
-                if (Encoding.filterString(ret).length() < plain.length / 1.5) {
-                    return base64;
-                } else {
-                    return ret;
-                }
+            if (plain != null && plain.length > 0) {
+                return new String(plain, "UTF-8");
             }
-            return base64;
         } catch (final Exception e) {
             e.printStackTrace();
-            return base64;
         }
+        return base64;
     }
 
     public static String Base64Encode(final String plain) {
@@ -124,17 +114,6 @@ public class Encoding {
             }
         }
         return tmp;
-    }
-
-    /**
-     * Filtert alle nicht lesbaren Zeichen aus str
-     *
-     * @param str
-     * @return
-     */
-    public static String filterString(final String str) {
-        final String allowed = "QWERTZUIOPÜASDFGHJKLÖÄYXCVBNMqwertzuiopasdfghjklyxcvbnmöäü;:,._-&$%(){}#~+ 1234567890<>='\"/";
-        return Encoding.filterString(str, allowed);
     }
 
     /**
