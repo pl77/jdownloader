@@ -344,12 +344,14 @@ public class Form {
                 continue;
             }
             if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
-                images.add(ipf);
+                // disabled see below.
+                //images.add(ipf);
             } else {
                 ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
             }
         }
         for (final InputField ipf : images) {
+            /* why do we do this??? if its required we should compare original html input values, if they have been updated we shouldn't randomly create ones! This creates duplicates and shit breaks shit ie (Open Circle Captcha). */
             if (keys.add(ipf.getKey() + ".x")) {
                 ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
             }
