@@ -330,8 +330,6 @@ public class Form {
      */
     public java.util.List<RequestVariable> getRequestVariables() {
         final List<RequestVariable> ret = new ArrayList<RequestVariable>();
-        final HashSet<String> keys = new HashSet<String>();
-        final HashSet<InputField> images = new HashSet<InputField>();
         for (final InputField ipf : this.inputfields) {
             // Do not send not prefered Submit types
             if (this.getPreferredSubmit() != null && ipf.getType() != null && ipf.getType().equalsIgnoreCase("submit") && this.getPreferredSubmit() != ipf) {
@@ -344,19 +342,14 @@ public class Form {
                 continue;
             }
             if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
-                // disabled see below.
-                //images.add(ipf);
+                if (!this.hasInputFieldByName(ipf.getKey() + ".x") || this.getInputField(ipf.getKey() + ".x").getValue() == null) {
+                    ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
+                }
+                if (!this.hasInputFieldByName(ipf.getKey() + ".y") || this.getInputField(ipf.getKey() + ".y").getValue() == null) {
+                    ret.add(new RequestVariable(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
+                }
             } else {
                 ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
-            }
-        }
-        for (final InputField ipf : images) {
-            /* why do we do this??? if its required we should compare original html input values, if they have been updated we shouldn't randomly create ones! This creates duplicates and shit breaks shit ie (Open Circle Captcha). */
-            if (keys.add(ipf.getKey() + ".x")) {
-                ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
-            }
-            if (keys.add(ipf.getKey() + ".y")) {
-                ret.add(new RequestVariable(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
             }
         }
         return ret;
