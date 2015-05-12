@@ -342,10 +342,12 @@ public class Form {
                 continue;
             }
             if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
-                if (!this.hasInputFieldByName(ipf.getKey() + ".x") || this.getInputField(ipf.getKey() + ".x").getValue() == null) {
+                final InputField x = this.getInputField(ipf.getKey() + ".x");
+                if (x==null || x.getValue() == null) {
                     ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
                 }
-                if (!this.hasInputFieldByName(ipf.getKey() + ".y") || this.getInputField(ipf.getKey() + ".y").getValue() == null) {
+                final InputField y = this.getInputField(ipf.getKey() + ".y");
+                if (y==null || y.getValue() == null) {
                     ret.add(new RequestVariable(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
                 }
             } else {
