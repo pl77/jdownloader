@@ -57,6 +57,7 @@ public class Encoding {
             if (plain != null && plain.length > 0) {
                 return new String(plain, "UTF-8");
             }
+        } catch (final ArrayIndexOutOfBoundsException ignore) {
         } catch (final Exception e) {
             e.printStackTrace();
         }
