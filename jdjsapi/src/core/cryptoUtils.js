@@ -1,11 +1,11 @@
-define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
+define("coreCryptoUtils",["coreCrypto"], function(CoreCrypto) {
 	/**
 	 * Utility Object for cryptography functions
 	 */
 	var CryptoUtils = {
 		/* hash a password with the given pass and domain as salt */
 		hashPassword: function(email, pass, domain) {
-			return CryptoJS.SHA256(CryptoJS.enc.Utf8.parse(email.toLowerCase() + pass + domain.toLowerCase()));
+			return CoreCrypto.SHA256(CoreCrypto.enc.Utf8.parse(email.toLowerCase() + pass + domain.toLowerCase()));
 		},
 		/* convert pass to secret hashes and delete it afterwards */
 		processPassword: function(options) {
@@ -29,19 +29,19 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 			options.sessiontoken = sessiontoken;
 			options.regaintoken = regaintoken;
 
-			var ses = CryptoJS.enc.Hex.parse(options.sessiontoken);
+			var ses = CoreCrypto.enc.Hex.parse(options.sessiontoken);
 			if (options.loginSecret) {
 				// calculate initial secret
 				var tot = options.loginSecret.concat(ses);
 				// keep old token to decrypt requests that got sent before a reconnect
 				options.serverEncryptionTokenOld = options.serverEncryptionToken;
-				options.serverEncryptionToken = CryptoJS.SHA256(tot);
+				options.serverEncryptionToken = CoreCrypto.SHA256(tot);
 				delete options.loginSecret;
 			} else {
 				// calculate new secret
 				options.serverEncryptionTokenOld = options.serverEncryptionToken;
 				var tot = options.serverEncryptionToken.concat(ses);
-				options.serverEncryptionToken = CryptoJS.SHA256(tot);
+				options.serverEncryptionToken = CoreCrypto.SHA256(tot);
 			}
 
 			var deviceSecret = options.deviceSecret.clone();
@@ -50,25 +50,28 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 			// requests after reconnect
 			options.deviceEncryptionTokenOld = options.deviceEncryptionToken;
 			// set new device encryption token
-			options.deviceEncryptionToken = CryptoJS.SHA256(totDev);
+			options.deviceEncryptionToken = CoreCrypto.SHA256(totDev);
 		},
 		/*
-		 * @param secret: CryptoJS.lib.WordArray used as secret
+		 * @param secret: CoreCrypto.lib.WordArray used as secret
 		 * @param plain: the JSON object to encrypt
 		 */
 		encryptJSON: function(secret, plain) {
+            if (!secret) {
+                return plain;
+            }
 			var iv = secret.firstHalf();
 			var key = secret.secondHalf();
 
-			var encrypted = CryptoJS.AES.encrypt(JSON.stringify(plain), key, {
-				mode: CryptoJS.mode.CBC,
+			var encrypted = CoreCrypto.AES.encrypt(JSON.stringify(plain), key, {
+				mode: CoreCrypto.mode.CBC,
 				iv: iv
 			});
 
 			return encrypted.toString();
 		},
 		/*
-		 * @param secret: CryptoJS.lib.WordArray used as secret
+		 * @param secret: CoreCrypto.lib.WordArray used as secret
 		 * @param secretOld: The secret from before a reconnect, can be null
 		 * @param plain: the ciphtext to decrypt
 		 */
@@ -79,10 +82,10 @@ define("coreCryptoUtils",["coreCrypto"], function(CryptoJS) {
 				var iv = secret.firstHalf();
 				var key = secret.secondHalf();
 
-				var plain_raw = CryptoJS.AES.decrypt(encrypted, key, {
-					mode: CryptoJS.mode.CBC,
+				var plain_raw = CoreCrypto.AES.decrypt(encrypted, key, {
+					mode: CoreCrypto.mode.CBC,
 					iv: iv
-				}).toString(CryptoJS.enc.Utf8);
+				}).toString(CoreCrypto.enc.Utf8);
 
 				plain = JSON.parse(plain_raw);
 			} catch (e) {

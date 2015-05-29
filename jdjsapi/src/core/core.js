@@ -1,10 +1,10 @@
-define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequestHandler"], function (CryptoJS, CryptoUtils, JDAPIRequest, JDAPICoreRequestHandler) {
+define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequestHandler"], function (CoreCrypto, CryptoUtils, JDAPIRequest, JDAPICoreRequestHandler) {
     "use strict";
 
     /**
      * CONSTANTS
      */
-    var TRANSFER_ENCODING = CryptoJS.enc.Hex;
+    var TRANSFER_ENCODING = CoreCrypto.enc.Hex;
     var API_ROOT = "http://api.jdownloader.org";
     var LOCAL_STORAGE_KEY = "jdapi/src/core/core.js";
 
@@ -30,8 +30,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                     try {
                         callback(apiState);
                     } catch (e) {
-                        console.error("Error while executing callback");
-                        console.error(e);
+                        // console.error(e);
                     }
                 });
             },
@@ -48,7 +47,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
         };
     })();
     //Default App Key
-    var APP_KEY = "JD_DEFAULT_APP_KEY";
+    var APP_KEY = "MYJD_JS_DEFAULT_APP_KEY";
 
     // Global Request Queue
     var jdapiRequestQueue = new Array();
@@ -173,14 +172,14 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             return disconnectCall;
         },
         /* send request to list all available devices */
-        serverCall: function (action, params) {
+        serverCall: function (action, params, type) {
             // Create request object
             params = params || {};
             var reqOptions = {
                 jdAction: action,
                 jdParams: params,
                 // url : this.options.apiRoot + queryString,
-                type: "POST",
+                type: type || "POST",
                 dataType: "aesjson-server",
                 contentType: "json",
                 converters: {
@@ -253,6 +252,9 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
         },
         getSessionToken: function () {
             return this.options.sessiontoken;
+        },
+        getSessionInfo: function () {
+            return this.options;
         },
         addAPIStateChangeListener: function (callback) {
             APIState.addAPIStateChangeListener(callback);

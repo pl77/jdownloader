@@ -1,4 +1,4 @@
-define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CryptoJS, CryptoUtils) {
+define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, CryptoUtils) {
     /**
      * API to handle server calls
      */
@@ -36,17 +36,17 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CryptoJS, Cr
             if (!pass) throw "No credentials given";
             var action = "finishregistration";
             var loginSecret = CryptoUtils.hashPassword(email, pass, "server");
-            var registerKey = CryptoJS.enc.Hex.parse(validationkey);
+            var registerKey = CoreCrypto.enc.Hex.parse(validationkey);
             var iv = registerKey.firstHalf();
             var key = registerKey.secondHalf();
-            var encrypted = CryptoJS.AES.encrypt(loginSecret, key, {
-                mode: CryptoJS.mode.CBC,
+            var encrypted = CoreCrypto.AES.encrypt(loginSecret, key, {
+                mode: CoreCrypto.mode.CBC,
                 iv: iv
             });
-            var stringEnc = CryptoJS.enc.Hex.stringify(encrypted.ciphertext);
+            var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
             var queryString = "/my/" + action + "?email=" + email + "&loginSecret=" + stringEnc;
-            queryString += "&signature=" + CryptoJS
-                .HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING);
+            queryString += "&signature=" + CoreCrypto
+                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING);
             var confirm = $.ajax({
                 url: this.jdapiCore.API_ROOT + queryString,
                 type: "POST",
@@ -85,17 +85,17 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CryptoJS, Cr
             var options = {email: email, pass: pw};
             CryptoUtils.processPassword(options);
             var action = "finishtermination";
-            var keyHex = CryptoJS.enc.Hex.parse(keyParam);
+            var keyHex = CoreCrypto.enc.Hex.parse(keyParam);
             var iv = keyHex.firstHalf();
             var key = keyHex.secondHalf();
-            var encrypted = CryptoJS.AES.encrypt(options.loginSecret, key, {
-                mode: CryptoJS.mode.CBC,
+            var encrypted = CoreCrypto.AES.encrypt(options.loginSecret, key, {
+                mode: CoreCrypto.mode.CBC,
                 iv: iv
             });
-            var stringEnc = CryptoJS.enc.Hex.stringify(encrypted.ciphertext);
+            var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
             var queryString = "/my/" + action + "?email=" + email + "&loginSecret=" + stringEnc + "&captchaResponse=" + captchaResponse + "&captchaChallenge=" + captchaChallenge;
-            queryString += "&signature=" + CryptoJS
-                .HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), keyHex).toString(this.jdapiCore.transferEncoding);
+            queryString += "&signature=" + CoreCrypto
+                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), keyHex).toString(this.jdapiCore.transferEncoding);
             var finish = $.ajax({
                 url: this.jdapiCore.API_ROOT + queryString,
                 type: "POST",
@@ -111,21 +111,21 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CryptoJS, Cr
             var action = "finishpasswordreset";
 
             var loginSecret = CryptoUtils.hashPassword(email, newpass, "server");
-            var registerKey = CryptoJS.enc.Hex.parse(key);
+            var registerKey = CoreCrypto.enc.Hex.parse(key);
 
             var iv = registerKey.firstHalf();
             var key = registerKey.secondHalf();
 
-            var encrypted = CryptoJS.AES.encrypt(loginSecret, key, {
-                mode: CryptoJS.mode.CBC,
+            var encrypted = CoreCrypto.AES.encrypt(loginSecret, key, {
+                mode: CoreCrypto.mode.CBC,
                 iv: iv
             });
 
-            var stringEnc = CryptoJS.enc.Hex.stringify(encrypted.ciphertext);
+            var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
             var queryString = "/my/" + action + "?email=" + email + "&loginSecret=" + stringEnc;
 
-            queryString += "&signature=" + CryptoJS
-                .HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING);
+            queryString += "&signature=" + CoreCrypto
+                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING);
 
             // issue authentication request
             var confirm = $.ajax({
@@ -137,7 +137,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CryptoJS, Cr
         },
         /* send feedback message to the server */
         feedback: function (data) {
-            return this.jdapiCore.serverCall("feedback", JSON.stringify(data));
+            return this.jdapiCore.serverCall("feedback", data);
         }
     });
     return JDAPIServer;

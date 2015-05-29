@@ -1,4 +1,4 @@
-define("serviceService",["coreCryptoUtils", "coreCrypto"], function(CryptoUtils, CryptoJS) {
+define("serviceService", ["coreCryptoUtils", "coreCrypto"], function (CryptoUtils, CoreCrypto) {
 	/**
 	 * API to handle service calls, eg the stats server
 	 */
@@ -15,8 +15,6 @@ define("serviceService",["coreCryptoUtils", "coreCrypto"], function(CryptoUtils,
 			if (this.serviceAccessTokens[servicename]) {
 				var tokens = $.Deferred();
 				tokens.resolve(this.serviceAccessTokens[servicename]);
-				console.log("Return tokens without making new request");
-				console.log(tokens);
 				return tokens;
 			}
 			//else request token first!
@@ -49,7 +47,7 @@ define("serviceService",["coreCryptoUtils", "coreCrypto"], function(CryptoUtils,
 			this.requestAccessToken(servicename).done(function(tokens) {
 				var queryString = action + "?" + params + "&rid=" + 12 + "&accesstoken=" + tokens.accessToken;
 				queryString = encodeURI(queryString);
-				queryString += "&signature=" + CryptoJS.HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), CryptoJS.enc.Hex.parse(tokens.accessSecret)).toString(CryptoJS.enc.Hex);
+				queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), CoreCrypto.enc.Hex.parse(tokens.accessSecret)).toString(CoreCrypto.enc.Hex);
 
 				var confirm = $.ajax({
 					url: url + queryString,
@@ -60,7 +58,6 @@ define("serviceService",["coreCryptoUtils", "coreCrypto"], function(CryptoUtils,
 					if (self.serviceAccessTokens[servicename]) {
 						var tokens = self.serviceAccessTokens[servicename];
 						tokens.used++;
-						//console.log(tokens.accessToken + " used " + tokens.used + " times");
 					}
 					returnDeferred.resolve(res);
 				}).fail(function(res) {

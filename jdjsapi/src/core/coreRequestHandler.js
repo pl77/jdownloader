@@ -1,4 +1,4 @@
-define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CryptoJS, CryptoUtils) {
+define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, CryptoUtils) {
     var LOCAL_STORAGE_RECONNECT_LOCK_KEY = "jdapi/src/core/coreRequestHandler.js";
     var JDAPICoreRequestHandler = function (appKey, transferEncoding, LOCAL_STORAGE_KEY, apiRoot) {
         this.appKey = appKey;
@@ -24,7 +24,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (Crypto
                 params.rid = 0;
 
                 var queryString = "/my/" + action + "?" + $.param(params);
-                queryString += "&signature=" + CryptoJS.HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), options.loginSecret).toString(this.transferEncoding);
+                queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.loginSecret).toString(this.transferEncoding);
 
                 // issue authentication request
                 var auth = $.ajax({
@@ -60,19 +60,17 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (Crypto
                     handshake.reject();
                 } else {
                     options = $.extend({}, restoredOptions);
-                    //Convert JSON back to CryptoJS.lib.WordArray instance
+                    //Convert JSON back to CoreCrypto.lib.WordArray instance
                     if (restoredOptions.serverEncryptionToken) {
-                        // console.log("reset encryption token");
-                        options.serverEncryptionToken = CryptoJS.lib.WordArray.random(restoredOptions.serverEncryptionToken.sigBytes);
+                        options.serverEncryptionToken = CoreCrypto.lib.WordArray.random(restoredOptions.serverEncryptionToken.sigBytes);
                         options.serverEncryptionToken.words = restoredOptions.serverEncryptionToken.words;
                     }
                     if (restoredOptions.deviceEncryptionToken) {
-                        options.deviceEncryptionToken = CryptoJS.lib.WordArray.random(restoredOptions.deviceEncryptionToken.sigBytes);
+                        options.deviceEncryptionToken = CoreCrypto.lib.WordArray.random(restoredOptions.deviceEncryptionToken.sigBytes);
                         options.deviceEncryptionToken.words = restoredOptions.deviceEncryptionToken.words;
                     }
                     if (restoredOptions.deviceSecret) {
-                        // console.log("Initialize device secret");
-                        options.deviceSecret = CryptoJS.lib.WordArray.random(restoredOptions.deviceSecret.sigBytes);
+                        options.deviceSecret = CoreCrypto.lib.WordArray.random(restoredOptions.deviceSecret.sigBytes);
                         options.deviceSecret.words = restoredOptions.deviceSecret.words;
                     }
                     handshake.resolve(options);
@@ -123,7 +121,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (Crypto
                 params.rid = rid;
 
                 var queryString = "/my/" + action + "?" + $.param(params);
-                queryString += "&signature=" + CryptoJS.HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), options.serverEncryptionToken).toString(this.transferEncoding);
+                queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.serverEncryptionToken).toString(this.transferEncoding);
 
                 var self = this;
                 //reconnect yourself
@@ -159,7 +157,32 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (Crypto
                 sessiontoken: options.sessiontoken
             };
             var queryString = "/my/disconnect?" + $.param(params);
-            queryString += "&signature=" + CryptoUtils.HmacSHA256(CryptoJS.enc.Utf8.parse(queryString), options.serverEncryptionToken).toString(this.transferEncoding);
+            queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.serverEncryptionToken).toString(this.transferEncoding);
+
+            var disconnect = $.ajax({
+                url: this.apiRoot + queryString,
+                async: true,
+                type: "POST",
+                dataType: "aesjson-server",
+                converters: {
+                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken, null)
+                }
+            }).done((function (data) {
+                if (data.rid !== options.rid) return this.connection.reject(undefined, "replay attack");
+            }).bind(this));
+
+            return disconnect;
+        },
+        requestTerminationEmail: function (options) {
+            var params =
+            {
+                rid: options.rid,
+                sessiontoken: options.sessiontoken,
+                captchaChallenge: options.captchaChallenge,
+                captchaResponse: options.captchaResponse
+            };
+            var queryString = "/my/disconnect?" + $.param(params);
+            queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.serverEncryptionToken).toString(this.transferEncoding);
 
             var disconnect = $.ajax({
                 url: this.apiRoot + queryString,

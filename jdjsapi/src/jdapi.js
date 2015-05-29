@@ -1,11 +1,3 @@
-/*
- ##MyJDownloader JavaScript API
- - - -
- @author AppWork GmbH
- Dependencies: jQuery, require.js
-
- (c) 2013-2014 by AppWork GmbH. All rights reserved.
- */
 /**
  * Wrap console to disable .log output in production
  */
@@ -15,10 +7,10 @@ var logger = {
         if (LOGGING_ENABLED) console.log(msg);
     },
     warn: function (msg) {
-        console.warn(msg);
+        if (LOGGING_ENABLED) console.warn(msg);
     },
     error: function (msg) {
-        console.error(msg);
+        if (LOGGING_ENABLED)  console.error(msg);
     }
 };
 /**
@@ -29,27 +21,10 @@ define("config/config", function () {
         TRANSFER_ENCODING: CryptoJS.enc.Hex,
         API_ROOT: "http://api.jdownloader.org",
         LOCAL_STORAGE_KEY: "api.transport.options",
-        APP_KEY: "JD_WEBUI_NEW_399"
+        APP_KEY: "MYJD_JS_DEFAULT_APP_KEY"
     };
 });
-/**
- * RequireJS config
- */
-require.config({
-    paths: {
-        jdapi: "build/jdapi",
-        coreCore: "src/core/core",
-        coreCrypto: "src/core/crypto",
-        coreCryptoUtils: "src/core/cryptoUtils",
-        coreRequest: "src/core/request",
-        coreRequestHandler: "src/core/coreRequestHandler",
-        device: "src/device/device",
-        deviceController: "src/device/deviceController",
-        serverServer: "src/server/server",
-        serviceService: "src/service/service",
-        CryptoJS: "vendor/cryptojs"
-    }
-});
+
 /**
  * Main Library Object, contains all functions the library makes available for clients
  */
@@ -265,6 +240,16 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
         },
         getCurrentUser: function () {
             return this.jdAPICore.getCurrentUser();
+        },
+        getCurrentSessionInfo: function () {
+            var sessionInfo = this.jdAPICore.getSessionInfo();
+            var result = {
+                s: sessionInfo.sessiontoken,
+                r: sessionInfo.regaintoken,
+                e: sessionInfo.serverEncryptionToken.toString(CryptoJS.enc.Base64),
+                d: sessionInfo.deviceSecret.toString(CryptoJS.enc.Base64)
+            };
+            return result;
         }
     });
     /**
