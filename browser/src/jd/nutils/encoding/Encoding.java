@@ -42,6 +42,9 @@ public class Encoding {
     }
 
     public static String Base64Decode(final String base64) {
+        if (base64 == null) {
+            return null;
+        }
         return Encoding.Base64Decode((CharSequence) base64).toString();
     }
 
@@ -303,7 +306,7 @@ public class Encoding {
                 urlcoded = urlcoded.replaceAll("%26", "&");
                 urlcoded = urlcoded.replaceAll("%23", "#");
             }
-            final boolean seemsFileURL = urlcoded.startsWith("file://");
+            final boolean seemsFileURL = urlcoded.startsWith("file:/");
             if (seemsFileURL) {
                 urlcoded = urlcoded.replaceAll("%20", " ");
             }
