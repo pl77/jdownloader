@@ -79,6 +79,7 @@ public class Browser {
 
     }
 
+   
     private static final HashMap<String, Cookies> COOKIES            = new HashMap<String, Cookies>();
     private static ProxySelectorInterface         GLOBAL_PROXY       = null;
     private static Logger                         LOGGER             = null;
