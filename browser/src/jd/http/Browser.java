@@ -1056,7 +1056,27 @@ public class Browser {
         }
         return null;
     }
-
+    
+    /**
+     * returns first found form with given Action. 
+     * 
+     * @author raztoki
+     * @since JD2
+     * @param action
+     * @return
+     */
+    public final Form getFormbyAction(final String action) {
+        if (action == null) {
+            return null;
+        }
+        for (final Form form : this.getForms()) {
+            if (action.equalsIgnoreCase(form.getAction())) {
+                return form;
+            }
+        }
+        return null;
+    }
+    
     /**
      * Returns the first form with an Submitvalue of name<br />
      * Note: String needs to be urlEncoded as values it's comparing against are!
@@ -1866,4 +1886,5 @@ public class Browser {
     public void setDefaultSSLTrustALL(Boolean defaultSSLTrustALL) {
         this.defaultSSLTrustALL = defaultSSLTrustALL;
     }
+
 }
