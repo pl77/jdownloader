@@ -187,7 +187,7 @@ public abstract class Request {
 
     protected String               customCharset  = null;
 
-    protected byte[]               byteArray      = null;
+    protected byte[]               responseBytes  = null;
 
     protected boolean              contentDecoded = true;
 
@@ -299,8 +299,8 @@ public abstract class Request {
 
     public String getCharsetFromMetaTags() {
         String parseFrom = null;
-        if (this.htmlCode == null && this.byteArray != null) {
-            parseFrom = new String(this.byteArray);
+        if (this.htmlCode == null && this.responseBytes != null) {
+            parseFrom = new String(this.responseBytes);
         } else if (this.htmlCode != null) {
             parseFrom = this.htmlCode;
         }
@@ -358,7 +358,7 @@ public abstract class Request {
     }
 
     public String getHtmlCode() throws CharacterCodingException {
-        if (this.htmlCode == null && this.byteArray != null) {
+        if (this.htmlCode == null && this.responseBytes != null) {
             final boolean keepBytes = this.isKeepByteArray();
             String ct = null;
             if (this.httpConnection != null) {
@@ -382,27 +382,27 @@ public abstract class Request {
                         if (useCS != null) {
                             /* try to use wanted charset */
                             useCS = useCS.toUpperCase(Locale.ENGLISH);
-                            this.htmlCode = new String(this.byteArray, useCS);
+                            this.htmlCode = new String(this.responseBytes, useCS);
                             if (!keepBytes) {
-                                this.byteArray = null;
+                                this.responseBytes = null;
                             }
                             this.httpConnection.setCharset(useCS);
                             return this.htmlCode;
                         }
                     } catch (final Exception e) {
                     }
-                    this.htmlCode = new String(this.byteArray, "ISO-8859-1");
+                    this.htmlCode = new String(this.responseBytes, "ISO-8859-1");
                     if (!keepBytes) {
-                        this.byteArray = null;
+                        this.responseBytes = null;
                     }
                     this.httpConnection.setCharset("ISO-8859-1");
                     return this.htmlCode;
                 } catch (final Exception e) {
                     System.out.println("could neither charset: " + useCS + " nor default charset");
                     /* fallback to default charset in error case */
-                    this.htmlCode = new String(this.byteArray);
+                    this.htmlCode = new String(this.responseBytes);
                     if (!keepBytes) {
-                        this.byteArray = null;
+                        this.responseBytes = null;
                     }
                     return this.htmlCode;
                 }
@@ -452,8 +452,8 @@ public abstract class Request {
         }
         return getLocation(location, this);
     }
-    
-    /** 
+
+    /**
      * 
      * @since JD2
      * @param locationn
@@ -512,7 +512,7 @@ public abstract class Request {
         }
         return tmp;
     }
-        
+
     public HTTPProxy getProxy() {
         return this.proxy;
     }
@@ -537,7 +537,7 @@ public abstract class Request {
      * @return the byteArray
      */
     public byte[] getResponseBytes() {
-        return this.byteArray;
+        return this.responseBytes;
     }
 
     public String getResponseHeader(final String key) {
@@ -636,9 +636,13 @@ public abstract class Request {
         this.keepByteArray = keepByteArray;
         final long tima = System.currentTimeMillis();
         this.httpConnection.setCharset(this.getCustomCharset());
-        this.byteArray = Request.read(this.getHttpConnection(), this.getReadLimit());
+        this.responseBytes = Request.read(this.getHttpConnection(), this.getReadLimit());
         this.readTime = System.currentTimeMillis() - tima;
         return this;
+    }
+
+    public void setKeepByteArray(boolean keepByteArray) {
+        this.keepByteArray = keepByteArray;
     }
 
     public void setConnectTimeout(final int connectTimeout) {
@@ -665,8 +669,15 @@ public abstract class Request {
     }
 
     public void setHtmlCode(final String htmlCode) {
-        this.byteArray = null;
+
+        this.responseBytes = null;
         this.htmlCode = htmlCode;
+        this.requested = true;
+    }
+
+    public void setResponseBytes(byte[] bytes) {
+        this.responseBytes = bytes;
+        htmlCode = null;
         this.requested = true;
     }
 
