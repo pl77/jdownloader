@@ -1,5 +1,7 @@
 package org.jdownloader.myjdownloader.client.bindings.interfaces;
 
+import java.util.HashMap;
+
 import org.jdownloader.myjdownloader.client.bindings.AddLinksQuery;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 import org.jdownloader.myjdownloader.client.bindings.LinkVariantStorable;
@@ -54,4 +56,9 @@ public interface LinkgrabberInterface extends Linkable {
      * @param packageIds
      */
     void setPriority(PriorityStorable priority, long[] linkIds, long[] packageIds);
+    
+	void startOnlineStatusCheck(long[] linkIds, long[] packageIds);
+	
+	HashMap<Long, String> getDownloadUrls(long[] linkIds, long[] packageIds);
+	
 }
