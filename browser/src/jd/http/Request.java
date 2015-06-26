@@ -69,7 +69,7 @@ public abstract class Request {
 
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
-     * 
+     *
      * @param query
      *            kann ein reines query ein (&key=value) oder eine url mit query
      * @return
@@ -339,17 +339,17 @@ public abstract class Request {
 
     protected RequestHeader getDefaultRequestHeader() {
         final RequestHeader headers = new RequestHeader();
+        headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0");
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
             /* deflate only java >=1.6 */
             headers.put("Accept-Encoding", "gzip,deflate");
         } else {
             headers.put("Accept-Encoding", "gzip");
         }
-        headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         headers.put("Cache-Control", "no-cache");
         // headers.put("Pragma", "no-cache");
-        headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:33.0) Gecko/20100101 Firefox/33.0");
         return headers;
     }
 
@@ -450,11 +450,11 @@ public abstract class Request {
                 location = new Regex(refresh, "url=(.+);?").getMatch(0);
             }
         }
-        return getLocation(location, this);
+        return Request.getLocation(location, this);
     }
 
     /**
-     * 
+     *
      * @since JD2
      * @param locationn
      * @param request
@@ -482,13 +482,13 @@ public abstract class Request {
                 location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + location;
             } else if (location.startsWith("?")) {
                 final String path = url.getPath();
-                location = getLocation(location, url, path);
+                location = Request.getLocation(location, url, path);
             } else {
                 String path = url.getPath();
                 if (path != null) {
                     path = new Regex(path, "^(/.+)/").getMatch(0);
                 }
-                location = getLocation(location, url, path);
+                location = Request.getLocation(location, url, path);
             }
         }
         return Browser.correctURL(location);
@@ -605,7 +605,7 @@ public abstract class Request {
                 }
             }
         }
-        if (this.httpConnection instanceof HTTPConnectionImpl) {
+        if (this.httpConnection instanceof URLConnectionAdapterDirectImpl) {
             final String connectionRequest = this.httpConnection.getRequestProperty(HTTPConstants.HEADER_REQUEST_CONNECTION);
             if (connectionRequest == null || StringUtils.containsIgnoreCase(connectionRequest, "Keep-Alive")) {
                 HTTPConnectionImpl httpConnectionImpl = (HTTPConnectionImpl) this.httpConnection;
@@ -677,7 +677,7 @@ public abstract class Request {
 
     public void setResponseBytes(byte[] bytes) {
         this.responseBytes = bytes;
-        htmlCode = null;
+        this.htmlCode = null;
         this.requested = true;
     }
 
