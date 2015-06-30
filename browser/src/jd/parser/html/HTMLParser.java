@@ -906,7 +906,7 @@ public class HTMLParser {
             }
         }
         /* ! is allowed so we convert back %21 to ! */
-        input = input.replaceAll(HTMLParser.specialReplace2Pattern, "!");
+        // input = input.replaceAll(HTMLParser.specialReplace2Pattern, "!");
         /* ' must be %27 encoded */
         input = input.replaceAll(HTMLParser.specialReplacePattern, "%27");
         /* spaces must be %20 encoded */
@@ -1059,7 +1059,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString) {
