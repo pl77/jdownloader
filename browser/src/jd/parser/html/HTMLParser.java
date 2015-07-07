@@ -502,9 +502,9 @@ public class HTMLParser {
     }
 
     final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
-    final private static String                 protocolPattern             = "(mega://|chrome://|directhttp://https?://|flashget://|https?viajd://|https?://|ccf://|dlc://|ftp://|jd://|rsdf://|jdlist://|file:/" + (!Application.isJared(null) ? "|jdlog://" : "") + ")";
+    final private static String                 protocolPattern             = "(magnet:|mega://|chrome://|directhttp://https?://|flashget://|https?viajd://|https?://|ccf://|dlc://|ftp://|jd://|rsdf://|jdlist://|file:/" + (!Application.isJared(null) ? "|jdlog://" : "") + ")";
     final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("(?s)base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("(?s)base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
-    final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE), };
+    final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPattern + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                protocols                   = Pattern.compile("(" + HTMLParser.protocolPattern + ")");
     final private static Pattern                LINKPROTOCOL                = Pattern.compile("^" + HTMLParser.protocolPattern, Pattern.CASE_INSENSITIVE);
@@ -545,12 +545,11 @@ public class HTMLParser {
 
     final private static Pattern                tagsPattern                 = Pattern.compile(".*<.*>.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    final private static Pattern                spacePattern                = Pattern.compile("\\s", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                singleSpacePattern          = Pattern.compile(" ", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                space2Pattern               = Pattern.compile(".*\\s.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                hdotsPattern                = Pattern.compile("h.{2,3}://", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                specialReplacePattern       = Pattern.compile("'", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern                specialReplace2Pattern      = Pattern.compile("%21", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     final private static Pattern                missingHTTPPattern          = Pattern.compile("^www\\.", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -686,7 +685,7 @@ public class HTMLParser {
         for (final Pattern pattern : HTMLParser.hrefPattern) {
             final HtmlParserCharSequence found = data.group(2, pattern);
             if (found != null) {
-                if (!found.equals("about:blank")) {
+                if (!found.equals("about:blank") && !found.equals("/") && !found.startsWith("#")) {
                     hrefURL = found;
                     break;
                 }
