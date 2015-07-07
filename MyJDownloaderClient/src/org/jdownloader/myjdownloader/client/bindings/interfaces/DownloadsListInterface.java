@@ -3,6 +3,7 @@ package org.jdownloader.myjdownloader.client.bindings.interfaces;
 import java.util.HashMap;
 import java.util.List;
 
+import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 import org.jdownloader.myjdownloader.client.bindings.PriorityStorable;
 import org.jdownloader.myjdownloader.client.bindings.UrlDisplayTypeStorable;
@@ -90,5 +91,7 @@ public interface DownloadsListInterface extends Linkable {
     void movetoNewPackage(long[] linkIds, long[] pkgIds, String newPkgName, String downloadPath);
 
     void splitPackageByHoster(long[] linkIds, long[] pkgIds);
+
+    void cleanup(final long[] linkIds, final long[] packageIds, final CleanupActionOptions.Action action, final CleanupActionOptions.Mode mode, final CleanupActionOptions.SelectionType selectionType);
 
 }
