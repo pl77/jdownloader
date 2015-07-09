@@ -1095,7 +1095,7 @@ public class HTMLParser {
         data = data.replaceAll(Pattern.compile("(?s)\\[(url|link)\\](.*?)\\[/(\\2)\\]"), "<$2>");
 
         final HtmlParserResultSet results = new HtmlParserResultSet();
-        if (baseURLString != null) {
+        if (baseURLString != null && HTMLParser.getProtocol(baseURLString) != null) {
             results.setBaseURL(new HtmlParserCharSequence(baseURLString));
         }
         HTMLParser._getHttpLinksWalker(data, results, null);
