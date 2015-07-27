@@ -26,6 +26,7 @@ public class AddLinksQuery extends AbstractJsonData {
     }
 
     private boolean autostart       = false;
+    private boolean deepDecrypt     = false;
     private String  links           = null;
     private String  packageName     = null;
     private String  extractPassword = null;

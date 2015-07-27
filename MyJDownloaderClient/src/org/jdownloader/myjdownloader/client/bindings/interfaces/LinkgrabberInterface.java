@@ -3,14 +3,13 @@ package org.jdownloader.myjdownloader.client.bindings.interfaces;
 import java.util.HashMap;
 
 import org.jdownloader.myjdownloader.client.bindings.AddLinksQuery;
-import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions;
+import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Action;
+import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Mode;
+import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.SelectionType;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 import org.jdownloader.myjdownloader.client.bindings.LinkVariantStorable;
 import org.jdownloader.myjdownloader.client.bindings.PriorityStorable;
 import org.jdownloader.myjdownloader.client.bindings.UrlDisplayTypeStorable;
-import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Action;
-import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Mode;
-import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.SelectionType;
 import org.jdownloader.myjdownloader.client.bindings.linkgrabber.CrawledLinkQuery;
 import org.jdownloader.myjdownloader.client.bindings.linkgrabber.CrawledLinkStorable;
 import org.jdownloader.myjdownloader.client.bindings.linkgrabber.CrawledPackageQuery;
@@ -71,5 +70,7 @@ public interface LinkgrabberInterface extends Linkable {
     void splitPackageByHoster(long[] linkIds, long[] pkgIds);
 
     void cleanup(long[] linkIds, long[] packageIds, Action action, Mode mode, SelectionType selectionType);
+
+    void setDownloadDirectory(String directory, long[] packageIds);
 
 }
