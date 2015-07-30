@@ -22,11 +22,25 @@ import java.net.URLEncoder;
 import java.util.HashSet;
 
 import jd.parser.Regex;
+import jd.parser.html.HTMLParser;
 
 import org.appwork.utils.logging.Log;
 
 public class Encoding {
 
+    private final static char[] HEX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+    public static String base16Encode(final String input) {
+        final byte[] byteArray = input.getBytes();
+        StringBuffer hexBuffer = new StringBuffer(byteArray.length * 2);
+        for (int i = 0; i < byteArray.length; i++) {
+            for (int j = 1; j >= 0; j--) {
+                hexBuffer.append(HEX[(byteArray[i] >> (j * 4)) & 0xF]);
+            }
+        }
+        return hexBuffer.toString();
+    }
+    
     public static byte[] base16Decode(String code) {
         while (code.length() % 2 > 0) {
             code += "0";
@@ -40,6 +54,7 @@ public class Encoding {
         }
         return res;
     }
+    
 
     public static String Base64Decode(final String base64) {
         if (base64 == null) {
@@ -306,7 +321,7 @@ public class Encoding {
                 urlcoded = urlcoded.replaceAll("%26", "&");
                 urlcoded = urlcoded.replaceAll("%23", "#");
             }
-            final boolean seemsFileURL = urlcoded.startsWith("file:/");
+            final boolean seemsFileURL = urlcoded.startsWith(HTMLParser.protocolFile);
             if (seemsFileURL) {
                 urlcoded = urlcoded.replaceAll("%20", " ");
             }
