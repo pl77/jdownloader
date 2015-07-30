@@ -842,7 +842,7 @@ public class HTMLParser {
             //
             return results;
         }
-        if (!data.contains(":/") && !data.contains(HTMLParser.protocolFile) && !data.contains(":\\/\\/") && !data.find(HTMLParser.urlEncodedProtocol) && !data.contains("www.")) {
+        if (!data.contains("://") && !data.contains(HTMLParser.protocolFile) && !data.contains(":\\/\\/") && !data.find(HTMLParser.urlEncodedProtocol) && !data.contains("www.")) {
             /* data must contain at least the protocol separator */
             if (!data.matches(HTMLParser.checkPatternHREFUNESCAPESRC)) {
                 /* maybe easy encrypted website or a href */
