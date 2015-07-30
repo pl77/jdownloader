@@ -502,12 +502,13 @@ public class HTMLParser {
     }
 
     final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
-    final private static String                 protocolPattern             = "(magnet:|mega://|chrome://|directhttp://https?://|flashget://|https?viajd://|https?://|ccf://|dlc://|ftp://|jd://|rsdf://|jdlist://|file:/" + (!Application.isJared(null) ? "|jdlog://" : "") + ")";
+    public final static String                  protocolFile                = "file:/";
+    final private static String                 protocolPrefixes            = "((?:mega|chrome|directhttp://https?|flashget|https?viajd|https?|ccf|dlc|ftp|jd|rsdf|jdlist" + (!Application.isJared(null) ? "|jdlog" : "")+ ")://|" + HTMLParser.protocolFile + "|magnet:)";
     final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("(?s)base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("(?s)base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
-    final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPattern + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern                protocols                   = Pattern.compile("(" + HTMLParser.protocolPattern + ")");
-    final private static Pattern                LINKPROTOCOL                = Pattern.compile("^" + HTMLParser.protocolPattern, Pattern.CASE_INSENSITIVE);
+    final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern                protocols                   = Pattern.compile("(" + HTMLParser.protocolPrefixes + ")");
+    final private static Pattern                LINKPROTOCOL                = Pattern.compile("^" + HTMLParser.protocolPrefixes, Pattern.CASE_INSENSITIVE);
 
     final private static Pattern                mergePattern_Root           = Pattern.compile("(.*?\\..*?)(/|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                mergePattern_Path           = Pattern.compile("(.*?\\.[^?#]+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -517,7 +518,7 @@ public class HTMLParser {
 
     static {
         try {
-            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPattern + "|www\\.).+?(?=((\\s*" + HTMLParser.protocolPattern + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s*" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         } catch (final Throwable e) {
             Log.exception(e);
         }
@@ -650,7 +651,7 @@ public class HTMLParser {
                     link = data.replaceFirst(HTMLParser.hdotsPattern, "http://").replaceFirst(HTMLParser.missingHTTPPattern, "http://www.");
                 }
                 if ((protocol = HTMLParser.getProtocol(link)) != null) {
-                    if (protocol.startsWith("file:/")) {
+                    if (protocol.startsWith(HTMLParser.protocolFile)) {
                         results.add(link);
                         return results;
                     } else {
@@ -841,7 +842,7 @@ public class HTMLParser {
             //
             return results;
         }
-        if (!data.contains(":/") && !data.contains(":\\/\\/") && !data.find(HTMLParser.urlEncodedProtocol) && !data.contains("www.")) {
+        if (!data.contains(":/") && !data.contains(HTMLParser.protocolFile) && !data.contains(":\\/\\/") && !data.find(HTMLParser.urlEncodedProtocol) && !data.contains("www.")) {
             /* data must contain at least the protocol separator */
             if (!data.matches(HTMLParser.checkPatternHREFUNESCAPESRC)) {
                 /* maybe easy encrypted website or a href */
