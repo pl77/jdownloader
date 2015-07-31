@@ -80,18 +80,8 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
             var apiRequest = $.ajax(this.options);
 
             apiRequest.done(function (response) {
-                /*
-                 * DEBUG: Trigger random reconnects
-                 */
-                // if (Math.random() < 0.2) {
-                // 	filter.reject({
-                // 		type: "TOKEN_INVALID"
-                // 	});
-                // 	return filter;
-                // } else {
                 logger.log("[MYJD] [JSAPI] [REQUEST] " + JSON.stringify(options ? options.type : "NO_TYPE") + " " + JSON.stringify(options ? options.url : "NO_URL") + "\nOPTIONS:\n" + JSON.stringify(options ? options : "NO_OPTIONS") + "\n\nRESPONSE:\n" + JSON.stringify(response));
                 filter.resolve(response);
-                // }
             });
             apiRequest.fail(function (error) {
                 if (error.responseText) {

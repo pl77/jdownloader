@@ -77,7 +77,6 @@ define("coreCryptoUtils",["coreCrypto"], function(CoreCrypto) {
 		 */
 		decryptJSON: function(secret, secretOld, encrypted) {
 			var plain = null;
-			var exception = null;
 			try {
 				var iv = secret.firstHalf();
 				var key = secret.secondHalf();
@@ -86,11 +85,10 @@ define("coreCryptoUtils",["coreCrypto"], function(CoreCrypto) {
 					mode: CoreCrypto.mode.CBC,
 					iv: iv
 				}).toString(CoreCrypto.enc.Utf8);
-
-				plain = JSON.parse(plain_raw);
+                if (plain_raw && typeof plain_raw === "string") {
+                    plain = JSON.parse(plain_raw);
+                }
 			} catch (e) {
-				console.warn(e);
-				exception = e;
 				plain = null;
 			}
 			//if decryption did not work, try with old tokens before failing finally

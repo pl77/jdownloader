@@ -107,7 +107,6 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         changePassword: function (email, newpass, key) {
 
             // craft query string
-            var params = {};
             var action = "finishpasswordreset";
 
             var loginSecret = CryptoUtils.hashPassword(email, newpass, "server");

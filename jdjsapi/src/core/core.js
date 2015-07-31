@@ -250,6 +250,12 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             }
             return this._call(reqOptions);
         },
+        localConnectCall: function (username, password, callback) {
+            $.post("http://localhost:8002/myjdconnect", {username: username, password: password}, callback);
+        },
+        discoverLocalDeviceLogin: function (callback) {
+            $.get("http://localhost:8002/myjdconnect", {}, callback);
+        },
         getSessionToken: function () {
             return this.options.sessiontoken;
         },
@@ -288,6 +294,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             };
         },
         API_ROOT: API_ROOT,
+        APP_KEY: APP_KEY,
         _rebuildRequestOptions: function (reqOptions) {
             if (reqOptions.deviceEncryptionToken) {
                 reqOptions.deviceEncryptionToken = this.options.deviceEncryptionToken;

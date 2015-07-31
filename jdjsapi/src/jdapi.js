@@ -84,6 +84,12 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
         disconnect: function () {
             return this.jdAPICore.disconnect();
         },
+        localConnect: function (username, password, callback) {
+            return this.jdAPICore.localConnectCall(username, password, callback);
+        },
+        discoverLocalDeviceLogin: function (callback) {
+            return this.jdAPICore.discoverLocalDeviceLogin(callback);
+        },
         confirmEmail: function (email, validationkey, pass) {
             return this.apiServer.confirmEmail(email, validationkey, pass);
         },
@@ -111,7 +117,6 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
             return this.apiService.send(serviceName, url, action, params);
         },
         listDevices: function () {
-            var devices = this.apiDeviceController.refreshAllDeviceAPIs();
             return this.apiDeviceController.refreshAllDeviceAPIs();
         },
         /**
