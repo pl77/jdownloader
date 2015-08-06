@@ -47,7 +47,7 @@ public class JSonRequest extends AbstractJsonData {
     }
 
     private String   diffID;
-    private long     rid;
+    private long     rid=-1;
     private Object[] params;
     private int      apiVer = -1;
 
