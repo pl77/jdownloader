@@ -822,7 +822,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             // localSecret = createSecret(username, password, "jd");
             final byte[] loginSecret = this.createSecret(email, password, "server");
             final long rid = this.getUniqueRID();
-            final StringBuilder query = new StringBuilder().append("/my/kill?email=").append(this.urlencode(email)).append("&token=").append(this.urlencode(this.appKey)).append("&rid=").append(rid);
+            final StringBuilder query = new StringBuilder().append("/my/kill?email=").append(this.urlencode(email)).append("&killtoken=").append(this.urlencode(sessionToken)).append("&rid=").append(rid);
             final String signature = this.sign(loginSecret, query.toString());
             query.append("&signature=").append(this.urlencode(signature));
             retString = this.toString(this.cryptedPost(query.toString(), "", loginSecret));
