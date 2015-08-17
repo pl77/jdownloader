@@ -49,7 +49,6 @@ public class BrowserSettingsThread extends Thread implements BrowserSettings {
          * use BrowserSettings from current thread if available
          */
         if (currentThread != null && currentThread instanceof BrowserSettings) {
-            @SuppressWarnings("unchecked")
             final BrowserSettings settings = (BrowserSettings) currentThread;
             this.proxySelector = settings.getProxySelector();
             this.debug = settings.isDebug();
