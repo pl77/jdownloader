@@ -476,7 +476,10 @@ public abstract class Request {
                 return null;
             }
             final URL url = request.getHttpConnection().getURL();
-            if (location.startsWith("//") && Browser.getHost("http:" + location, false) != null) {
+            if (location.matches("^:\\d+/.+")) {
+                // workaround for some buggy servers//
+                location = url.getProtocol() + "://" + Browser.getHost(request.getUrl(), true) + location;
+            } else if (location.startsWith("//") && Browser.getHost("http:" + location, false) != null) {
                 location = url.getProtocol() + ":" + location;
             } else if (location.startsWith("/")) {
                 location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + location;
