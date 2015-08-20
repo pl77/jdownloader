@@ -705,7 +705,7 @@ public class Browser {
             // we have no method to validate html tags.. could be faked, or multiples
             final String baseTag = this.getRegex("<\\s*base\\s+[^>]*>").getMatch(-1);
             if (baseTag != null) {
-                String sourceBase = new Regex(baseTag, "href=(\"|')(.+?)\\1").getMatch(0);
+                String sourceBase = new Regex(baseTag, "href=(\"|')(.+?)\\1").getMatch(1);
                 if (sourceBase == null) {
                     sourceBase = new Regex(baseTag, "\\s+href\\s*=([^\\s]+)").getMatch(0);
                 }
