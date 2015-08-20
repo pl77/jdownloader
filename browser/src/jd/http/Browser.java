@@ -53,6 +53,7 @@ import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 
+
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
     public class BrowserException extends IOException {
@@ -220,7 +221,7 @@ public class Browser {
             }
             return sb.toString();
         }
-        System.out.println("WARNING: correctURL failed for " + url);
+        //System.out.println("WARNING: correctURL failed for " + url);
         return url;
     }
 
@@ -701,11 +702,18 @@ public class Browser {
             base = lRequest.getUrl();
         }
         try {
-            final String sourceBase = this.getRegex("<base.*?href=\"(.+?)\"").getMatch(0);
-            if (sourceBase != null) {
-                /* take baseURL in case we've found one in current request */
-                new URL(sourceBase.trim());
-                base = sourceBase;
+            // we have no method to validate html tags.. could be faked, or multiples
+            final String baseTag = this.getRegex("<\\s*base\\s+[^>]*>").getMatch(-1);
+            if (baseTag != null) {
+                String sourceBase = new Regex(baseTag, "href=(\"|')(.+?)\\1").getMatch(0);
+                if (sourceBase == null) {
+                    sourceBase = new Regex(baseTag, "\\s+href\\s*=([^\\s]+)").getMatch(0);
+                }
+                if (sourceBase != null) {
+                    /* take baseURL in case we've found one in current request */
+                    new URL(sourceBase.trim());
+                    base = sourceBase;
+                }
             }
         } catch (final Throwable e) {
         }
@@ -779,7 +787,7 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      */
-    private Request createPostRequest(String url, final List<RequestVariable> post, final String encoding) throws IOException {
+    public Request createPostRequest(String url, final List<RequestVariable> post, final String encoding) throws IOException {
         final PostRequest request = new PostRequest(this.getURL(url));
         if (post != null) {
             request.addAll(post);
@@ -1071,6 +1079,26 @@ public class Browser {
         }
         for (final Form form : this.getForms()) {
             if (action.equalsIgnoreCase(form.getAction())) {
+                return form;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * returns first found form with given Action. Searches performed by Regex, 
+     * 
+     * @author raztoki
+     * @since JD2
+     * @param action
+     * @return
+     */
+    public final Form getFormbyActionRegex(final String action) {
+        if (action == null) {
+            return null;
+        }
+        for (final Form form : this.getForms()) {
+            if (form.getAction() != null && new Regex(form.getAction(), action).matches()) {
                 return form;
             }
         }
@@ -1886,5 +1914,6 @@ public class Browser {
     public void setDefaultSSLTrustALL(Boolean defaultSSLTrustALL) {
         this.defaultSSLTrustALL = defaultSSLTrustALL;
     }
-
+    
+   
 }
