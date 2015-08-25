@@ -93,7 +93,7 @@ public class HTMLParser {
      * @author daniel
      *
      */
-    private static class HtmlParserCharSequence implements CharSequence {
+    public static class HtmlParserCharSequence implements CharSequence {
 
         private final static HashMap<Thread, HtmlParserCharSequence> THREADRESULTS = new HashMap<Thread, HtmlParserCharSequence>();
 
@@ -437,12 +437,21 @@ public class HTMLParser {
         }
     }
 
-    private static class HtmlParserResultSet {
+    public static class HtmlParserResultSet {
 
-        protected final ArrayList<HtmlParserCharSequence> results   = new ArrayList<HtmlParserCharSequence>();
-        protected final HashSet<HtmlParserCharSequence>   dupeCheck = new HashSet<HTMLParser.HtmlParserCharSequence>();
+        protected final ArrayList<HtmlParserCharSequence> results     = new ArrayList<HtmlParserCharSequence>();
+        protected final HashSet<HtmlParserCharSequence>   dupeCheck   = new HashSet<HTMLParser.HtmlParserCharSequence>();
 
-        private HtmlParserCharSequence                    baseURL   = null;
+        private HtmlParserCharSequence                    baseURL     = null;
+        private boolean                                   skipBaseURL = false;
+
+        protected void setSkipBaseURL(boolean skipBaseURL) {
+            this.skipBaseURL = skipBaseURL;
+        }
+
+        protected boolean isSkipBaseURL() {
+            return this.skipBaseURL;
+        }
 
         private HtmlParserCharSequence getBaseURL() {
             return this.baseURL;
@@ -478,8 +487,16 @@ public class HTMLParser {
             return this.results.size();
         }
 
-        public List<HtmlParserCharSequence> getResults() {
+        protected List<HtmlParserCharSequence> getResults() {
             return this.results;
+        }
+
+        protected LinkedHashSet<String> exportResults() {
+            final LinkedHashSet<String> ret = new LinkedHashSet<String>();
+            for (HtmlParserCharSequence result : this.getResults()) {
+                ret.add(result.toString());
+            }
+            return ret;
         }
 
         public List<HtmlParserCharSequence> getResultsSublist(final int index) {
@@ -504,7 +521,7 @@ public class HTMLParser {
     final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
     public final static String                  protocolFile                = "file:/";
     final private static String                 protocolPrefixes            = "((?:mega|chrome|directhttp://https?|usenet|flashget|https?viajd|https?|ccf|dlc|ftp|jd|rsdf|jdlist" + (!Application.isJared(null) ? "|jdlog" : "") + ")://|" + HTMLParser.protocolFile + "|magnet:)";
-    final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("(?s)base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("(?s)base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
+    final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                protocols                   = Pattern.compile("(" + HTMLParser.protocolPrefixes + ")");
@@ -665,7 +682,7 @@ public class HTMLParser {
             }
         }
         HtmlParserCharSequence baseURL = results.getBaseURL();
-        if (baseURL == null) {
+        if (baseURL == null && !results.isSkipBaseURL()) {
             for (final Pattern pattern : HTMLParser.basePattern) {
                 final HtmlParserCharSequence found = data.group(2, pattern);
                 if (found != null) {
@@ -680,6 +697,7 @@ public class HTMLParser {
             } else {
                 baseURL = null;
             }
+            results.setSkipBaseURL(true);
         }
 
         HtmlParserCharSequence hrefURL = null;
@@ -1025,7 +1043,11 @@ public class HTMLParser {
     }
 
     public static String[] getHttpLinks(final String data, final String url) {
-        HashSet<String> links = HTMLParser.getHttpLinksIntern(data, url);
+        return HTMLParser.getHttpLinks(data, url, null);
+    }
+
+    public static String[] getHttpLinks(final String data, final String url, HtmlParserResultSet results) {
+        HashSet<String> links = HTMLParser.getHttpLinksIntern(data, url, results);
         if (links == null || links.size() == 0) {
             return new String[0];
         }
@@ -1057,12 +1079,16 @@ public class HTMLParser {
         return tmplinks.toArray(new String[tmplinks.size()]);
     }
 
+    public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString) {
+        return HTMLParser.getHttpLinksIntern(content, baseURLString, null);
+    }
+
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
      * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
-    public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString) {
+    public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
         if (content == null || content.length() == 0) {
             return null;
         }
@@ -1095,23 +1121,27 @@ public class HTMLParser {
         // data = data.replaceAll("(?i)</span.*?>", "");
         data = data.replaceAll(Pattern.compile("(?s)\\[(url|link)\\](.*?)\\[/(\\2)\\]"), "<$2>");
 
-        final HtmlParserResultSet results = new HtmlParserResultSet();
-        if (baseURLString != null && HTMLParser.getProtocol(baseURLString) != null) {
-            results.setBaseURL(new HtmlParserCharSequence(baseURLString));
+        final HtmlParserResultSet resultSet;
+        if (results != null) {
+            resultSet = results;
+        } else {
+            resultSet = new HtmlParserResultSet();
         }
-        HTMLParser._getHttpLinksWalker(data, results, null);
+        if (baseURLString != null && HTMLParser.getProtocol(baseURLString) != null) {
+            resultSet.setBaseURL(new HtmlParserCharSequence(baseURLString));
+        }
+        HTMLParser._getHttpLinksWalker(data, resultSet, null);
+        data = null;
         /* we don't want baseurl to be included in result set */
-        results.remove(results.getBaseURL());
+        resultSet.remove(resultSet.getBaseURL());
         // System.out.println("Walker:" + results.getWalkerCounter() + "|DeepWalker:" + results.getDeepWalkerCounter() + "|Finder:" +
         // results.getFinderCounter() + "|Found:" + results.size());
-        if (results.getResults().size() == 0) {
+        final LinkedHashSet<String> ret = resultSet.exportResults();
+        if (ret.size() == 0) {
             return null;
+        } else {
+            return ret;
         }
-        final LinkedHashSet<String> ret = new LinkedHashSet<String>();
-        for (HtmlParserCharSequence result : results.getResults()) {
-            ret.add(result.toString());
-        }
-        return ret;
     }
 
     /**

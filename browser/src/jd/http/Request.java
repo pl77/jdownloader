@@ -43,6 +43,7 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.os.CrossSystem;
 
 public abstract class Request {
     // public static int MAX_REDIRECTS = 30;
@@ -339,7 +340,19 @@ public abstract class Request {
 
     protected RequestHeader getDefaultRequestHeader() {
         final RequestHeader headers = new RequestHeader();
-        headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0");
+        switch (CrossSystem.getOSFamily()) {
+        case WINDOWS:
+            headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0");
+            break;
+        case MAC:
+            headers.put("User-Agent", "MMozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
+            break;
+        case LINUX:
+        default:
+            headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0");
+            break;
+        }
+
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
