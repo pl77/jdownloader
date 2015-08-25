@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jd.http.requests.RequestVariable;
+import jd.nutils.encoding.Encoding;
+import jd.nutils.encoding.HTMLEntities;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
 
@@ -409,7 +411,7 @@ public class Form {
             value = entry[1];
             lowvalue = value.toLowerCase();
             if (key.equalsIgnoreCase("action")) {
-                this.setAction(value);
+                this.setAction(HTMLEntities.unhtmlentities(value));
             } else if (key.equalsIgnoreCase("enctype")) {
                 this.setEncoding(value);
 
