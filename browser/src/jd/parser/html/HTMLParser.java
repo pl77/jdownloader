@@ -158,7 +158,7 @@ public class HTMLParser {
             if (this == anObject) {
                 return true;
             }
-            if (anObject instanceof CharSequence) {
+            if (anObject != null && anObject instanceof CharSequence) {
                 final CharSequence anotherString = (CharSequence) anObject;
                 int n = this.length();
                 if (n == anotherString.length()) {
@@ -453,7 +453,7 @@ public class HTMLParser {
             return this.skipBaseURL;
         }
 
-        private HtmlParserCharSequence getBaseURL() {
+        public HtmlParserCharSequence getBaseURL() {
             return this.baseURL;
         }
 
@@ -1085,7 +1085,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
