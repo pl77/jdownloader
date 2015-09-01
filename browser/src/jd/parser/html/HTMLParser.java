@@ -978,54 +978,6 @@ public class HTMLParser {
     }
 
     /**
-     * Diese Methode sucht nach passwÃ¶rtern in einem Datensatz
-     *
-     * @param data
-     * @return
-     */
-    public static ArrayList<String> findPasswords(String data) {
-        if (data == null) {
-            return new ArrayList<String>();
-        }
-        final ArrayList<String> ret = new ArrayList<String>();
-        data = data.replaceAll("(?s)<!-- .*? -->", "").replaceAll("(?s)<script .*?>.*?</script>", "").replaceAll("(?s)<.*?>", "").replaceAll("Spoiler:", "").replaceAll("(no.{0,2}|kein.{0,8}|ohne.{0,8}|nicht.{0,8})(pw|passwort|password|pass)", "").replaceAll("(pw|passwort|password|pass).{0,12}(nicht|falsch|wrong)", "");
-
-        Pattern pattern = Pattern.compile("(пароль|пасс|pa?s?w|passwort|password|passw?)[\\s][\\s]*?[\"']([[^\\:\"'\\s]][^\"'\\s]*)[\"']?", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(data);
-        while (matcher.find()) {
-            final String pass = matcher.group(2);
-            if (pass != null && pass.length() > 2 && !pass.matches(".*(rar|zip|jpg|gif|png|html|php|avi|mpg)$") && !ret.contains(pass)) {
-                ret.add(pass);
-            }
-        }
-        pattern = Pattern.compile("(пароль|пасс|pa?s?w|passwort|password|passw?)[\\s][\\s]*?([[^\\:\"'\\s]][^\"'\\s]*)[\\s]?", Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(data);
-        while (matcher.find()) {
-            final String pass = matcher.group(2);
-            if (pass != null && pass.length() > 4 && !pass.matches(".*(rar|zip|jpg|gif|png|html|php|avi|mpg)$") && !ret.contains(pass)) {
-                ret.add(pass);
-            }
-        }
-        pattern = Pattern.compile("(пароль|пасс|pa?s?w|passwort|password|passw?)[\\s]?(\\:|=)[\\s]*?[\"']([^\"']+)[\"']?", Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(data);
-        while (matcher.find()) {
-            final String pass = matcher.group(2);
-            if (pass != null && pass.length() > 2 && !pass.matches(".*(rar|zip|jpg|gif|png|html|php|avi|mpg)$") && !ret.contains(pass)) {
-                ret.add(pass);
-            }
-        }
-        pattern = Pattern.compile("(пароль|пасс|pa?s?w|passwort|password|passw?)[\\s]?(\\:|=[\\s]*?)([^\"'\\s]+)[\\s]?", Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(data);
-        while (matcher.find()) {
-            final String pass = matcher.group(3);
-            if (pass != null && pass.length() > 2 && !pass.matches(".*(rar|zip|jpg|gif|png|html|php|avi|mpg)$") && !ret.contains(pass)) {
-                ret.add(pass);
-            }
-        }
-        return ret;
-    }
-
-    /**
      * Diese Methode sucht die vordefinierten input type="hidden" und formatiert sie zu einem poststring z.b. wÃ¼rde bei:
      *
      * <input type="hidden" name="f" value="f50b0f" /> <input type="hidden" name="h" value="390b4be0182b85b0" /> <input type="hidden"
