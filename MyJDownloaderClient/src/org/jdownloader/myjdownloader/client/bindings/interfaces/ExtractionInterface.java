@@ -15,6 +15,8 @@ public interface ExtractionInterface extends Linkable {
     public HashMap<String, Boolean> startExtractionNow(final long[] linkIds, final long[] packageIds);
 
     public List<ArchiveStatusStorable> getArchiveInfo(final long[] linkIds, final long[] packageIds);
+    
+    public List<ArchiveStatusStorable> getQueue();
 
     public Boolean cancelExtraction(long archiveId);
 }
