@@ -114,4 +114,10 @@ public class AccountStorable extends AbstractJsonData {
         this.validUntil = validUntil;
     }
 
+    public static enum AccountError {
+        TEMP_DISABLED,
+        EXPIRED,
+        INVALID,
+        PLUGIN_ERROR;
+    }
 }

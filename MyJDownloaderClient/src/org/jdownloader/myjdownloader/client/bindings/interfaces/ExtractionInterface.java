@@ -3,6 +3,7 @@ package org.jdownloader.myjdownloader.client.bindings.interfaces;
 import java.util.HashMap;
 import java.util.List;
 
+import org.jdownloader.myjdownloader.client.bindings.ArchiveSettingsStorable;
 import org.jdownloader.myjdownloader.client.bindings.ArchiveStatusStorable;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 
@@ -15,8 +16,12 @@ public interface ExtractionInterface extends Linkable {
     public HashMap<String, Boolean> startExtractionNow(final long[] linkIds, final long[] packageIds);
 
     public List<ArchiveStatusStorable> getArchiveInfo(final long[] linkIds, final long[] packageIds);
-    
+
     public List<ArchiveStatusStorable> getQueue();
 
     public Boolean cancelExtraction(long archiveId);
+
+    public List<ArchiveSettingsStorable> getArchiveSettings(String[] archiveIds);
+
+    public Boolean setArchiveSettings(String archiveId, ArchiveSettingsStorable archiveSettings);
 }

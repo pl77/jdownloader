@@ -73,4 +73,8 @@ public interface LinkgrabberInterface extends Linkable {
 
     void setDownloadDirectory(String directory, long[] packageIds);
 
+    boolean clearList();
+
+    boolean setDownloadPassword(long[] linkIds, long[] packageIds, String pass);
+
 }

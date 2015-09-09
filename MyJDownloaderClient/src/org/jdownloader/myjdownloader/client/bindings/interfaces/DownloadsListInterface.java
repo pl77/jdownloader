@@ -94,4 +94,6 @@ public interface DownloadsListInterface extends Linkable {
 
     void cleanup(final long[] linkIds, final long[] packageIds, final CleanupActionOptions.Action action, final CleanupActionOptions.Mode mode, final CleanupActionOptions.SelectionType selectionType);
 
+    boolean setDownloadPassword(long[] linkIds, long[] packageIds, String pass);
+
 }
