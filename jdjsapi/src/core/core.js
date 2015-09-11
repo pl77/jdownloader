@@ -197,12 +197,14 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
         /* wraps jd api call in reconnect handling jQuery ajax call */
         deviceCall: function (deviceId, action, postData, timeout) {
             postData = postData || [];
+            var rID = getRID();
             var reqOptions = {
                 jdAction: action,
                 jdData: {
                     url: action,
                     params: postData,
-                    apiVer: 1
+                    apiVer: 1,
+                    rid:rID
                 },
                 deviceId: deviceId,
                 type: "POST",
@@ -215,7 +217,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: API_ROOT,
                 sessiontoken: this.options.sessiontoken,
-                rid: getRID()
+                rid:rID
             };
             if (timeout) {
                 reqOptions.timeout = timeout;
@@ -225,12 +227,14 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
         /* wraps jd local call in reconnect handling jQuery ajax call */
         localDeviceCall: function (localURL, deviceId, action, postData, timeout) {
             postData = postData || [];
+            var rID = getRID();
             var reqOptions = {
                 jdAction: action,
                 jdData: {
                     url: action,
                     params: postData,
-                    apiVer: 1
+                    apiVer: 1,
+                    rid:rID
                 },
                 deviceId: deviceId,
                 type: "POST",
@@ -243,7 +247,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: localURL,
                 sessiontoken: this.options.sessiontoken,
-                rid: getRID()
+                rid: rID
             };
             if (timeout) {
                 reqOptions.timeout = timeout;
