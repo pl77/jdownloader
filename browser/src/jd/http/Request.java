@@ -141,12 +141,12 @@ public abstract class Request {
                 } catch (final IOException e) {
                     if (bos.size() > 0) {
                         if (e instanceof EOFException && "gzip".equalsIgnoreCase(contentEncoding)) {
-                            System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
+                            //System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
                             return bos.toByteArray();
                         }
                         final String ioMessage = e.toString();
                         if (ioMessage != null && (ioMessage.contains("end of ZLIB") || ioMessage.contains("Premature") || ioMessage.contains("Corrupt GZIP trailer"))) {
-                            System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
+                            //System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
                             return bos.toByteArray();
                         }
                     }
@@ -345,7 +345,7 @@ public abstract class Request {
             headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0");
             break;
         case MAC:
-            headers.put("User-Agent", "MMozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
+            headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
             break;
         case LINUX:
         default:
