@@ -53,7 +53,6 @@ import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 
-
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
     public class BrowserException extends IOException {
@@ -80,7 +79,6 @@ public class Browser {
 
     }
 
-   
     private static final HashMap<String, Cookies> COOKIES            = new HashMap<String, Cookies>();
     private static ProxySelectorInterface         GLOBAL_PROXY       = null;
     private static Logger                         LOGGER             = null;
@@ -221,7 +219,7 @@ public class Browser {
             }
             return sb.toString();
         }
-        //System.out.println("WARNING: correctURL failed for " + url);
+        // System.out.println("WARNING: correctURL failed for " + url);
         return url;
     }
 
@@ -574,7 +572,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
@@ -1064,10 +1062,10 @@ public class Browser {
         }
         return null;
     }
-    
+
     /**
-     * returns first found form with given Action. 
-     * 
+     * returns first found form with given Action.
+     *
      * @author raztoki
      * @since JD2
      * @param action
@@ -1084,10 +1082,10 @@ public class Browser {
         }
         return null;
     }
-    
+
     /**
-     * returns first found form with given Action. Searches performed by Regex, 
-     * 
+     * returns first found form with given Action. Searches performed by Regex,
+     *
      * @author raztoki
      * @since JD2
      * @param action
@@ -1104,7 +1102,7 @@ public class Browser {
         }
         return null;
     }
-    
+
     /**
      * Returns the first form with an Submitvalue of name<br />
      * Note: String needs to be urlEncoded as values it's comparing against are!
@@ -1472,6 +1470,7 @@ public class Browser {
                         }
                         connection = request.connect().getHttpConnection();
                     } finally {
+                        this.updateCookies(request);
                         if (this.isDebug()) {
                             final Logger llogger = this.getLogger();
                             if (llogger != null) {
@@ -1483,7 +1482,6 @@ public class Browser {
                             }
                         }
                     }
-
                     if (connection != null) {
                         connection.setAllowedResponseCodes(this.getAllowedResponseCodes());
                         if (connection.getResponseCode() == 407) {
@@ -1914,6 +1912,5 @@ public class Browser {
     public void setDefaultSSLTrustALL(Boolean defaultSSLTrustALL) {
         this.defaultSSLTrustALL = defaultSSLTrustALL;
     }
-    
-   
+
 }

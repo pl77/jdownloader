@@ -57,6 +57,18 @@ public class BrowserSettingsThread extends Thread implements BrowserSettings {
         }
     }
 
+    public static ProxySelectorInterface getThreadProxySelector() {
+        final Thread currentThread = Thread.currentThread();
+        /**
+         * use BrowserSettings from current thread if available
+         */
+        if (currentThread != null && currentThread instanceof BrowserSettings) {
+            final BrowserSettings settings = (BrowserSettings) currentThread;
+            return settings.getProxySelector();
+        }
+        return null;
+    }
+
     public ProxySelectorInterface getProxySelector() {
         return this.proxySelector;
     }
