@@ -535,7 +535,7 @@ public class HTMLParser {
 
     static {
         try {
-            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s*" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s*" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         } catch (final Throwable e) {
             Log.exception(e);
         }
@@ -1037,7 +1037,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
