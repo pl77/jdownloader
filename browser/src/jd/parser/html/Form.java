@@ -20,16 +20,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jd.http.requests.RequestVariable;
-import jd.nutils.encoding.Encoding;
 import jd.nutils.encoding.HTMLEntities;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
@@ -345,11 +344,11 @@ public class Form {
             }
             if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
                 final InputField x = this.getInputField(ipf.getKey() + ".x");
-                if (x==null || x.getValue() == null) {
+                if (x == null || x.getValue() == null) {
                     ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
                 }
                 final InputField y = this.getInputField(ipf.getKey() + ".y");
-                if (y==null || y.getValue() == null) {
+                if (y == null || y.getValue() == null) {
                     ret.add(new RequestVariable(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
                 }
             } else {
@@ -387,36 +386,31 @@ public class Form {
         final String header = new Regex(total, "<[\\s]*form(.*?)>").getMatch(0);
         //
         // <[\\s]*form(.*?)>(.*?)<[\\s]*/[\\s]*form[\\s]*>|<[\\s]*form(.*?)>(.+)
-        final String[][] headerEntries = new Regex(header, "[\"' ](\\w+?)[ ]*=[ ]*[\"'](.*?)[\"']").getMatches();
-        final String[][] headerEntries2 = new Regex(header, "[\"' ](\\w+?)[ ]*=[ ]*([^>^ ^\"^']+)").getMatches();
-
+        final String[][] headerEntries = new Regex(header, "(\\w+?)\\s*=\\s*('|\")(.*?)(\\2)").getMatches();
+        final String[][] headerEntries2 = new Regex(header, "(\\w+?)\\s*=\\s*([^> \"']+)").getMatches();
         this.parseHeader(headerEntries);
         this.parseHeader(headerEntries2);
 
         this.parseInputFields();
-
-        // if (form.action == null) {
-        // form.action =
-        // requestInfo.getConnection().getURL().toString();
-        // }
-        // form.vars.add(form.getInputFields(inForm));
     }
 
     private void parseHeader(final String[][] headerEntries) {
-        String key;
-        String value;
-        String lowvalue;
         for (final String[] entry : headerEntries) {
-            key = entry[0];
-            value = entry[1];
-            lowvalue = value.toLowerCase();
+            final String key;
+            final String value;
+            if (entry.length == 4) {
+                key = entry[0];
+                value = entry[2];
+            } else {
+                key = entry[0];
+                value = entry[1];
+            }
+            final String lowvalue = value.toLowerCase(Locale.ENGLISH);
             if (key.equalsIgnoreCase("action")) {
                 this.setAction(HTMLEntities.unhtmlentities(value));
             } else if (key.equalsIgnoreCase("enctype")) {
                 this.setEncoding(value);
-
             } else if (key.equalsIgnoreCase("method")) {
-
                 if (lowvalue.matches(".*post.*")) {
                     this.setMethod(MethodType.POST);
                 } else if (lowvalue.matches(".*get.*")) {

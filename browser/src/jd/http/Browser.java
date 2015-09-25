@@ -572,7 +572,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
@@ -673,7 +673,7 @@ public class Browser {
         br.cookiesExclusive = this.cookiesExclusive;
         br.debug = this.debug;
         br.verbose = this.verbose;
-        br.logger = this.logger;
+        br.logger = this.getLogger();
         br.proxy = this.proxy;
         br.keepResponseContentBytes = this.keepResponseContentBytes;
         br.allowedResponseCodes = this.allowedResponseCodes;
@@ -1177,6 +1177,10 @@ public class Browser {
 
     public String getPage(final String string) throws IOException {
         return this.loadConnection(this.openRequestConnection(this.createGetRequest(string))).getHTMLSource();
+    }
+
+    public String getPage(Request request) throws IOException {
+        return this.loadConnection(this.openRequestConnection(request)).getHTMLSource();
     }
 
     public String getPage(final URL url) throws IOException {
