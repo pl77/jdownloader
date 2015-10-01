@@ -34,7 +34,6 @@ import jd.nutils.encoding.Encoding;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
-import org.appwork.utils.Exceptions;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
@@ -141,12 +140,12 @@ public abstract class Request {
                 } catch (final IOException e) {
                     if (bos.size() > 0) {
                         if (e instanceof EOFException && "gzip".equalsIgnoreCase(contentEncoding)) {
-                            //System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
+                            // System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
                             return bos.toByteArray();
                         }
                         final String ioMessage = e.toString();
                         if (ioMessage != null && (ioMessage.contains("end of ZLIB") || ioMessage.contains("Premature") || ioMessage.contains("Corrupt GZIP trailer"))) {
-                            //System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
+                            // System.out.println("Try workaround for " + Exceptions.getStackTrace(e));
                             return bos.toByteArray();
                         }
                     }
@@ -373,18 +372,26 @@ public abstract class Request {
     public String getHtmlCode() throws CharacterCodingException {
         if (this.htmlCode == null && this.responseBytes != null) {
             final boolean keepBytes = this.isKeepByteArray();
-            String ct = null;
+            final String contentType;
             if (this.httpConnection != null) {
-                ct = this.httpConnection.getContentType();
+                contentType = this.httpConnection.getContentType();
+            } else {
+                contentType = null;
             }
             /* check for image content type */
-            if (ct != null && Pattern.compile("images?/\\w*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(ct).matches()) {
-                throw new IllegalStateException("Content-Type: " + ct);
+            if (contentType != null && Pattern.compile("images?/\\w*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(contentType).matches()) {
+                throw new IllegalStateException("Content-Type: " + contentType);
             }
             /* use custom charset or charset from httpconnection */
             String useCS = this.customCharset;
             if (StringUtils.isEmpty(useCS)) {
                 useCS = this.httpConnection.getCharset();
+            }
+            if (StringUtils.isEmpty(useCS)) {
+                if (StringUtils.contains(contentType, "application/json")) {
+                    // application/json default is UTF-8
+                    useCS = "UTF-8";
+                }
             }
             if (StringUtils.isEmpty(useCS)) {
                 useCS = this.getCharsetFromMetaTags();
