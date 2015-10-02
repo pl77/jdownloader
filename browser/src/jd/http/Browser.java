@@ -385,7 +385,6 @@ public class Browser {
             if (length > 0 && length != done) {
                 throw new IOException("Incomplete:" + length + "<=>" + done);
             }
-            System.out.println("Downloaded: " + done);
             okay = true;
         } finally {
             try {
@@ -397,7 +396,6 @@ public class Browser {
             } catch (final Throwable e) {
             }
             if (okay == false) {
-                System.out.println("Delete: " + file);
                 file.delete();
             }
         }
