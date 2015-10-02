@@ -382,7 +382,10 @@ public class Browser {
                 fos.write(b, 0, len);
                 done += len;
             }
-            okay = length < 0 || length == done;
+            if (length > 0 && length != done) {
+                throw new IOException("Incomplete:" + length + "<=>" + done);
+            }
+            okay = true;
         } finally {
             try {
                 input.close();
