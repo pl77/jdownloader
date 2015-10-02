@@ -385,6 +385,7 @@ public class Browser {
             if (length > 0 && length != done) {
                 throw new IOException("Incomplete:" + length + "<=>" + done);
             }
+            System.out.println("downloaded: " + done);
             okay = true;
         } finally {
             try {
@@ -396,6 +397,7 @@ public class Browser {
             } catch (final Throwable e) {
             }
             if (okay == false) {
+                System.out.println("delete: " + file);
                 file.delete();
             }
         }
@@ -575,7 +577,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
