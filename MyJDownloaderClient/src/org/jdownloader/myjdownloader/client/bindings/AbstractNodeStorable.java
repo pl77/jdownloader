@@ -4,13 +4,14 @@ import org.jdownloader.myjdownloader.client.json.AbstractJsonData;
 
 public abstract class AbstractNodeStorable extends AbstractJsonData implements Node {
 
-    private long    bytesTotal = -1;
-    private String  comment    = null;
-    private boolean enabled    = false;
-    private String  name       = null;
-    private long    uuid       = -1;
-    
-    private PriorityStorable priority    = PriorityStorable.DEFAULT;
+    private long             bytesTotal       = -1;
+    private String           comment          = null;
+    private boolean          enabled          = false;
+    private String           name             = null;
+    private long             uuid             = -1;
+    private String           downloadPassword = null;
+
+    private PriorityStorable priority         = PriorityStorable.DEFAULT;
 
     public PriorityStorable getPriority() {
         return priority;
@@ -58,6 +59,14 @@ public abstract class AbstractNodeStorable extends AbstractJsonData implements N
 
     public void setUuid(final long uuid) {
         this.uuid = uuid;
+    }
+
+    public String getDownloadPassword() {
+        return downloadPassword;
+    }
+
+    public void setDownloadPassword(String downloadPassword) {
+        this.downloadPassword = downloadPassword;
     }
 
 }

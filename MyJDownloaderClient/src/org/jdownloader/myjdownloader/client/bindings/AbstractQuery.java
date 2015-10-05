@@ -8,6 +8,15 @@ public abstract class AbstractQuery extends AbstractJsonData {
     private boolean comment    = false;
     private boolean status     = false;
     private boolean priority   = false;
+    private boolean password   = false;
+
+    public boolean isPassword() {
+        return password;
+    }
+
+    public void setPassword(boolean password) {
+        this.password = password;
+    }
 
     public boolean isStatus() {
         return status;
