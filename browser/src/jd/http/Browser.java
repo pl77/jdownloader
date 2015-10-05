@@ -575,7 +575,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
@@ -1428,24 +1428,32 @@ public class Browser {
         return this.openPostConnection(url, Request.parseQuery(post));
     }
 
-    private void setRequestProperties(Request request, final String refererURL) {
-        if (request != null) {
-            if (request.isSSLTrustALLSet() == null) {
-                request.setSSLTrustALL(this.getDefaultSSLTrustALL());
+    private void setRequestProperties(final Request sourceRequest, final Request nextRequest, final String refererURL) {
+        if (nextRequest != null) {
+            if (nextRequest.isSSLTrustALLSet() == null) {
+                nextRequest.setSSLTrustALL(this.getDefaultSSLTrustALL());
             }
-            this.forwardCookies(request);
-            if (request.getCustomCharset() == null) {
-                request.setCustomCharset(this.customCharset);
+            this.forwardCookies(nextRequest);
+            if (nextRequest.getCustomCharset() == null) {
+                nextRequest.setCustomCharset(this.customCharset);
             }
-            if (!request.getHeaders().contains(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE)) {
-                request.getHeaders().put(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE, this.getAcceptLanguage());
+            if (!nextRequest.getHeaders().contains(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE)) {
+                nextRequest.getHeaders().put(HTTPConstants.HEADER_REQUEST_ACCEPT_LANGUAGE, this.getAcceptLanguage());
             }
-            request.setConnectTimeout(this.getConnectTimeout());
-            request.setReadTimeout(this.getReadTimeout());
-            if (refererURL != null && !request.getHeaders().contains(HTTPConstants.HEADER_REQUEST_REFERER)) {
-                request.getHeaders().put(HTTPConstants.HEADER_REQUEST_REFERER, refererURL);
+            nextRequest.setConnectTimeout(this.getConnectTimeout());
+            nextRequest.setReadTimeout(this.getReadTimeout());
+
+            final boolean allowRefererURL;
+            if (sourceRequest != null && StringUtils.startsWithCaseInsensitive(sourceRequest.getUrl(), "https")) {
+                // http://allben.net/post/2009/02/25/Null-Url-Referrer-going-from-HTTPS-to-HTTP
+                allowRefererURL = StringUtils.startsWithCaseInsensitive(nextRequest.getUrl(), "https");
+            } else {
+                allowRefererURL = true;
             }
-            this.mergeHeaders(request);
+            if (allowRefererURL && refererURL != null && !nextRequest.getHeaders().contains(HTTPConstants.HEADER_REQUEST_REFERER)) {
+                nextRequest.getHeaders().put(HTTPConstants.HEADER_REQUEST_REFERER, refererURL);
+            }
+            this.mergeHeaders(nextRequest);
         }
     }
 
@@ -1458,7 +1466,7 @@ public class Browser {
         final Request originalRequest = request;
         final String refererURL = this.getRefererURL();
         while (true) {
-            this.setRequestProperties(request, refererURL);
+            this.setRequestProperties(originalRequest, request, refererURL);
             int proxyRetryCounter = 0;
             while (true) {
                 try {
