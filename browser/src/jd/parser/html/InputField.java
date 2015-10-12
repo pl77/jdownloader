@@ -31,8 +31,8 @@ public class InputField {
         // lets make all quotation marks within 'data' the same. As it's hard to make consistent regex 'matches' when quote marks are not
         // the same, without using lazy regex!.
         ArrayList<String> cleanupRegex = new ArrayList<String>();
-        cleanupRegex.add("(\\w+\\s*=\\s*\"[^\"]+\")");
-        cleanupRegex.add("(\\w+\\s*=\\s*'[^']+')");
+        cleanupRegex.add("(\\w+\\s*=\\s*\"[^\"]*\")");
+        cleanupRegex.add("(\\w+\\s*=\\s*'[^']*')");
         for (String reg : cleanupRegex) {
             String results[] = new Regex(data, reg).getColumn(0);
             if (results != null) {
