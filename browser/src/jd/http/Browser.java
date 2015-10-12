@@ -167,7 +167,7 @@ public class Browser {
             return url;
         }
         /** full URL */
-        String[] urlParts = new Regex(url, "^(?i-)([a-z]+)://([^/\\?#]+)([^\\?&]+)?(\\?.*)?$").getRow(0);
+        String[] urlParts = new Regex(url, "^(?i-)([a-z]+)://([^/\\?#]+)([^\\?&#]+)?(\\?.*|#.*?)?$").getRow(0);
         String[] locationParts = null;
         String protPart = null;
         String hostPart = null;
@@ -185,6 +185,10 @@ public class Browser {
                 pathPart = locationParts[0];
                 queryPart = locationParts[1];
             }
+        }
+        if (StringUtils.isNotEmpty(queryPart)) {
+            // do not send anchor, those are evaluated in browser only
+            queryPart = new Regex(queryPart, "(.*?)(#|$)").getMatch(0);
         }
 
         if (StringUtils.isNotEmpty(pathPart) && (pathPart.contains("//") || pathPart.contains("./"))) {
@@ -575,7 +579,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
