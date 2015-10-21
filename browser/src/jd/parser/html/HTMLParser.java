@@ -535,7 +535,7 @@ public class HTMLParser {
 
     static {
         try {
-            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s*" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         } catch (final Throwable e) {
             Log.exception(e);
         }
@@ -760,6 +760,7 @@ public class HTMLParser {
                 if (HTMLParser.getProtocol(link) == null && !link.contains("%2F")) {
                     link = link.replaceFirst(HTMLParser.missingHTTPPattern, "http://www\\.");
                 }
+                results.add(HTMLParser.correctURL(link));
                 final Matcher mlinks = HTMLParser.protocols.matcher(link);
                 int start = -1;
                 /*
@@ -1006,7 +1007,7 @@ public class HTMLParser {
         /*
          * in case we have valid and invalid (...) urls for the same link, we only use the valid one
          */
-        final HashSet<String> tmplinks = new HashSet<String>(links.size());
+        final LinkedHashSet<String> tmplinks = new LinkedHashSet<String>(links.size());
         for (final String link : links) {
             if (link.contains("...")) {
                 final String check = link.substring(0, link.indexOf("..."));
@@ -1037,7 +1038,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
