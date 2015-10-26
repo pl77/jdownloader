@@ -33,7 +33,7 @@ import jd.parser.Regex;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.encoding.Hex;
-import org.appwork.utils.logging.Log;
+
 
 public class HTMLParser {
 
@@ -537,7 +537,7 @@ public class HTMLParser {
         try {
             HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
     }
 
@@ -627,7 +627,7 @@ public class HTMLParser {
                     hex = new HtmlParserCharSequence(hexString);
                     HTMLParser._getHttpLinksFinder(hex, results);
                 } catch (final Throwable e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
         }

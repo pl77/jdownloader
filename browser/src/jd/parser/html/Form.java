@@ -34,7 +34,7 @@ import jd.parser.Regex;
 import jd.utils.EditDistance;
 
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging.Log;
+
 
 public class Form {
 
@@ -132,7 +132,7 @@ public class Form {
             try {
                 baseurl = new URL(baseURL);
             } catch (final MalformedURLException e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         String ret = this.action;
@@ -517,7 +517,7 @@ public class Form {
                 return;
             }
         }
-        Log.L.warning("No exact match for submit found! Trying to find best match now!");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No exact match for submit found! Trying to find best match now!");
         for (final InputField ipf : this.inputfields) {
             if (ipf.getType() != null && ipf.getValue() != null && ipf.getType().equalsIgnoreCase("submit") && ipf.getValue().contains(preferredSubmit)) {
                 this.preferredSubmit = ipf;

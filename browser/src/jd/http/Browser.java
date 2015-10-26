@@ -31,7 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import jd.http.requests.FormData;
@@ -48,7 +47,8 @@ import jd.parser.html.InputField;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.LogSource;
+import org.appwork.utils.logging2.ConsoleLogImpl;
+import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
@@ -81,7 +81,7 @@ public class Browser {
 
     private static final HashMap<String, Cookies> COOKIES            = new HashMap<String, Cookies>();
     private static ProxySelectorInterface         GLOBAL_PROXY       = null;
-    private static Logger                         LOGGER             = null;
+    private static LogInterface                   LOGGER             = new ConsoleLogImpl();
 
     private static HashMap<String, Integer>       REQUEST_INTERVAL_LIMIT_MAP;
 
@@ -317,7 +317,7 @@ public class Browser {
         Browser.TIMEOUT_CONNECT = valueMS;
     }
 
-    public static void setGlobalLogger(final Logger logger) {
+    public static void setGlobalLogger(final LogInterface logger) {
         Browser.LOGGER = logger;
     }
 
@@ -409,7 +409,7 @@ public class Browser {
         return Browser.TIMEOUT_CONNECT;
     }
 
-    public static Logger getGlobalLogger() {
+    public static LogInterface getGlobalLogger() {
         return Browser.LOGGER;
     }
 
@@ -579,7 +579,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                              connectTimeout   = -1;
@@ -595,7 +595,7 @@ public class Browser {
     private boolean                          doRedirects      = false;
     private RequestHeader                    headers;
     private int                              limit            = 2 * 1024 * 1024;
-    private Logger                           logger           = null;
+    private LogInterface                     logger           = null;
     private ProxySelectorInterface           proxy;
     private int                              readTimeout      = -1;
     private Request                          request;
@@ -874,9 +874,10 @@ public class Browser {
             newRequest = request.cloneRequest();
             break;
         default:
-            Logger logger = this.getLogger();
+            LogInterface logger = this.getLogger();
             if (logger != null && this.isVerbose()) {
-                LogSource.exception(logger, new IllegalStateException("ResponseCode " + responseCode + " is unsupported!"));
+                logger.log(new IllegalStateException("ResponseCode " + responseCode + " is unsupported!"));
+
             }
             return null;
         }
@@ -914,7 +915,7 @@ public class Browser {
     }
 
     public String followConnection() throws IOException {
-        final Logger llogger = this.getLogger();
+        final LogInterface llogger = this.getLogger();
         Request lRequest = this.getRequest();
         if (lRequest == null) {
             throw new IllegalStateException("Request is null");
@@ -1170,8 +1171,8 @@ public class Browser {
         return this.limit;
     }
 
-    public Logger getLogger() {
-        final Logger llogger = this.logger;
+    public LogInterface getLogger() {
+        final LogInterface llogger = this.logger;
         if (llogger != null) {
             return llogger;
         }
@@ -1357,7 +1358,7 @@ public class Browser {
             this.checkContentLengthLimit(requ);
             requ.read(this.isKeepResponseContentBytes());
             if (this.isVerbose() && requ != null) {
-                final Logger llogger = this.getLogger();
+                final LogInterface llogger = this.getLogger();
                 if (llogger != null) {
                     llogger.finest("\r\n" + requ.getHTMLSource() + "\r\n");
                 }
@@ -1491,12 +1492,13 @@ public class Browser {
                     } finally {
                         this.updateCookies(request);
                         if (this.isDebug()) {
-                            final Logger llogger = this.getLogger();
+                            final LogInterface llogger = this.getLogger();
                             if (llogger != null) {
                                 try {
                                     llogger.finest("\r\n" + request.printHeaders());
                                 } catch (final Throwable e) {
-                                    LogSource.exception(llogger, e);
+                                    llogger.log(e);
+
                                 }
                             }
                         }
@@ -1515,9 +1517,9 @@ public class Browser {
                     throw e;
                 } catch (IOException e) {
                     request.disconnect();
-                    final Logger llogger = this.getLogger();
+                    final LogInterface llogger = this.getLogger();
                     if (llogger != null) {
-                        LogSource.exception(llogger, e);
+                        llogger.log(e);
                     }
                     proxyRetryCounter++;
                     if (this.reportConnectException(proxyRetryCounter, e, request) || e instanceof ProxyAuthException && this.updateProxy(proxyRetryCounter, request)) {
@@ -1804,7 +1806,7 @@ public class Browser {
         this.limit = Math.max(0, i);
     }
 
-    public void setLogger(final Logger logger) {
+    public void setLogger(final LogInterface logger) {
         this.logger = logger;
     }
 
@@ -1836,7 +1838,7 @@ public class Browser {
         }
         this.proxy = proxy;
         if (this.debug) {
-            final Logger llogger = this.getLogger();
+            final LogInterface llogger = this.getLogger();
             if (llogger != null) {
                 llogger.info("Use local proxy: " + proxy + " wished: " + wished);
             }

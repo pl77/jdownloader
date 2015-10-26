@@ -1,12 +1,12 @@
 package jd.http;
 
-import java.util.logging.Logger;
+import org.appwork.utils.logging2.LogInterface;
 
 public interface BrowserSettings {
 
     public ProxySelectorInterface getProxySelector();
 
-    public Logger getLogger();
+    public LogInterface getLogger();
 
     public boolean isDebug();
 
@@ -16,7 +16,7 @@ public interface BrowserSettings {
 
     public void setDebug(boolean b);
 
-    public void setLogger(Logger logger);
+    public void setLogger(LogInterface logger);
 
     public void setVerbose(boolean b);
 

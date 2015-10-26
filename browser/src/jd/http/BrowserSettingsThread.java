@@ -1,13 +1,13 @@
 package jd.http;
 
-import java.util.logging.Logger;
+import org.appwork.utils.logging2.LogInterface;
 
 public class BrowserSettingsThread extends Thread implements BrowserSettings {
 
     private ProxySelectorInterface proxySelector;
     private boolean                debug;
     private boolean                verbose;
-    protected Logger               logger;
+    protected LogInterface         logger;
 
     public BrowserSettingsThread() {
         this.copySettings();
@@ -69,34 +69,42 @@ public class BrowserSettingsThread extends Thread implements BrowserSettings {
         return null;
     }
 
+    @Override
     public ProxySelectorInterface getProxySelector() {
         return this.proxySelector;
     }
 
-    public Logger getLogger() {
+    @Override
+    public LogInterface getLogger() {
         return this.logger;
     }
 
+    @Override
     public boolean isDebug() {
         return this.debug;
     }
 
+    @Override
     public boolean isVerbose() {
         return this.verbose;
     }
 
+    @Override
     public void setProxySelector(final ProxySelectorInterface proxy) {
         this.proxySelector = proxy;
     }
 
+    @Override
     public void setDebug(final boolean b) {
         this.debug = b;
     }
 
-    public void setLogger(final Logger logger) {
+    @Override
+    public void setLogger(final LogInterface logger) {
         this.logger = logger;
     }
 
+    @Override
     public void setVerbose(final boolean b) {
         this.verbose = b;
     }

@@ -21,7 +21,7 @@ import java.util.Locale;
 
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.formatter.TimeFormatter;
-import org.appwork.utils.logging.Log;
+
 
 public class Cookie {
 
@@ -160,7 +160,7 @@ public class Cookie {
             return;
         }
         this.expireTime = -1;
-        Log.L.severe("Cookie: no Format for " + expires + " found!");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cookie: no Format for " + expires + " found!");
         return;
     }
 
@@ -185,7 +185,7 @@ public class Cookie {
             return;
         }
         this.hostTime = -1;
-        Log.L.severe("Cookie: no Format for " + date + " found!");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cookie: no Format for " + date + " found!");
         return;
     }
 
