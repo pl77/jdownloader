@@ -97,7 +97,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
         } else {
             this.connect(this.options);
         }
-        //initialize localstorage listener to refresh options if reconnect happend in other browser tab
+        //initialize local storage listener to refresh options if reconnect happened in other browser tab
         window.addEventListener('storage', function (e) {
             if (e.key === LOCAL_STORAGE_KEY) {
                 if (!e.newValue) {
@@ -148,7 +148,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 reconnect.then(reconnectDef.resolve, reconnectDef.reject);
             } else {
                 //RECONNECT ALREADY HAPPENING -> RESOLVE
-                //TODO: Not depnendant on reconnect outcome
+                //TODO: Not dependent on reconnect outcome
                 reconnectDef.resolve();
             }
             return reconnectDef;

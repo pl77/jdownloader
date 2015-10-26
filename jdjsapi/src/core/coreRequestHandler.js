@@ -40,7 +40,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 auth.fail(handshake.reject);
                 // if the handshake gets rejected beforehand (e.g. because of a disconnect() call), abort the authentication request
                 handshake.fail(auth.abort);
-                // if authentication is successfull, initialize connection
+                // if authentication is successful, initialize connection
                 auth.done((function (data) {
                     if (data.rid !== params.rid) return handshake.reject(undefined, "replay attack");
                     CryptoUtils.initialiseConnection(options, data.sessiontoken, data.regaintoken);
@@ -94,8 +94,8 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
             }
             //lock exists and is not timeouted
             if (reconnectLock && (new Date().getTime() - reconnectLock.time) < 5000) {
-                //wait for reconnect
-                //listen to localstorage
+                // wait for reconnect
+                // listen to local storage
                 window.addEventListener('storage', function (event) {
                     if (event.key === this.LOCAL_STORAGE_KEY) {
                         if (!e.newValue) {
@@ -110,7 +110,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 localStorage.setItem(LOCAL_STORAGE_RECONNECT_LOCK_KEY, JSON.stringify({
                     time: new Date().getTime()
                 }));
-                //do the reconnect in this tab
+                // do the reconnect in this tab
                 // craft query string
                 var params = {};
                 var action;
@@ -138,7 +138,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 reauth.fail(handshake.reject.bind(handshake));
                 // if the handshake gets rejected beforehand (e.g. because of a disconnect() call), abort the authentication request
                 handshake.fail(reauth.abort.bind(reauth));
-                // if authentication is successfull, initialize connection
+                // if authentication is successful, initialize connection
                 reauth.done((function (data) {
                     CryptoUtils.initialiseConnection(options, data.sessiontoken, data.regaintoken);
                     localStorage.removeItem(LOCAL_STORAGE_RECONNECT_LOCK_KEY);

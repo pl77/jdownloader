@@ -46,8 +46,8 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
 
     $.extend(API.prototype, {
         /**
-         * Get captcha challenge from the API used for register Email and forgto Password
-         *  @returns  deffered object that resolves to captcha object which contains the captcha challenge id
+         * Get captcha challenge from the API used for 'Register Account' and 'Password Recovery'
+         *  @returns  deferred object that resolves to captcha object which contains the captcha challenge id
          *              and the captcha challenge image as dataUrl
          */
         getCaptcha: function () {
@@ -226,7 +226,7 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
             return ret;
         },
         /**
-         *   @returns a dictionary (object) containing the neccessary data
+         *   @returns a dictionary (object) containing the necessary data
          *   for the next authentication.
          */
         getAuth: function () {

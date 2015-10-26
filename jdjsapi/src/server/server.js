@@ -10,7 +10,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
             return this.jdapiCore.serverCall("listdevices");
         },
         /**
-         * Calls that don't require authentication, and thus are made directely and not via the JDAPICore
+         * Calls that don't require authentication, and thus are made directly and not via the JDAPICore
          */
         getCaptcha: function () {
             var request = $.ajax({
