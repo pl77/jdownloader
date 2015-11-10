@@ -81,10 +81,12 @@ public abstract class Request {
             return null;
         }
         final LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();
-        if (query.toLowerCase().trim().startsWith("http")) {
-            query = new URL(query).getQuery();
+        if (StringUtils.startsWithCaseInsensitive(query, "https://") || StringUtils.startsWithCaseInsensitive(query, "http://")) {
+            try {
+                query = new URL(query).getQuery();
+            } catch (final IOException e) {
+            }
         }
-
         if (query == null) {
             return ret;
         }
