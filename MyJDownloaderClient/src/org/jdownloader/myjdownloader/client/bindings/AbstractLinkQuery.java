@@ -35,7 +35,9 @@ package org.jdownloader.myjdownloader.client.bindings;
 
 public abstract class AbstractLinkQuery extends AbstractQuery {
 
-    private boolean host = false;
+    private boolean password = false;
+
+    private boolean host     = false;
 
     public boolean isHost() {
         return host;
@@ -51,6 +53,14 @@ public abstract class AbstractLinkQuery extends AbstractQuery {
 
     public void setUrl(final boolean url) {
         this.url = url;
+    }
+
+    public boolean isPassword() {
+        return password;
+    }
+
+    public void setPassword(boolean password) {
+        this.password = password;
     }
 
     private boolean url = false;
