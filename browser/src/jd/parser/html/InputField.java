@@ -119,7 +119,7 @@ public class InputField {
         return ret;
     }
 
-    private String            key;
+    private String                  key;
     private String                  value      = null;
     private HashMap<String, String> properties = null;
 
@@ -149,20 +149,19 @@ public class InputField {
     public String getKey() {
         return this.key;
     }
-    
+
     /**
      * so you can rename inputfield without having to delete and re-add inputfield/put and loose properties etc.
-     * 
+     *
      * @since JD2
      * @author raztoki
      * @param key
      */
     public void setKey(final String key) {
         // inputfields require non null value
-        if (key == null) {
-            return;
+        if (key != null) {
+            this.key = key;
         }
-        this.key = key;
     }
 
     @Override
