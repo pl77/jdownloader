@@ -178,11 +178,7 @@ public class InputField {
 
     @Override
     public int hashCode() {
-        if (this.key != null) {
-            return this.key.hashCode();
-        } else {
-            return this.getClass().hashCode();
-        }
+        return this.getClass().hashCode();
     }
 
     public String getProperty(final String key, final String defValue) {
