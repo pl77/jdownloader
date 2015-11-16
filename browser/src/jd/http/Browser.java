@@ -1138,6 +1138,46 @@ public class Browser {
         this.getPage(downloadURL);
         return this.getForms();
     }
+    
+    /**
+     * 
+     * same as getFormbyAction
+     * 
+     * @author raztoki
+     * @since JD2
+     * @param action
+     * @return
+     */
+    public Form[] getFormsByAction(final String action) {
+        final ArrayList<Form> results = new ArrayList<Form>();
+        for (final Form form : this.getForms()) {
+            if (StringUtils.equalsIgnoreCase(form.getAction(), action)) {
+                results.add(form);
+            }
+        }
+        return results.toArray(new Form[results.size()]);
+    }
+    
+    /**
+     * same as getFormbyActionRegex
+     * 
+     * @author raztoki
+     * @since JD2
+     * @param action
+     * @return
+     */
+    public Form[] getFormsByActionRegex(final String action) {
+        if (action == null) {
+            return null;
+        }
+        final ArrayList<Form> results = new ArrayList<Form>();
+        for (final Form form : this.getForms()) {
+            if (form.getAction() != null && new Regex(form.getAction(), action).matches()) {
+                results.add(form);
+            }
+        }
+        return results.toArray(new Form[results.size()]);
+    }
 
     public RequestHeader getHeaders() {
         RequestHeader lHeaders = this.headers;
