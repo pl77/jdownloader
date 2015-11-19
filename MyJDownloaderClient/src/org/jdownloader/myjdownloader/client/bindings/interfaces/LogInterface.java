@@ -9,7 +9,7 @@ import org.jdownloader.myjdownloader.client.bindings.LogFolderStorable;
 public interface LogInterface {
     public static final String NAMESPACE = "log";
 
-    public List<LogFolderStorable> listLogs();
+    public List<LogFolderStorable> getAvailableLogs();
 
     public String sendLogFile(LogFolderStorable[] logFolders);
 }
