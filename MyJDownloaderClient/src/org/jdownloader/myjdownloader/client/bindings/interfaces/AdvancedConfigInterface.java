@@ -36,6 +36,7 @@ package org.jdownloader.myjdownloader.client.bindings.interfaces;
 import java.util.ArrayList;
 
 import org.jdownloader.myjdownloader.client.bindings.AdvancedConfigEntryDataStorable;
+import org.jdownloader.myjdownloader.client.bindings.AdvancedConfigQuery;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 import org.jdownloader.myjdownloader.client.bindings.EnumOptionStorable;
 
@@ -60,5 +61,7 @@ public interface AdvancedConfigInterface extends Linkable {
     public boolean reset(String interfaceName, String storage, String key);
 
     public Object getDefault(String interfaceName, String storage, String key);
+
+    public ArrayList<AdvancedConfigEntryDataStorable> query(AdvancedConfigQuery query);
 
 }

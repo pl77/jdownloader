@@ -60,6 +60,7 @@ public class AddLinksQuery extends AbstractJsonData {
 
     private boolean autostart       = false;
     private boolean deepDecrypt     = false;
+    private boolean autoExtract     = false;
     private String  links           = null;
     private String  packageName     = null;
     private String  extractPassword = null;
@@ -129,6 +130,22 @@ public class AddLinksQuery extends AbstractJsonData {
 
     public void setSourceUrl(String sourceUrl) {
         this.sourceUrl = sourceUrl;
+    }
+
+    public boolean isAutoExtract() {
+        return autoExtract;
+    }
+
+    public void setAutoExtract(boolean autoExtract) {
+        this.autoExtract = autoExtract;
+    }
+
+    public boolean isDeepDecrypt() {
+        return deepDecrypt;
+    }
+
+    public void setDeepDecrypt(boolean deepDecrypt) {
+        this.deepDecrypt = deepDecrypt;
     }
 
     private String downloadPassword  = null;

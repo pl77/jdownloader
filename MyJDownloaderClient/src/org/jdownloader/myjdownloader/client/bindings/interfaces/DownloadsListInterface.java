@@ -129,4 +129,5 @@ public interface DownloadsListInterface extends Linkable {
 
     boolean setDownloadPassword(long[] linkIds, long[] packageIds, String pass);
 
+    boolean forceDownload(long[] linkIds, long[] packageIds);
 }
