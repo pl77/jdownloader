@@ -517,7 +517,7 @@ public class HTMLParser {
         }
     }
 
-    final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
+    final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\\\\\"|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\\\\\"|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
     public final static String                  protocolFile                = "file:/";
     final private static String                 protocolPrefixes            = "((?:mega|chrome|directhttp://https?|usenet|flashget|https?viajd|https?|ccf|dlc|ftp|jd|rsdf|jdlist|youtubev2" + (!Application.isJared(null) ? "|jdlog" : "") + ")://|" + HTMLParser.protocolFile + "|magnet:)";
     final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
@@ -534,7 +534,7 @@ public class HTMLParser {
 
     static {
         try {
-            HTMLParser.mp = Pattern.compile("(\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|<|>|\r|\n|\f|\t|$|\\1|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            HTMLParser.mp = Pattern.compile("(\\\\\"|\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|\\1|<|>|\r|\n|\f|\t|$|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         } catch (final Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
@@ -1037,7 +1037,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
