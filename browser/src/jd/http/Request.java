@@ -224,20 +224,23 @@ public abstract class Request {
              */
             headers.remove(HTTPConstants.HEADER_REQUEST_REFERER);
             this.setHeaders(headers);
+        } else {
+            this.setHeaders(this.getDefaultRequestHeader());
         }
-        final String basicAuth = this.getURI().getUserInfo();
-        if (basicAuth != null) {
-            this.getHeaders().put("Authorization", "Basic " + basicAuth);
+        this.setAuth(cloneRequest.getURI());
+    }
+
+    protected void setAuth(final URI uri) {
+        final String userInfo = uri != null ? uri.getUserInfo() : null;
+        if (StringUtils.isNotEmpty(userInfo)) {
+            this.getHeaders().put("Authorization", "Basic " + Encoding.Base64Encode(userInfo));
         }
     }
 
-    public Request(final URI url) throws IOException {
-        this.setURI(url);
+    public Request(final URI uri) throws IOException {
+        this.setURI(uri);
         this.setHeaders(this.getDefaultRequestHeader());
-        final String basicAuth = this.getURI().getUserInfo();
-        if (basicAuth != null) {
-            this.getHeaders().put("Authorization", "Basic " + basicAuth);
-        }
+        this.setAuth(uri);
     }
 
     public Request(final String url) throws IOException {
