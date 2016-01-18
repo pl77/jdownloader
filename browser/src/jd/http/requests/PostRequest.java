@@ -18,7 +18,7 @@ package jd.http.requests;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -58,7 +58,7 @@ public class PostRequest extends Request {
     private byte[]                                postBytes     = null;
     private SEND                                  sendWHAT      = null;
 
-    public PostRequest(final Form form) throws MalformedURLException {
+    public PostRequest(final Form form) throws IOException {
         super(form.getAction(null));
     }
 
@@ -66,8 +66,12 @@ public class PostRequest extends Request {
         super(cloneRequest);
     }
 
-    public PostRequest(final String url) throws MalformedURLException {
+    public PostRequest(final String url) throws IOException {
         super(url);
+    }
+
+    public PostRequest(final URI uri) throws IOException {
+        super(uri);
     }
 
     public void addAll(final HashMap<String, String> post) {

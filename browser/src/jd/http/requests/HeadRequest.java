@@ -18,6 +18,7 @@ package jd.http.requests;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 
 import jd.http.Request;
 
@@ -45,8 +46,12 @@ public class HeadRequest extends Request {
      * @throws MalformedURLException
      *             in case URL was malformed
      */
-    public HeadRequest(final String url) throws MalformedURLException {
+    public HeadRequest(final String url) throws IOException {
         super(url);
+    }
+
+    public HeadRequest(final URI uri) throws IOException {
+        super(uri);
     }
 
     @Override

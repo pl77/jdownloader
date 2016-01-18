@@ -18,6 +18,8 @@ package jd.http.requests;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import jd.http.Request;
 
@@ -44,9 +46,14 @@ public class GetRequest extends Request {
      * @see jd.http.Browser.correctURL(String)
      * @throws MalformedURLException
      *             in case URL was malformed
+     * @throws URISyntaxException
      */
-    public GetRequest(final String url) throws MalformedURLException {
+    public GetRequest(final String url) throws IOException {
         super(url);
+    }
+
+    public GetRequest(final URI uri) throws IOException {
+        super(uri);
     }
 
     @Override

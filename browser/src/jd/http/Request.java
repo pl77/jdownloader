@@ -21,6 +21,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.CharacterCodingException;
 import java.util.LinkedHashMap;
@@ -31,6 +33,7 @@ import java.util.regex.Pattern;
 
 import jd.nutils.encoding.Encoding;
 
+import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
@@ -178,6 +181,7 @@ public abstract class Request {
     protected String               htmlCode;
 
     protected URLConnectionAdapter httpConnection;
+
     protected long                 readTime       = -1;
 
     protected boolean              requested      = false;
@@ -185,7 +189,7 @@ public abstract class Request {
 
     protected HTTPProxy            proxy;
 
-    protected String               orgURL;
+    protected URI                  uri;
 
     protected String               customCharset  = null;
 
@@ -206,7 +210,7 @@ public abstract class Request {
     }
 
     protected Request(final Request cloneRequest) {
-        this.setURL(cloneRequest.getUrl());
+        this.setURI(cloneRequest.getURI());
         this.setCustomCharset(cloneRequest.getCustomCharset());
         this.setReadTimeout(cloneRequest.getReadTimeout());
         this.setConnectTimeout(cloneRequest.getConnectTimeout());
@@ -221,23 +225,32 @@ public abstract class Request {
             headers.remove(HTTPConstants.HEADER_REQUEST_REFERER);
             this.setHeaders(headers);
         }
-        final String basicAuth = Browser.getBasicAuthfromURL(this.getUrl());
+        final String basicAuth = this.getURI().getUserInfo();
         if (basicAuth != null) {
             this.getHeaders().put("Authorization", "Basic " + basicAuth);
         }
     }
 
-    public Request(final String url) throws MalformedURLException {
-        this.setURL(Browser.correctURL(url));
+    public Request(final URI url) throws IOException {
+        this.setURI(url);
         this.setHeaders(this.getDefaultRequestHeader());
-        final String basicAuth = Browser.getBasicAuthfromURL(url);
+        final String basicAuth = this.getURI().getUserInfo();
         if (basicAuth != null) {
             this.getHeaders().put("Authorization", "Basic " + basicAuth);
         }
     }
 
-    public Request(final URLConnectionAdapter con) {
+    public Request(final String url) throws IOException {
+        this(Browser.constructURI(url));
+    }
+
+    public Request(final URLConnectionAdapter con) throws IOException {
         this.httpConnection = con;
+        try {
+            this.setURI(con.getURL().toURI());
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
         this.requested = true;
         this.collectCookiesFromConnection();
     }
@@ -250,7 +263,7 @@ public abstract class Request {
         final List<String> cookieHeaders = this.httpConnection.getHeaderFields("Set-Cookie");
         if (cookieHeaders != null && cookieHeaders.size() > 0) {
             final String date = this.httpConnection.getHeaderField("Date");
-            final String host = Browser.getHost(this.httpConnection.getURL());
+            final String host = Browser.getHost(this.httpConnection.getRequest().getURI());
             final Cookies requestCookies = this.getCookies();
             for (int i = 0; i < cookieHeaders.size(); i++) {
                 final String header = cookieHeaders.get(i);
@@ -353,7 +366,6 @@ public abstract class Request {
             headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0");
             break;
         }
-
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
@@ -459,20 +471,42 @@ public abstract class Request {
         return this.httpConnection;
     }
 
+    /**
+     * cached location
+     */
+    protected String location = null;
+
     public String getLocation() {
-        if (this.httpConnection == null) {
-            return null;
-        }
-        String location = this.httpConnection.getHeaderField("Location");
-        if (StringUtils.isEmpty(location)) {
-            /* check if we have an old-school refresh header */
-            final String refresh = this.httpConnection.getHeaderField("refresh");
-            if (refresh != null) {
-                // we need to filter the time count from the url
-                location = new Regex(refresh, "url=(.+);?").getMatch(0);
+        final String location = this.location;
+        if (location == null) {
+            if (this.httpConnection != null) {
+                final String locationHeader = this.httpConnection.getHeaderField("Location");
+                if (StringUtils.isEmpty(locationHeader)) {
+                    /* check if we have an old-school refresh header */
+                    final String refresh = this.httpConnection.getHeaderField("refresh");
+                    if (refresh != null) {
+                        // we need to filter the time count from the url
+                        final String locationRefresh = new Regex(refresh, "url=(.+);?").getMatch(0);
+                        this.location = Request.getLocation(locationRefresh, this);
+                        return this.location;
+                    } else {
+                        this.location = "";
+                        return null;
+                    }
+                } else {
+                    this.location = Request.getLocation(locationHeader, this);
+                    return this.location;
+                }
+            } else {
+                return null;
+            }
+        } else {
+            if (location.length() == 0) {
+                return null;
+            } else {
+                return location;
             }
         }
-        return Request.getLocation(location, this);
     }
 
     /**
@@ -482,60 +516,23 @@ public abstract class Request {
      * @param request
      * @return
      */
-    public static String getLocation(final String locationn, final Request request) {
-        String location = locationn;
+    public static String getLocation(final String location, final Request request) {
         if (StringUtils.isEmpty(location)) {
             return null;
         }
+        String loc = location;
         final String contentType = request == null ? null : request.httpConnection.getHeaderField("Content-Type");
         if (contentType != null && contentType.contains("UTF-8")) {
-            location = Encoding.UTF8Decode(location, "ISO-8859-1");
+            loc = Encoding.UTF8Decode(loc, "ISO-8859-1");
         }
         try {
-            new URL(location);
+            return new URL(loc).toString();
         } catch (final Exception e) {
-            if (request == null) {
-                return null;
-            }
-            final URL url = request.getHttpConnection().getURL();
-            if (location.matches("^:\\d+/.+")) {
-                // workaround for some buggy servers//
-                location = url.getProtocol() + "://" + Browser.getHost(request.getUrl(), true) + location;
-            } else if (location.startsWith("//") && Browser.getHost("http:" + location, false) != null) {
-                location = url.getProtocol() + ":" + location;
-            } else if (location.startsWith("/")) {
-                location = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + location;
-            } else if (location.startsWith("?")) {
-                final String path = url.getPath();
-                location = Request.getLocation(location, url, path);
-            } else {
-                String path = url.getPath();
-                if (path != null) {
-                    path = new Regex(path, "^(/.+)/").getMatch(0);
-                }
-                location = Request.getLocation(location, url, path);
+            if (request != null) {
+                return Browser.parseLocation(request.getURI(), loc);
             }
         }
-        return Browser.correctURL(location);
-    }
-
-    /**
-     * @since JD2
-     * @param location
-     * @param url
-     * @param path
-     * @return
-     */
-    private static String getLocation(final String location, final URL url, final String path) {
-        String tmp = null;
-        if (path == null) {
-            tmp = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + "/" + location;
-        } else if (path.endsWith("/")) {
-            tmp = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + location;
-        } else {
-            tmp = url.getProtocol() + "://" + url.getHost() + (url.getPort() != -1 && url.getPort() != url.getDefaultPort() ? ":" + url.getPort() : "") + path + "/" + location;
-        }
-        return tmp;
+        return null;
     }
 
     public HTTPProxy getProxy() {
@@ -581,7 +578,16 @@ public abstract class Request {
     }
 
     public String getUrl() {
-        return this.orgURL;
+        try {
+            return Browser.getURI(this.getURI(), true, false, false).toString();
+        } catch (final IOException e) {
+            ThrowUncheckedException.throwUncheckedException(e);
+            return null;
+        }
+    }
+
+    public URI getURI() {
+        return this.uri;
     }
 
     protected boolean hasCookies() {
@@ -613,7 +619,7 @@ public abstract class Request {
     }
 
     private void openConnection() throws IOException {
-        this.httpConnection = HTTPConnectionFactory.createHTTPConnection(new URL(this.getUrl()), this.getProxy());
+        this.httpConnection = HTTPConnectionFactory.createHTTPConnection(Browser.getURI(this.getURI(), true, false, false).toURL(), this.getProxy());
         this.httpConnection.setRequest(this);
         this.httpConnection.setReadTimeout(this.getReadTimeout());
         this.httpConnection.setConnectTimeout(this.getConnectTimeout());
@@ -730,8 +736,8 @@ public abstract class Request {
         }
     }
 
-    public void setURL(final String url) {
-        this.orgURL = url;
+    protected void setURI(final URI uri) {
+        this.uri = uri;
     }
 
     @Override

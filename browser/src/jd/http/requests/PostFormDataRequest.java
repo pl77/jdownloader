@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 
 import jd.http.Request;
@@ -33,7 +33,7 @@ import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 
 /**
  * Extending the Request class, this class is able to to HTML Formdata Posts.
- * 
+ *
  * @author coalado
  */
 public class PostFormDataRequest extends Request {
@@ -42,8 +42,14 @@ public class PostFormDataRequest extends Request {
     private final java.util.List<FormData> formDatas;
     private String                         encodeType = "multipart/form-data";
 
-    public PostFormDataRequest(final String url) throws MalformedURLException {
+    public PostFormDataRequest(final String url) throws IOException {
         super(url);
+        this.generateBoundary();
+        this.formDatas = new ArrayList<FormData>();
+    }
+
+    public PostFormDataRequest(final URI uri) throws IOException {
+        super(uri);
         this.generateBoundary();
         this.formDatas = new ArrayList<FormData>();
     }

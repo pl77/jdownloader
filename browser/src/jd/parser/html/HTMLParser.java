@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jd.http.Browser;
 import jd.nutils.encoding.Encoding;
 import jd.parser.Regex;
 
@@ -1037,7 +1036,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
@@ -1238,7 +1237,9 @@ public class HTMLParser {
             }
         }
         if (merged != null) {
-            final String mergedResult = Browser.correctURL(merged.toString(), true);
+            // FIXME
+            // final String mergedResult = Browser.correctURL(merged.toString(), true);
+            final String mergedResult = merged.toString();
             if (mergedResult != null) {
                 return new HtmlParserCharSequence(mergedResult);
             }
