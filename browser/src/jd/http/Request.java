@@ -532,7 +532,12 @@ public abstract class Request {
             return new URL(loc).toString();
         } catch (final Exception e) {
             if (request != null) {
-                return Browser.parseLocation(request.getURI(), loc);
+                try {
+                    return Browser.parseLocation(request.getURI(), loc);
+                } catch (WTFException wtf) {
+                    // javascript can cause issue! best to just return null, so that plugins that call this method do not all require try catch!
+                    return null;
+                }
             }
         }
         return null;
