@@ -534,8 +534,7 @@ public abstract class Request {
             if (request != null) {
                 try {
                     return Browser.parseLocation(request.getURI(), loc);
-                } catch (WTFException wtf) {
-                    // javascript can cause issue! best to just return null, so that plugins that call this method do not all require try catch!
+                } catch (final Throwable wtf) {
                     return null;
                 }
             }
