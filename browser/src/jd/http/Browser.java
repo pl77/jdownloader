@@ -42,6 +42,7 @@ import jd.http.requests.HeadRequest;
 import jd.http.requests.PostFormDataRequest;
 import jd.http.requests.PostRequest;
 import jd.http.requests.RequestVariable;
+import jd.nutils.encoding.Encoding;
 import jd.parser.Regex;
 import jd.parser.html.Form;
 import jd.parser.html.InputField;
@@ -300,7 +301,8 @@ public class Browser {
 
     public static URI constructURI(final String url) throws IOException {
         try {
-            return new URL(url).toURI();
+            final String fixedURL = Browser.fixURL(url);
+            return new URL(fixedURL).toURI();
         } catch (URISyntaxException e) {
             throw new IOException(e);
         }
@@ -336,7 +338,8 @@ public class Browser {
         }
     }
 
-    public static String parseLocation(final URI uri, final String location) {
+    public static String parseLocation(final URI uri, final String loc) {
+        final String location = Browser.fixURL(loc);
         try {
             if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc
@@ -658,7 +661,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -1385,6 +1388,19 @@ public class Browser {
         return lRequest == null ? null : lRequest.getURI();
     }
 
+    public static String fixURL(final String url) {
+        if (url != null) {
+            final String ret = Encoding.urlEncode_light(url);
+            if (StringUtils.equals(ret, url)) {
+                return url;
+            } else {
+                return ret;
+            }
+        } else {
+            return url;
+        }
+    }
+
     /**
      * Tries to get a full URL out of string
      *
@@ -1398,7 +1414,8 @@ public class Browser {
             throw new NullPointerException("location is null");
         }
         try {
-            return new URL(location).toURI();
+            final String fixedLocation = Browser.fixURL(location);
+            return new URL(fixedLocation).toURI();
         } catch (final IOException e) {
             try {
                 final Request lRequest = this.getRequest();

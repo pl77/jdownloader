@@ -529,7 +529,8 @@ public abstract class Request {
             loc = Encoding.UTF8Decode(loc, "ISO-8859-1");
         }
         try {
-            return new URL(loc).toString();
+            final String fixedLocation = Browser.fixURL(loc);
+            return new URL(fixedLocation).toString();
         } catch (final Exception e) {
             if (request != null) {
                 try {
