@@ -23,8 +23,6 @@ import java.util.HashSet;
 
 import jd.parser.Regex;
 
-
-
 public class Encoding {
 
     private final static char[] HEX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -348,6 +346,11 @@ public class Encoding {
         return str;
     }
 
+    /**
+     * URI Parser does not like '[' and ']', so we encode them as well
+     * @param url
+     * @return
+     */
     public static String urlEncode_light(final String url) {
         if (url == null) {
             return null;
@@ -355,7 +358,11 @@ public class Encoding {
         final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < url.length(); i++) {
             final char ch = url.charAt(i);
-            if (ch == ' ') {
+            if (ch == '[') {
+                sb.append("%5B");
+            } else if (ch == ']') {
+                sb.append("%5D");
+            } else if (ch == ' ') {
                 sb.append("%20");
             } else if (ch >= 33 && ch <= 38) {
                 sb.append(ch);
