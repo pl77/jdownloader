@@ -1,6 +1,7 @@
 package jd.http;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +25,7 @@ public class StaticProxySelector implements ProxySelectorInterface {
     }
 
     @Override
-    public List<HTTPProxy> getProxiesByUrl(final String url) {
+    public List<HTTPProxy> getProxiesByURI(final URI uri) {
         return this.lst;
     }
 

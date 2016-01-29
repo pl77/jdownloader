@@ -661,7 +661,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -1604,7 +1604,7 @@ public class Browser {
                     final URLConnectionAdapter connection;
                     try {
                         if (request.getProxy() == null) {
-                            final List<HTTPProxy> proxies = this.selectProxies(request.getUrl());
+                            final List<HTTPProxy> proxies = this.selectProxies(request.getURI());
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
@@ -1714,7 +1714,7 @@ public class Browser {
         return this.getPage(request);
     }
 
-    protected List<HTTPProxy> selectProxies(final String url) throws IOException {
+    protected List<HTTPProxy> selectProxies(final URI uri) throws IOException {
         final ProxySelectorInterface selector;
         if (this.proxy != null) {
             selector = this.proxy;
@@ -1728,7 +1728,7 @@ public class Browser {
         }
         final List<HTTPProxy> list;
         try {
-            list = selector.getProxiesByUrl(url);
+            list = selector.getProxiesByURI(uri);
         } catch (Throwable e) {
             throw new NoGateWayException(selector, e);
         }
