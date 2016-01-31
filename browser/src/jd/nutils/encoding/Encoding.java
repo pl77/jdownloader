@@ -22,6 +22,9 @@ import java.net.URLEncoder;
 import java.util.HashSet;
 
 import jd.parser.Regex;
+import jd.parser.html.HTMLParser;
+
+import org.appwork.utils.StringUtils;
 
 public class Encoding {
 
@@ -317,7 +320,7 @@ public class Encoding {
                 urlcoded = urlcoded.replaceAll("%26", "&");
                 urlcoded = urlcoded.replaceAll("%23", "#");
             }
-            final boolean seemsFileURL = urlcoded.startsWith("file:/");
+            final boolean seemsFileURL = StringUtils.startsWithCaseInsensitive(urlcoded, HTMLParser.protocolFile);
             if (seemsFileURL) {
                 urlcoded = urlcoded.replaceAll("%20", " ");
             }
@@ -358,7 +361,9 @@ public class Encoding {
         final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < url.length(); i++) {
             final char ch = url.charAt(i);
-            if (ch == '[') {
+            if (ch == '\\') {
+                sb.append("%5C");
+            } else if (ch == '[') {
                 sb.append("%5B");
             } else if (ch == ']') {
                 sb.append("%5D");
