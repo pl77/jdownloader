@@ -885,13 +885,11 @@ public class HTMLParser {
     }
 
     private static HtmlParserCharSequence correctURL(HtmlParserCharSequence input) {
-        int specialCutOff = input.indexOf("', ");
-        if (specialCutOff < 0) {
-            specialCutOff = input.indexOf("',");
-        }
+        final int specialCutOff = input.indexOf("', ");
         if (specialCutOff >= 0) {
             input = input.subSequence(0, specialCutOff);
         }
+
         final int indexofa = input.indexOf("&");
         if (indexofa > 0 && input.indexOf("?") == -1) {
             final int indexofb = input.indexOf("#");
