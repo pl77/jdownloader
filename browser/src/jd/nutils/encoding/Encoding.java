@@ -351,6 +351,7 @@ public class Encoding {
 
     /**
      * URI Parser does not like '[' and ']', so we encode them as well
+     *
      * @param url
      * @return
      */
@@ -361,7 +362,9 @@ public class Encoding {
         final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < url.length(); i++) {
             final char ch = url.charAt(i);
-            if (ch == '\\') {
+            if (ch == '|') {
+                sb.append("%7C");
+            } else if (ch == '\\') {
                 sb.append("%5C");
             } else if (ch == '[') {
                 sb.append("%5B");
