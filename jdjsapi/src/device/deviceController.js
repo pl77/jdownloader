@@ -51,8 +51,40 @@ define("deviceController", ["device"], function (JDAPIDevice) {
                     }
                     ret.resolve(devices.list);
                 });
+                self._iterateAndCheckForSessionPublicKey(new Iterator(devices.list), function () {
+                    for (var i = 0; i < devices.list.length; i++) {
+
+                    }
+                });
             });
             return ret;
+        },
+        _iterateAndCheckForSessionPublicKey: function (iterator, finishedCallback) {
+            var dev = iterator.next();
+            //Last element reached
+            if (!dev) {
+                finishedCallback();
+                return;
+            }
+            //put device on device list
+            this.devices[dev.id] = this.devices[dev.id] || new JDAPIDevice(this.jdAPICore, dev);
+            var self = this;
+            this.jdAPICore.deviceCall(dev.id, "/device/getSessionPublicKey", [], undefined).done(function (result) {
+                if (!result || !result.data) {
+                    self._iterateAndCheckForSessionPublicKey(iterator, finishedCallback);
+                } else {
+                    self.devices[dev.id].rsaPublicKey = "-----BEGIN RSA PRIVATE KEY-----" + result.data + "-----END RSA PRIVATE KEY-----";
+                    console.log(JSON.stringify(self.devices[dev.id]));
+                    self.jdAPICore.deviceCall(dev.id, "/update/isUpdateAvailable", [], self.devices[dev.id].rsaPublicKey).done(function (result) {
+                        console.log(JSON.stringify(result));
+                    }).fail(function (result) {
+                        console.log(JSON.stringify(result));
+                    });
+                }
+            }).fail(function () {
+                //on fail, just skip this device
+                self._iterateAndCheckForSessionPublicKey(iterator, finishedCallback);
+            });
         },
         _iterateAndCheckForLocalMode: function (iterator, finishedCallback) {
             var dev = iterator.next();
@@ -64,7 +96,7 @@ define("deviceController", ["device"], function (JDAPIDevice) {
             //put device on device list
             this.devices[dev.id] = new JDAPIDevice(this.jdAPICore, dev);
             var self = this;
-            this.jdAPICore.deviceCall(dev.id, "/device/getDirectConnectionInfos", [], GET_DIRECT_CONNECTION_INFOS_TIMEOUT).done(function (result) {
+            this.jdAPICore.deviceCall(dev.id, "/device/getDirectConnectionInfos", [], undefined, GET_DIRECT_CONNECTION_INFOS_TIMEOUT).done(function (result) {
                 if (!result || !result.data || !result.data.infos || !result.data.infos.length === 0) {
                     self._iterateAndCheckForLocalMode(iterator, finishedCallback);
                 } else {
@@ -81,9 +113,13 @@ define("deviceController", ["device"], function (JDAPIDevice) {
         _iterateAndPingForAvailability: function (iterator, deviceId, finishedCallback) {
             var deviceAddress = iterator.next();
             var self = this;
-            var localURL = "http://" + deviceAddress.ip + ":" + deviceAddress.port;
+            var localURL = "//" + deviceAddress.ip + ":" + deviceAddress.port;
+            if (window.location.protocol && window.location.protocol == "https:") {
+                // dyndns service for wildcard certificate
+                localURL = "//" + deviceAddress.ip.replace(new RegExp("\\.", 'g'), "-") + ".mydns.jdownloader.org:" + deviceAddress.port;
+            }
             //make test call
-            var pingCall = self.jdAPICore.localDeviceCall(localURL, deviceId, "/device/ping", [], PING_TIMEOUT);
+            var pingCall = self.jdAPICore.localDeviceCall(localURL, deviceId, "/device/ping", [], undefined, PING_TIMEOUT);
             pingCall.done(function (result) {
                 self.devices[deviceId].setLocalURL(localURL);
             });
@@ -97,6 +133,7 @@ define("deviceController", ["device"], function (JDAPIDevice) {
                 }
             });
         },
+
         /**
          * Construct reusable deviceAPI Interface for given deviceId
          */

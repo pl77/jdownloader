@@ -33,7 +33,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                     async: true,
                     dataType: "aesjson-server",
                     converters: {
-                        "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.loginSecret, null)
+                        "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.loginSecret.firstHalf(),options.loginSecret.secondHalf())
                     }
                 });
                 // if authentication fails, reject the handshake
@@ -131,7 +131,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                     async: true,
                     dataType: "aesjson-server",
                     converters: {
-                        "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken, null)
+                        "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken.firstHalf(),options.serverEncryptionToken.secondHalf())
                     }
                 });
                 // if authentication fails, reject the handshake
@@ -165,7 +165,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 type: "POST",
                 dataType: "aesjson-server",
                 converters: {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken, null)
+                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken.firstHalf(),options.serverEncryptionToken.secondHalf())
                 }
             }).done((function (data) {
                 if (data.rid !== options.rid) return this.connection.reject(undefined, "replay attack");
@@ -190,7 +190,7 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 type: "POST",
                 dataType: "aesjson-server",
                 converters: {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken, null)
+                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, options.serverEncryptionToken.firstHalf(),options.serverEncryptionToken.secondHalf())
                 }
             }).done((function (data) {
                 if (data.rid !== options.rid) return this.connection.reject(undefined, "replay attack");

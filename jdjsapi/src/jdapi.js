@@ -19,7 +19,7 @@ var logger = {
 define("config/config", function () {
     return {
         TRANSFER_ENCODING: CryptoJS.enc.Hex,
-        API_ROOT: "http://api.jdownloader.org",
+        API_ROOT: "//api.jdownloader.org",
         LOCAL_STORAGE_KEY: "api.transport.options",
         APP_KEY: "MYJD_JS_DEFAULT_APP_KEY"
     };
@@ -83,12 +83,6 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
          */
         disconnect: function () {
             return this.jdAPICore.disconnect();
-        },
-        localConnect: function (username, password, callback) {
-            return this.jdAPICore.localConnectCall(username, password, callback);
-        },
-        discoverLocalDeviceLogin: function (callback) {
-            return this.jdAPICore.discoverLocalDeviceLogin(callback);
         },
         confirmEmail: function (email, validationkey, pass) {
             return this.apiServer.confirmEmail(email, validationkey, pass);
@@ -196,14 +190,14 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
          */
         send: function (action, params, localModeCallback) {
             var ret = $.Deferred();
-            var deviceAPI = this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
+            this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
                 deviceAPI.call(action, params, localModeCallback).then(ret.resolve, ret.reject, ret.progress);
             });
             return ret;
         },
         fetchActiveDeviceURL: function () {
             var ret = $.Deferred();
-            var deviceAPI = this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
+            this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
                 var url = deviceAPI.getURL();
                 ret.resolve(url);
             });
@@ -211,7 +205,7 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
         },
         fetchActiveDeviceTokenRoot: function () {
             var ret = $.Deferred();
-            var deviceAPI = this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
+            this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
                 var url = deviceAPI.getTokenRoot();
                 ret.resolve(url);
             });
@@ -219,7 +213,7 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
         },
         isActiveDeviceInLocalMode: function () {
             var ret = $.Deferred();
-            var deviceAPI = this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
+            this.apiDeviceController.getDeviceAPIForId(this.getActiveDevice()).done(function (deviceAPI) {
                 var local = deviceAPI.isInLocalMode();
                 ret.resolve(local);
             });

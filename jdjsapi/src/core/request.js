@@ -10,11 +10,13 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
         // if URL params are included build querystring with
         // sessiontoken and signature
         if (options.jdParams) {
+            options = addConverters(options, options.serverEncryptionToken.firstHalf(), options.serverEncryptionToken.secondHalf());
             if (options.type === "GET") {
                 var queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid + $
                         .param(options.jdParams);
             } else {
                 if (options.serverEncryptionToken) {
+                    options.contentType = "application/json; charset=utf-8";
                     var queryString;
                     var unencrypted;
                     var payload;
@@ -28,17 +30,18 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
                             "params": [],
                             "url": queryString,
                             "rid": options.rid
-                        }
+                        };
 
                         if (JSON.stringify(options.jdParams) !== "{}") {
                             // Do net send empty param
                             unencrypted.params = [options.jdParams];
                         }
 
-                        payload = CryptoUtils.encryptJSON(options.serverEncryptionToken, unencrypted);
-                        options.data = payload;
+                        var encryptedJSON = CryptoUtils.encryptJSON(options.serverEncryptionToken, unencrypted, options.rsaPublicKey);
+                        options.data = encryptedJSON.data;
+                        options.contentType = encryptedJSON.contentType;
+                        options = addConverters(options, encryptedJSON.iv, encryptedJSON.key);
                     }
-                    options.contentType = "application/json; charset=utf-8";
                 } else {
                     logger.error("[MYJD] [JSAPI] [REQUEST] [FAILED] Server encryption token missing. Action: " + JSON.stringify(options ? options.jdAction : "NO_ACTION"));
                 }
@@ -49,13 +52,22 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
             options.url = options.API_ROOT + queryString;
         } else {
             if (options.deviceEncryptionToken) {
-            options.data = CryptoUtils.encryptJSON(options.deviceEncryptionToken, options.jdData);
-            options.contentType = "application/json";
+                var encryptedJSON = CryptoUtils.encryptJSON(options.deviceEncryptionToken, options.jdData, options.rsaPublicKey);
+                options.contentType = encryptedJSON.contentType;
+                options.data = encryptedJSON.data;
+                options = addConverters(options, encryptedJSON.iv, encryptedJSON.key);
             options.url = options.API_ROOT + "/t_" + options.sessiontoken + "_" + options.deviceId + options.jdAction;
             } else {
                 logger.error("[MYJD] [JSAPI] [REQUEST] [FAILED] " + JSON.stringify((options ? options.type : "NO_OPTIONS")) + " Error: Device encryption token missing!");
             }
         }
+    };
+
+    var addConverters = function (options, aesIv, aesKey) {
+        options.converters = {
+            "* aesjson": CryptoUtils.decryptJSON.bind(this, aesIv, aesKey),
+        };
+        return options;
     };
 
     /**

@@ -5,7 +5,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
      * CONSTANTS
      */
     var TRANSFER_ENCODING = CoreCrypto.enc.Hex;
-    var API_ROOT = "http://api.jdownloader.org";
+    var API_ROOT = "//api.jdownloader.org";
     var LOCAL_STORAGE_KEY = "jdapi/src/core/core.js";
 
     // API States
@@ -176,15 +176,12 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             // Create request object
             params = params || {};
             var reqOptions = {
+
                 jdAction: action,
                 jdParams: params,
                 // url : this.options.apiRoot + queryString,
                 type: type || "POST",
                 dataType: "aesjson-server",
-                contentType: "json",
-                converters: {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, this.options.serverEncryptionToken, this.options.serverEncryptionTokenOld)
-                },
                 serverEncryptionToken: this.options.serverEncryptionToken,
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: API_ROOT,
@@ -195,7 +192,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             return this._call(reqOptions);
         },
         /* wraps jd api call in reconnect handling jQuery ajax call */
-        deviceCall: function (deviceId, action, postData, timeout) {
+        deviceCall: function (deviceId, action, postData, rsaPublicKey, timeout) {
             postData = postData || [];
             var rID = getRID();
             var reqOptions = {
@@ -209,11 +206,8 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 deviceId: deviceId,
                 type: "POST",
                 dataType: "aesjson-server",
-                contentType: "json",
-                converters: {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, this.options.deviceEncryptionToken, this.options.deviceEncryptionTokenOld)
-                },
                 deviceEncryptionToken: this.options.deviceEncryptionToken,
+                rsaPublicKey: rsaPublicKey,
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: API_ROOT,
                 sessiontoken: this.options.sessiontoken,
@@ -225,7 +219,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             return this._call(reqOptions);
         },
         /* wraps jd local call in reconnect handling jQuery ajax call */
-        localDeviceCall: function (localURL, deviceId, action, postData, timeout) {
+        localDeviceCall: function (localURL, deviceId, action, postData, rsaPublicKey, timeout) {
             postData = postData || [];
             var rID = getRID();
             var reqOptions = {
@@ -239,11 +233,8 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 deviceId: deviceId,
                 type: "POST",
                 dataType: "aesjson-server",
-                contentType: "json",
-                converters: {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, this.options.deviceEncryptionToken, this.options.deviceEncryptionTokenOld)
-                },
                 deviceEncryptionToken: this.options.deviceEncryptionToken,
+                rsaPublicKey: rsaPublicKey,
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: localURL,
                 sessiontoken: this.options.sessiontoken,
@@ -253,12 +244,6 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 reqOptions.timeout = timeout;
             }
             return this._call(reqOptions);
-        },
-        localConnectCall: function (username, password, callback) {
-            $.post("http://localhost:8002/myjdconnect", {username: username, password: password}, callback);
-        },
-        discoverLocalDeviceLogin: function (callback) {
-            $.get("http://localhost:8002/myjdconnect", {}, callback);
         },
         getSessionToken: function () {
             return this.options.sessiontoken;
@@ -303,16 +288,10 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             if (reqOptions.deviceEncryptionToken) {
                 reqOptions.deviceEncryptionToken = this.options.deviceEncryptionToken;
                 reqOptions.deviceEncryptionTokenOld = this.options.deviceEncryptionTokenOld;
-                reqOptions.converters = {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, this.options.deviceEncryptionToken, this.options.deviceEncryptionTokenOld)
-                };
             }
 
             if (reqOptions.serverEncryptionToken) {
                 reqOptions.serverEncryptionToken = this.options.serverEncryptionToken;
-                reqOptions.converters = {
-                    "* aesjson-server": CryptoUtils.decryptJSON.bind(this, this.options.serverEncryptionToken, this.options.serverEncryptionTokenOld)
-                };
             }
 
             reqOptions.sessiontoken = this.options.sessiontoken;

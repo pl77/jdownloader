@@ -16,7 +16,8 @@
   "dependencies": {
     "jquery": "2.1.1",
     "requirejs": "2.1.15",
-    "qunit": "1.15"
+    "qunit": "1.15",
+    "jsencrypt": "2.1.0"
   },
   "devDependencies": {
     "jquery-mockjax": "~1.6.0"
