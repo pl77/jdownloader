@@ -661,7 +661,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -1733,7 +1733,7 @@ public class Browser {
             throw new NoGateWayException(selector, e);
         }
         if (list == null || list.size() == 0) {
-            throw new NoGateWayException(selector, "No Gateway or Proxy Found");
+            throw new NoGateWayException(selector, "No Gateway or Proxy Found: " + uri);
         }
         return list;
 
