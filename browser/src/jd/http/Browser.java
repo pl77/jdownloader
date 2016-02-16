@@ -224,11 +224,23 @@ public class Browser {
         return url;
     }
 
+    public static String getHostFromURI(final URI uri) {
+        String host = uri.getHost();
+        if (host == null) {
+            try {
+                host = uri.toURL().getHost();
+            } catch (Throwable e) {
+                // workaround because URI cannot handle domains with leading/trailing '-' (test-.example.com) (invalid by rfc)
+            }
+        }
+        return host;
+    }
+
     public static String getHost(final URI uri, final boolean includeSubDomains) {
         if (uri == null) {
             return null;
         }
-        String ret = uri.getHost();
+        String ret = Browser.getHostFromURI(uri);
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
             final PublicSuffixList psl = PublicSuffixList.getInstance();
@@ -317,7 +329,7 @@ public class Browser {
         } else {
             final URI ret;
             try {
-                ret = new URI(uri.getScheme(), includeUserInfo ? uri.getUserInfo() : null, uri.getHost(), uri.getPort(), uri.getPath(), includeQuery ? uri.getQuery() : null, includeFragment ? uri.getFragment() : null);
+                ret = new URI(uri.getScheme(), includeUserInfo ? uri.getUserInfo() : null, Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), includeQuery ? uri.getQuery() : null, includeFragment ? uri.getFragment() : null);
             } catch (URISyntaxException e) {
                 throw new IOException(e);
             }
@@ -343,7 +355,7 @@ public class Browser {
         try {
             if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc
-                final String newLocation = uri.getScheme() + "://" + uri.getHost() + location;
+                final String newLocation = uri.getScheme() + "://" + Browser.getHostFromURI(uri) + location;
                 return newLocation;
             } else if (location.startsWith("//")) {
                 final URI dummyURI = new URI("http:" + location);
@@ -358,14 +370,14 @@ public class Browser {
             } else if (location.startsWith("/")) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(uri.getScheme()).append("://");
-                sb.append(uri.getHost());
+                sb.append(Browser.getHostFromURI(uri));
                 if (uri.getPort() != -1) {
                     sb.append(":").append(uri.getPort());
                 }
                 sb.append(location);
                 return sb.toString();
             } else if (location.startsWith("?")) {
-                final URI dummyURI = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+                final URI dummyURI = new URI(uri.getScheme(), null, Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), null, null);
                 final String query = location.substring(1);
                 if (StringUtils.isEmpty(query)) {
                     return dummyURI.toString();
@@ -409,7 +421,7 @@ public class Browser {
         } catch (final Throwable e) {
             e.printStackTrace();
             try {
-                final URI dummy = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+                final URI dummy = new URI(uri.getScheme(), uri.getUserInfo(), Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), null, null);
                 final StringBuilder sb = new StringBuilder();
                 sb.append(dummy.toString());
                 if (StringUtils.isNotEmpty(queryString)) {
@@ -661,7 +673,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -1039,7 +1051,7 @@ public class Browser {
     }
 
     public static String getBaseURL(final URI uri) throws URISyntaxException {
-        final URI baseURI = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+        final URI baseURI = new URI(uri.getScheme(), null, Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), null, null);
         final String base;
         if (baseURI.getPath() != null) {
             base = new Regex(baseURI.toString(), "(https?://.+)/").getMatch(0);
