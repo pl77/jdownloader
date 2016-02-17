@@ -58,14 +58,17 @@ public class AddLinksQuery extends AbstractJsonData {
         this.destinationFolder = destinationFolder;
     }
 
-    private Boolean  autostart       = null;
-    private Boolean  deepDecrypt     = null;
-    private Boolean  autoExtract     = null;
-    private String   links           = null;
-    private String[] dataURLs        = null;
-    private String   packageName     = null;
-    private String   extractPassword = null;
-    private String   sourceUrl       = null;
+    private Boolean  autostart               = null;
+    private Boolean  deepDecrypt             = null;
+    private Boolean  autoExtract             = null;
+    private Boolean  overridePackagizerRules = null;
+    private String   links                   = null;
+    private String[] dataURLs                = null;
+    private String   packageName             = null;
+    private String   extractPassword         = null;
+    private String   sourceUrl               = null;
+    private String   downloadPassword        = null;
+    private String   destinationFolder       = null;
 
     public Boolean isAutostart() {
         return this.autostart;
@@ -157,7 +160,12 @@ public class AddLinksQuery extends AbstractJsonData {
         this.dataURLs = dataURLs;
     }
 
-    private String downloadPassword  = null;
-    private String destinationFolder = null;
+    public Boolean isOverridePackagizerRules() {
+        return overridePackagizerRules;
+    }
+
+    public void setOverridePackagizerRules(Boolean overridePackagizerRules) {
+        this.overridePackagizerRules = overridePackagizerRules;
+    }
 
 }

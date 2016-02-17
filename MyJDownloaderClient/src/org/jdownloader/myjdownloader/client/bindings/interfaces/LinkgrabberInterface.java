@@ -109,5 +109,7 @@ public interface LinkgrabberInterface extends Linkable {
     boolean clearList();
 
     boolean setDownloadPassword(long[] linkIds, long[] packageIds, String pass);
+    
+    boolean abort();
 
 }
