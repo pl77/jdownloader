@@ -61,7 +61,7 @@ public class AddLinksQuery extends AbstractJsonData {
     private Boolean  autostart               = null;
     private Boolean  deepDecrypt             = null;
     private Boolean  autoExtract             = null;
-    private Boolean  overridePackagizerRules = null;
+    private Boolean  overwritePackagizerRules = null;
     private String   links                   = null;
     private String[] dataURLs                = null;
     private String   packageName             = null;
@@ -160,12 +160,12 @@ public class AddLinksQuery extends AbstractJsonData {
         this.dataURLs = dataURLs;
     }
 
-    public Boolean isOverridePackagizerRules() {
-        return overridePackagizerRules;
+    public Boolean isOverwritePackagizerRules() {
+        return overwritePackagizerRules;
     }
 
-    public void setOverridePackagizerRules(Boolean overridePackagizerRules) {
-        this.overridePackagizerRules = overridePackagizerRules;
+    public void setOverwritePackagizerRules(Boolean overridePackagizerRules) {
+        this.overwritePackagizerRules = overridePackagizerRules;
     }
 
 }
