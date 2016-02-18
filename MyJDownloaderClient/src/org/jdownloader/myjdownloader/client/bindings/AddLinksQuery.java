@@ -164,8 +164,8 @@ public class AddLinksQuery extends AbstractJsonData {
         return overwritePackagizerRules;
     }
 
-    public void setOverwritePackagizerRules(Boolean overridePackagizerRules) {
-        this.overwritePackagizerRules = overridePackagizerRules;
+    public void setOverwritePackagizerRules(Boolean overwritePackagizerRules) {
+        this.overwritePackagizerRules = overwritePackagizerRules;
     }
 
 }
