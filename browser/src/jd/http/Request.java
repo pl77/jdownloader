@@ -524,7 +524,7 @@ public abstract class Request {
             return null;
         }
         String loc = location;
-        final String contentType = request == null ? null : request.httpConnection.getHeaderField("Content-Type");
+        final String contentType = (request  == null || request.httpConnection == null ? null : request.httpConnection.getHeaderField("Content-Type"));
         if (contentType != null && contentType.contains("UTF-8")) {
             loc = Encoding.UTF8Decode(loc, "ISO-8859-1");
         }
