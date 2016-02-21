@@ -34,12 +34,23 @@
 package org.jdownloader.myjdownloader.client.bindings.interfaces;
 
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
+import org.jdownloader.myjdownloader.client.bindings.MenuStructure;
 import org.jdownloader.myjdownloader.client.exceptions.device.ApiFileNotFoundException;
 import org.jdownloader.myjdownloader.client.exceptions.device.InternalServerErrorException;
 import org.jdownloader.myjdownloader.client.json.IconDescriptor;
 
 @ClientApiNameSpace("contentV2")
 public interface ContentInterface extends Linkable {
+    public static enum Context {
+        /** Linkgrabber rightlick */
+        LGC,
+        /** Downloadlist rightlick */
+        DLC
+    }
+
+    public MenuStructure getMenu(Context context) throws InternalServerErrorException;
+
+    public Object invokeAction(Context context, String id, long[] linkIds, long[] packageIds) throws InternalServerErrorException;
 
     public byte[] getFavIcon(String hostername) throws ApiFileNotFoundException, InternalServerErrorException;
 
