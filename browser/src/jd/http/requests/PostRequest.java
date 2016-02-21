@@ -21,17 +21,19 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import jd.http.Request;
-import jd.http.URLConnectionAdapter;
-import jd.parser.html.Form;
-
+import org.appwork.utils.KeyValueEntry;
+import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
+
+import jd.http.QueryInfo;
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
+import jd.parser.html.Form;
 
 public class PostRequest extends Request {
     private static enum SEND {
@@ -41,22 +43,22 @@ public class PostRequest extends Request {
         NOTHING
     }
 
-    public static java.util.List<RequestVariable> variableMaptoArray(final LinkedHashMap<String, String> post) {
+    public static java.util.List<KeyValueStringEntry> queryToVariableList(final QueryInfo post) {
         if (post == null) {
             return null;
         }
-        final java.util.List<RequestVariable> ret = new ArrayList<RequestVariable>();
-        for (final Entry<String, String> entry : post.entrySet()) {
-            ret.add(new RequestVariable(entry.getKey(), entry.getValue()));
+        final java.util.List<KeyValueStringEntry> ret = new ArrayList<KeyValueStringEntry>();
+        for (final KeyValueEntry<String, String> entry : post.list()) {
+            ret.add(new KeyValueStringEntry(entry.getKey(), entry.getValue()));
         }
         return ret;
     }
 
-    private final java.util.List<RequestVariable> postVariables = new ArrayList<RequestVariable>();
-    private String                                postString    = null;
-    private String                                contentType   = null;
-    private byte[]                                postBytes     = null;
-    private SEND                                  sendWHAT      = null;
+    private final java.util.List<KeyValueStringEntry> postVariables = new ArrayList<KeyValueStringEntry>();
+    private String                                    postString    = null;
+    private String                                    contentType   = null;
+    private byte[]                                    postBytes     = null;
+    private SEND                                      sendWHAT      = null;
 
     public PostRequest(final Form form) throws IOException {
         super(form.getAction(null));
@@ -76,16 +78,16 @@ public class PostRequest extends Request {
 
     public void addAll(final HashMap<String, String> post) {
         for (final Entry<String, String> entry : post.entrySet()) {
-            this.postVariables.add(new RequestVariable(entry));
+            this.postVariables.add(new KeyValueStringEntry(entry));
         }
     }
 
-    public void addAll(final java.util.List<RequestVariable> post) {
+    public void addAll(final java.util.List<KeyValueStringEntry> post) {
         this.postVariables.addAll(post);
     }
 
     public void addVariable(final String key, final String value) {
-        this.postVariables.add(new RequestVariable(key, value));
+        this.postVariables.add(new KeyValueStringEntry(key, value));
     }
 
     @Override
@@ -101,7 +103,7 @@ public class PostRequest extends Request {
 
     public String getPostDataString() {
         final StringBuilder buffer = new StringBuilder();
-        for (final RequestVariable rv : this.postVariables) {
+        for (final KeyValueStringEntry rv : this.postVariables) {
             if (rv.getKey() != null) {
                 buffer.append("&");
                 buffer.append(rv.getKey());

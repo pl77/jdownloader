@@ -28,13 +28,12 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jd.http.requests.RequestVariable;
+import org.appwork.utils.KeyValueStringEntry;
+import org.appwork.utils.StringUtils;
+
 import jd.nutils.encoding.HTMLEntities;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
-
-import org.appwork.utils.StringUtils;
-
 
 public class Form {
 
@@ -329,8 +328,8 @@ public class Form {
      *
      * @return
      */
-    public java.util.List<RequestVariable> getRequestVariables() {
-        final List<RequestVariable> ret = new ArrayList<RequestVariable>();
+    public java.util.List<KeyValueStringEntry> getRequestVariables() {
+        final List<KeyValueStringEntry> ret = new ArrayList<KeyValueStringEntry>();
         for (final InputField ipf : this.inputfields) {
             // Do not send not prefered Submit types
             if (this.getPreferredSubmit() != null && ipf.getType() != null && ipf.getType().equalsIgnoreCase("submit") && this.getPreferredSubmit() != ipf) {
@@ -345,14 +344,14 @@ public class Form {
             if (StringUtils.equalsIgnoreCase("image", ipf.getType())) {
                 final InputField x = this.getInputField(ipf.getKey() + ".x");
                 if (x == null || x.getValue() == null) {
-                    ret.add(new RequestVariable(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
+                    ret.add(new KeyValueStringEntry(ipf.getKey() + ".x", new Random().nextInt(100) + ""));
                 }
                 final InputField y = this.getInputField(ipf.getKey() + ".y");
                 if (y == null || y.getValue() == null) {
-                    ret.add(new RequestVariable(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
+                    ret.add(new KeyValueStringEntry(ipf.getKey() + ".y", new Random().nextInt(100) + ""));
                 }
             } else {
-                ret.add(new RequestVariable(ipf.getKey(), ipf.getValue()));
+                ret.add(new KeyValueStringEntry(ipf.getKey(), ipf.getValue()));
             }
         }
         return ret;
@@ -517,7 +516,7 @@ public class Form {
                 return;
             }
         }
-              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No exact match for submit found! Trying to find best match now!");
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No exact match for submit found! Trying to find best match now!");
         for (final InputField ipf : this.inputfields) {
             if (ipf.getType() != null && ipf.getValue() != null && ipf.getType().equalsIgnoreCase("submit") && ipf.getValue().contains(preferredSubmit)) {
                 this.preferredSubmit = ipf;

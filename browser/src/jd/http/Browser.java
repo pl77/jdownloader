@@ -36,25 +36,25 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import jd.http.requests.FormData;
-import jd.http.requests.GetRequest;
-import jd.http.requests.HeadRequest;
-import jd.http.requests.PostFormDataRequest;
-import jd.http.requests.PostRequest;
-import jd.http.requests.RequestVariable;
-import jd.nutils.encoding.Encoding;
-import jd.parser.Regex;
-import jd.parser.html.Form;
-import jd.parser.html.InputField;
-
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
+import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.ConsoleLogImpl;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
+
+import jd.http.requests.FormData;
+import jd.http.requests.GetRequest;
+import jd.http.requests.HeadRequest;
+import jd.http.requests.PostFormDataRequest;
+import jd.http.requests.PostRequest;
+import jd.nutils.encoding.Encoding;
+import jd.parser.Regex;
+import jd.parser.html.Form;
+import jd.parser.html.InputField;
 
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
@@ -876,11 +876,19 @@ public class Browser {
 
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
+     * 
+     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
      */
-    public PostRequest createPostRequest(String url, final List<RequestVariable> post, final String encoding) throws IOException {
+    @Deprecated
+    public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
+        return this.createPostRequest(url, QueryInfo.get(post), encoding);
+
+    }
+
+    public PostRequest createPostRequest(String url, QueryInfo post, final String encoding) throws IOException {
         final PostRequest request = new PostRequest(this.getURI(url));
         if (post != null) {
-            request.addAll(post);
+            request.addAll(post.list());
         }
         String requestContentType = encoding;
         final RequestHeader lHeaders = this.headers;
@@ -900,8 +908,8 @@ public class Browser {
     /**
      * Creates a new POstrequest based on a variable HashMap
      */
-    public PostRequest createPostRequest(final String url, final LinkedHashMap<String, String> post) throws IOException {
-        return this.createPostRequest(url, PostRequest.variableMaptoArray(post), null);
+    public PostRequest createPostRequest(final String url, final QueryInfo post) throws IOException {
+        return this.createPostRequest(url, post.list(), null);
     }
 
     /**
@@ -1553,16 +1561,26 @@ public class Browser {
 
     /**
      * Opens a Post Connection based on a variable HashMap
+     * 
+     * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
      */
+    @Deprecated
     public URLConnectionAdapter openPostConnection(final String url, final LinkedHashMap<String, String> post) throws IOException {
-        return this.openRequestConnection(this.createPostRequest(url, post));
+        return this.openRequestConnection(this.createPostRequest(url, QueryInfo.get(post)));
     }
 
     /**
      * OPens a new Post connection based on a query string
+     * 
+     * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
      */
+    @Deprecated
     public URLConnectionAdapter openPostConnection(final String url, final String post) throws IOException {
         return this.openPostConnection(url, Request.parseQuery(post));
+    }
+
+    private URLConnectionAdapter openPostConnection(String url, QueryInfo query) throws IOException {
+        return this.openRequestConnection(this.createPostRequest(url, query));
     }
 
     private void setRequestProperties(final Request sourceRequest, final Request nextRequest, final String refererURL) {
@@ -1699,20 +1717,30 @@ public class Browser {
 
     /**
      * loads a new page (post)
+     * 
+     * @deprecated Use {@link #postPage(String, QueryInfo)} instead
      */
+    @Deprecated
     public String postPage(final String url, final LinkedHashMap<String, String> post) throws IOException {
-        return this.getPage(this.createPostRequest(url, post));
+        return this.postPage(url, QueryInfo.get(post));
     }
 
     /**
      * loads a new page (POST)
+     * 
+     * @deprecated Use {@link #postPage(String, QueryInfo)} or {@link #postPageRaw(String, String) instead
      */
+    @Deprecated
     public String postPage(final String url, final String post) throws IOException {
         return this.postPage(url, Request.parseQuery(post));
     }
 
+    public String postPage(String url, QueryInfo queryInfo) throws IOException {
+        return this.getPage(this.createPostRequest(url, queryInfo));
+    }
+
     public String postPageRaw(final String url, final byte[] post) throws IOException {
-        final PostRequest request = this.createPostRequest(url, new ArrayList<RequestVariable>(), null);
+        final PostRequest request = this.createPostRequest(url, new ArrayList<KeyValueStringEntry>(), null);
         request.setPostBytes(post);
         return this.getPage(request);
     }
@@ -1721,7 +1749,7 @@ public class Browser {
      * loads a new page (post) the postdata is given by the poststring. It will be sent as is
      */
     public String postPageRaw(final String url, final String post) throws IOException {
-        final PostRequest request = this.createPostRequest(url, new ArrayList<RequestVariable>(), null);
+        final PostRequest request = this.createPostRequest(url, new ArrayList<KeyValueStringEntry>(), null);
         request.setPostDataString(post);
         return this.getPage(request);
     }
@@ -1866,7 +1894,7 @@ public class Browser {
      *
      * @param string
      * @since JD2
-     * */
+     */
     public void setCurrentURL(final String url) throws MalformedURLException {
         if (url == null) {
             this.currentURL = null;
@@ -1920,7 +1948,7 @@ public class Browser {
      * do not below revision 10000
      *
      * @since JD2
-     * */
+     */
     public void setHeader(final String field, final String value) {
         this.getHeaders().put(field, value);
     }
@@ -1959,6 +1987,7 @@ public class Browser {
     @Deprecated
     /**
      * for usage in plugins for stable compatibility only
+     * 
      * @param threadProxy
      */
     public void setProxy(final ProxySelectorInterface threadProxy) {

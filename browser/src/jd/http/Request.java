@@ -25,13 +25,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.CharacterCodingException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import jd.nutils.encoding.Encoding;
 
 import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
@@ -46,6 +43,8 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
+
+import jd.nutils.encoding.Encoding;
 
 public abstract class Request {
     // public static int MAX_REDIRECTS = 30;
@@ -79,11 +78,11 @@ public abstract class Request {
      * @throws MalformedURLException
      */
 
-    public static LinkedHashMap<String, String> parseQuery(String query) throws MalformedURLException {
+    public static QueryInfo parseQuery(String query) throws MalformedURLException {
         if (query == null) {
             return null;
         }
-        final LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();
+        final QueryInfo ret = new QueryInfo();
         if (StringUtils.startsWithCaseInsensitive(query, "https://") || StringUtils.startsWithCaseInsensitive(query, "http://")) {
             try {
                 query = new URL(query).getQuery();
@@ -97,7 +96,8 @@ public abstract class Request {
         if (split != null) {
             final int splitLength = split.length;
             for (int i = 0; i < splitLength; i++) {
-                ret.put(split[i][0], split[i][1]);
+                ret.add(split[i][0], split[i][1]);
+
             }
         }
         return ret;
