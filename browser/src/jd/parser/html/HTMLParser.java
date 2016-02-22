@@ -38,15 +38,26 @@ public class HTMLParser {
     private static class ConcatCharSequence implements CharSequence {
 
         private final CharSequence[] charSequences;
+        private final int            offset;
+        private final int            end;
         private final int            length;
 
-        public ConcatCharSequence(CharSequence... charSequences) {
+        public ConcatCharSequence(final CharSequence... charSequences) {
             this.charSequences = charSequences;
             int length = 0;
-            for (CharSequence charSequence : charSequences) {
+            for (final CharSequence charSequence : charSequences) {
                 length += charSequence.length();
             }
+            this.offset = 0;
+            this.end = length;
             this.length = length;
+        }
+
+        private ConcatCharSequence(final int offset, final int start, final int end, ConcatCharSequence concatCharSequence) {
+            this.charSequences = concatCharSequence.charSequences;
+            this.end = end;
+            this.offset = offset + start;
+            this.length = end - start;
         }
 
         @Override
@@ -56,21 +67,24 @@ public class HTMLParser {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(this.length);
-            for (CharSequence charSequence : this.charSequences) {
-                sb.append(charSequence);
+            final StringBuilder sb = new StringBuilder(this.length());
+            sb.ensureCapacity(this.length());
+            for (int index = 0; index < this.length(); index++) {
+                sb.append(this.charAt(index));
             }
             return sb.toString();
         }
 
         @Override
         public char charAt(int index) {
-            if (index < 0 || index >= this.length) {
+            index = index + this.offset;
+            final int offsetEnd = this.end + this.offset;
+            if (index < 0 || index >= offsetEnd) {
                 throw new IndexOutOfBoundsException("Index " + index);
             }
             int range = 0;
-            for (CharSequence charSequence : this.charSequences) {
-                if (index < range + charSequence.length()) {
+            for (final CharSequence charSequence : this.charSequences) {
+                if (index < offsetEnd && index < range + charSequence.length()) {
                     return charSequence.charAt(index - range);
                 }
                 range += charSequence.length();
@@ -80,9 +94,8 @@ public class HTMLParser {
 
         @Override
         public CharSequence subSequence(int start, int end) {
-            throw new UnsupportedOperationException();
+            return new ConcatCharSequence(this.offset, start, end, this);
         }
-
     }
 
     /**
@@ -1034,7 +1047,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
@@ -1189,10 +1202,19 @@ public class HTMLParser {
         ConcatCharSequence merged = null;
         final char first = path.charAt(0);
         if (first == '/') {
-            /* absolut path relative to baseURL */
-            HtmlParserCharSequence base = baseURL.group(1, HTMLParser.mergePattern_Root);
-            if (base != null) {
-                merged = new ConcatCharSequence(base, path);
+            if (path.length() > 1 && path.charAt(1) == '/') {
+                /* absolut path relative to baseURL */
+                HtmlParserCharSequence protocol = HTMLParser.getProtocol(baseURL);
+                if (protocol != null) {
+                    protocol = protocol.subSequence(0, protocol.length() - 2);
+                    merged = new ConcatCharSequence(protocol, path);
+                }
+            } else {
+                /* absolut path relative to baseURL */
+                HtmlParserCharSequence base = baseURL.group(1, HTMLParser.mergePattern_Root);
+                if (base != null) {
+                    merged = new ConcatCharSequence(base, path);
+                }
             }
         } else if (first == '.' && (path.charAt(1) == '.' || path.charAt(1) == '/')) {
             /* relative path relative to baseURL */
@@ -1235,12 +1257,7 @@ public class HTMLParser {
             }
         }
         if (merged != null) {
-            // FIXME
-            // final String mergedResult = Browser.correctURL(merged.toString(), true);
-            final String mergedResult = merged.toString();
-            if (mergedResult != null) {
-                return new HtmlParserCharSequence(mergedResult);
-            }
+            return new HtmlParserCharSequence(merged);
         }
         return null;
     }
