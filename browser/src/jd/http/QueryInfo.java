@@ -13,17 +13,15 @@ import org.appwork.utils.StringUtils;
 
 public class QueryInfo {
 
-    private List<KeyValueStringEntry> list;
+    private final List<KeyValueStringEntry> list = new ArrayList<KeyValueStringEntry>();
 
     public QueryInfo() {
-        this.list = new ArrayList<KeyValueStringEntry>();
     }
 
     @Override
     public String toString() {
-
-        StringBuilder ret = new StringBuilder();
-        for (KeyValueStringEntry s : this.list) {
+        final StringBuilder ret = new StringBuilder();
+        for (final KeyValueStringEntry s : this.list) {
             if (ret.length() > 0) {
                 ret.append("&");
             }
@@ -38,12 +36,12 @@ public class QueryInfo {
 
     /**
      * Gets the first entry for the key . The result is probably urlEncoded
-     * 
+     *
      * @param key
      * @return
      */
     public String get(String key) {
-        for (KeyValueStringEntry s : this.list) {
+        for (final KeyValueStringEntry s : this.list) {
             if (StringUtils.equals(s.getKey(), key)) {
                 return s.getValue();
             }
@@ -52,9 +50,16 @@ public class QueryInfo {
     }
 
     public String getDecoded(String key) throws UnsupportedEncodingException {
-        for (KeyValueStringEntry s : this.list) {
+        return this.getDecoded(key, "UTF-8");
+    }
+
+    public String getDecoded(String key, String encoding) throws UnsupportedEncodingException {
+        if (StringUtils.isEmpty(encoding)) {
+            encoding = "UTF-8";
+        }
+        for (final KeyValueStringEntry s : this.list) {
             if (StringUtils.equals(s.getKey(), key)) {
-                return URLDecoder.decode(s.getValue(), "ASCII");
+                return URLDecoder.decode(s.getValue(), encoding);
             }
         }
         return null;
@@ -65,9 +70,9 @@ public class QueryInfo {
     }
 
     public static QueryInfo get(Map<String, String> post) {
-        QueryInfo ret = new QueryInfo();
+        final QueryInfo ret = new QueryInfo();
         if (post != null) {
-            for (Entry<String, String> es : post.entrySet()) {
+            for (final Entry<String, String> es : post.entrySet()) {
                 ret.add(es.getKey(), es.getValue());
             }
         }
@@ -75,7 +80,7 @@ public class QueryInfo {
     }
 
     public void addAndReplace(String key, String value) {
-        int index = this.remove(key);
+        final int index = this.remove(key);
         if (index < 0) {
             // add new
             this.add(key, value);
@@ -83,12 +88,11 @@ public class QueryInfo {
             // replace
             this.list.add(index, new KeyValueStringEntry(key, value));
         }
-
     }
 
     /**
      * Removes all entries for the key and returns the index of the first removed one
-     * 
+     *
      * @param key
      * @return
      */
@@ -96,9 +100,8 @@ public class QueryInfo {
         KeyValueStringEntry value;
         int first = -1;
         int i = 0;
-        for (Iterator<KeyValueStringEntry> it = this.list.iterator(); it.hasNext();) {
+        for (final Iterator<KeyValueStringEntry> it = this.list.iterator(); it.hasNext();) {
             value = it.next();
-
             if (StringUtils.equals(value.getKey(), key)) {
                 it.remove();
                 if (first < 0) {
@@ -106,13 +109,12 @@ public class QueryInfo {
                 }
             }
             i++;
-
         }
         return first;
     }
 
     public boolean containsKey(String key) {
-        for (KeyValueStringEntry es : this.list) {
+        for (final KeyValueStringEntry es : this.list) {
             if (StringUtils.equals(es.getKey(), key)) {
                 return true;
             }
@@ -130,19 +132,17 @@ public class QueryInfo {
 
     /**
      * Tries to split the information if a key is used several times.
-     * 
-     * 
+     *
+     *
      * @return
      */
     public List<QueryInfo> split() {
-        ArrayList<QueryInfo> ret = new ArrayList<QueryInfo>();
-
-        ArrayList<KeyValueStringEntry> lst = new ArrayList<KeyValueStringEntry>(this.list);
+        final ArrayList<QueryInfo> ret = new ArrayList<QueryInfo>();
+        final ArrayList<KeyValueStringEntry> lst = new ArrayList<KeyValueStringEntry>(this.list);
         while (true) {
-            QueryInfo map = new QueryInfo();
+            final QueryInfo map = new QueryInfo();
             KeyValueStringEntry es;
-
-            for (Iterator<KeyValueStringEntry> it = lst.iterator(); it.hasNext();) {
+            for (final Iterator<KeyValueStringEntry> it = lst.iterator(); it.hasNext();) {
                 es = it.next();
                 if (!map.containsKey(es.getKey())) {
                     map.add(es.getKey(), es.getValue());
@@ -152,11 +152,9 @@ public class QueryInfo {
             if (map.size() > 0) {
                 ret.add(map);
             }
-
             if (lst.size() == 0) {
                 break;
             }
-
         }
         return ret;
     }
@@ -166,7 +164,7 @@ public class QueryInfo {
     }
 
     public static QueryInfo get(List<KeyValueStringEntry> post) {
-        QueryInfo ret = new QueryInfo();
+        final QueryInfo ret = new QueryInfo();
         ret.addAll(post);
         return ret;
     }
