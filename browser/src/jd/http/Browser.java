@@ -20,10 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -36,6 +33,15 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import jd.http.requests.FormData;
+import jd.http.requests.GetRequest;
+import jd.http.requests.HeadRequest;
+import jd.http.requests.PostFormDataRequest;
+import jd.http.requests.PostRequest;
+import jd.parser.Regex;
+import jd.parser.html.Form;
+import jd.parser.html.InputField;
+
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.KeyValueStringEntry;
@@ -45,16 +51,6 @@ import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
-
-import jd.http.requests.FormData;
-import jd.http.requests.GetRequest;
-import jd.http.requests.HeadRequest;
-import jd.http.requests.PostFormDataRequest;
-import jd.http.requests.PostRequest;
-import jd.nutils.encoding.Encoding;
-import jd.parser.Regex;
-import jd.parser.html.Form;
-import jd.parser.html.InputField;
 
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
@@ -170,8 +166,8 @@ public class Browser {
         return Browser.getHost(url, false);
     }
 
-    public static String getHost(final URI uri) {
-        return Browser.getHost(uri, false);
+    public static String getHost(final URL url) {
+        return Browser.getHost(url, false);
     }
 
     private static final Pattern HOST_IP_PATTERN1     = Pattern.compile("^(?:[a-z0-9]{2,64}://)?[a-z0-9]{2,64}://(?:[^\\s@/]+?@)?(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -224,23 +220,11 @@ public class Browser {
         return url;
     }
 
-    public static String getHostFromURI(final URI uri) {
-        String host = uri.getHost();
-        if (host == null) {
-            try {
-                host = uri.toURL().getHost();
-            } catch (Throwable e) {
-                // workaround because URI cannot handle domains with leading/trailing '-' (test-.example.com) (invalid by rfc)
-            }
-        }
-        return host;
-    }
-
-    public static String getHost(final URI uri, final boolean includeSubDomains) {
+    public static String getHost(final URL uri, final boolean includeSubDomains) {
         if (uri == null) {
             return null;
         }
-        String ret = Browser.getHostFromURI(uri);
+        String ret = uri.getHost();
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
             final PublicSuffixList psl = PublicSuffixList.getInstance();
@@ -261,18 +245,6 @@ public class Browser {
             return ret.toLowerCase(Locale.ENGLISH);
         }
         return ret;
-    }
-
-    /**
-     *
-     *
-     * @param url
-     * @return
-     * @throws MalformedURLException
-     */
-
-    public static String getHost(final URL url) {
-        return Browser.getHost(url.getHost());
     }
 
     /**
@@ -311,132 +283,81 @@ public class Browser {
 
     private static boolean VERBOSE                  = false;
 
-    public static URI constructURI(final String url) throws IOException {
-        try {
-            final String fixedURL = Browser.fixURL(url);
-            return new URL(fixedURL).toURI();
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
-        }
-    }
-
-    public static URI getURI(final URI uri, final boolean includeQuery, final boolean includeUserInfo, final boolean includeFragment) throws IOException {
-        final boolean modifyQuery = includeQuery == false && uri.getRawQuery() != null;
-        final boolean modifyUserInfo = includeUserInfo == false && uri.getRawUserInfo() != null;
-        final boolean modifyFragment = includeFragment == false && uri.getRawFragment() != null;
-        if (!modifyQuery && !modifyUserInfo && !modifyFragment) {
-            return uri;
+    public static URL getURL(final URL url, final boolean includeQuery, final boolean includeUserInfo, final boolean includeRef) throws MalformedURLException {
+        final boolean modifyQuery = includeQuery == false && url.getQuery() != null;
+        final boolean modifyUserInfo = includeUserInfo == false && url.getUserInfo() != null;
+        final boolean modifyRef = includeRef == false && url.getRef() != null;
+        if (!modifyQuery && !modifyUserInfo && !modifyRef) {
+            return url;
         } else {
-            final URI ret;
-            try {
-                ret = new URI(uri.getScheme(), includeUserInfo ? uri.getUserInfo() : null, Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), includeQuery ? uri.getQuery() : null, includeFragment ? uri.getFragment() : null);
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
+            final StringBuilder sb = new StringBuilder();
+            sb.append(url.getProtocol());
+            sb.append("://");
+            if (includeUserInfo && url.getUserInfo() != null) {
+                sb.append(url.getUserInfo());
+                sb.append("@");
             }
-            if (StringUtils.equals(ret.toString(), uri.toString())) {
-                return uri;
+            sb.append(url.getHost());
+            if (url.getPort() != -1) {
+                sb.append(":");
+                sb.append(url.getPort());
+            }
+            if (url.getPath() != null) {
+                sb.append(url.getPath());
             } else {
-                if (ret.getQuery() == null) {
-                    return ret;
-                } else {
-                    final URI fixed = Browser.setURIQuery(ret, uri.getRawQuery());
-                    if (StringUtils.equals(fixed.toString(), uri.toString())) {
-                        return uri;
-                    } else {
-                        return fixed;
-                    }
-                }
+                sb.append("/");
             }
+            if (includeQuery && url.getQuery() != null) {
+                sb.append("?");
+                sb.append(url.getQuery());
+            }
+            if (includeRef && url.getRef() != null) {
+                sb.append("#");
+                sb.append(url.getRef());
+            }
+            return new URL(sb.toString());
         }
     }
 
-    public static String parseLocation(final URI uri, final String loc) {
-        final String location = Browser.fixURL(loc);
+    public static String parseLocation(final URL url, final String location) {
         try {
             if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc
-                final String newLocation = uri.getScheme() + "://" + Browser.getHostFromURI(uri) + location;
+                final String newLocation = url.getProtocol() + "://" + url.getHost() + location;
                 return newLocation;
             } else if (location.startsWith("//")) {
-                final URI dummyURI = new URI("http:" + location);
+                final URL dummyURI = new URL("http:" + location);
                 if (dummyURI.getHost() != null) {
                     // first check if http://loc has a valid host
                     // scheme + loc
-                    final String newLocation = uri.getScheme() + ":" + location;
+                    final String newLocation = url.getProtocol() + ":" + location;
                     return newLocation;
                 } else {
                     throw new WTFException("FIXME:location=" + location);
                 }
             } else if (location.startsWith("/")) {
                 final StringBuilder sb = new StringBuilder();
-                sb.append(uri.getScheme()).append("://");
-                sb.append(Browser.getHostFromURI(uri));
-                if (uri.getPort() != -1) {
-                    sb.append(":").append(uri.getPort());
+                sb.append(url.getProtocol()).append("://");
+                sb.append(url.getHost());
+                if (url.getPort() != -1) {
+                    sb.append(":").append(url.getPort());
                 }
                 sb.append(location);
                 return sb.toString();
             } else if (location.startsWith("?")) {
-                final URI dummyURI = new URI(uri.getScheme(), null, Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), null, null);
+                final URL dummyURL = Browser.getURL(url, false, false, false);
                 final String query = location.substring(1);
                 if (StringUtils.isEmpty(query)) {
-                    return dummyURI.toString();
+                    return dummyURL.toString();
                 } else {
-                    final URI ret = Browser.setURIQuery(dummyURI, location.substring(1));
-                    return ret.toString();
+                    return dummyURL.toString() + location;
                 }
             } else {
-                final URI dummyURI = new URI(Browser.getBaseURL(uri) + location);
-                return dummyURI.toString();
+                return Browser.getBaseURL(url) + location;
             }
-        } catch (URISyntaxException e) {
+        } catch (MalformedURLException e) {
             throw new WTFException("FIXME:location=" + location, e);
         }
-    }
-
-    /**
-     * URI fails to correct queryString (eg @ )
-     *
-     * this method uses reflection to set queryString
-     *
-     * @param uri
-     * @param queryString
-     * @return
-     */
-    public static URI setURIQuery(final URI uri, final String queryString) {
-        try {
-            if (!StringUtils.equals(uri.getRawQuery(), queryString)) {
-                final Field query = URI.class.getDeclaredField("query");
-                query.setAccessible(true);
-                query.set(uri, queryString);// set query
-                final Field decodedQuery = URI.class.getDeclaredField("decodedQuery");
-                decodedQuery.setAccessible(true);
-                decodedQuery.set(uri, null);// reset decoded query
-                final Field string = URI.class.getDeclaredField("string");
-                string.setAccessible(true);
-                string.set(uri, null);// reset decoded string
-            } else {
-                return uri;
-            }
-        } catch (final Throwable e) {
-            e.printStackTrace();
-            try {
-                final URI dummy = new URI(uri.getScheme(), uri.getUserInfo(), Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), null, null);
-                final StringBuilder sb = new StringBuilder();
-                sb.append(dummy.toString());
-                if (StringUtils.isNotEmpty(queryString)) {
-                    sb.append("?").append(queryString);
-                }
-                if (StringUtils.isNotEmpty(uri.getRawFragment())) {
-                    sb.append("#").append(uri.getRawFragment());
-                }
-                final URI ret = new URI(sb.toString());
-                return ret;
-            } catch (URISyntaxException e1) {
-                e1.printStackTrace();
-            }
-        }
-        return uri;
     }
 
     /**
@@ -561,7 +482,7 @@ public class Browser {
     }
 
     private static synchronized void waitForPageAccess(final Browser browser, final Request request) throws InterruptedException {
-        final String host = Browser.getHost(request.getURI());
+        final String host = Browser.getHost(request.getURL());
         ArrayList<Long> ts = null;
         if (Browser.REQUESTS_THRESHOLD_INTERVAL_MAP != null && Browser.REQUESTS_THRESHOLD_INTERVAL_MAP.containsKey(host)) {
             ts = Browser.REQUESTS_THRESHOLD_TIME_HISTORY_MAP.get(host);
@@ -673,7 +594,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -863,21 +784,21 @@ public class Browser {
     }
 
     public GetRequest createGetRequest(String url) throws IOException {
-        return new GetRequest(this.getURI(url));
+        return new GetRequest(this.getURL(url));
     }
 
     public HeadRequest createHeadRequest(String url) throws IOException {
-        return new HeadRequest(this.getURI(url));
+        return new HeadRequest(this.getURL(url));
     }
 
     public PostFormDataRequest createPostFormDataRequest(String url) throws IOException {
-        return new PostFormDataRequest(this.getURI(url));
+        return new PostFormDataRequest(this.getURL(url));
     }
 
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
-     * 
-     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
+     *
+     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -886,7 +807,7 @@ public class Browser {
     }
 
     public PostRequest createPostRequest(String url, QueryInfo post, final String encoding) throws IOException {
-        final PostRequest request = new PostRequest(this.getURI(url));
+        final PostRequest request = new PostRequest(this.getURL(url));
         if (post != null) {
             request.addAll(post.list());
         }
@@ -934,7 +855,7 @@ public class Browser {
         if (StringUtils.isEmpty(location)) {
             throw new IllegalStateException("Request does not contain a redirect");
         }
-        final URI newURI = this.getURI(location);
+        final URL newURL = this.getURL(location);
         final int responseCode = request.getHttpConnection().getResponseCode();
         Request newRequest = null;
         switch (responseCode) {
@@ -974,7 +895,7 @@ public class Browser {
             }
             return null;
         }
-        newRequest.setURI(newURI);
+        newRequest.setURL(newURL);
         return newRequest;
     }
 
@@ -1034,7 +955,7 @@ public class Browser {
 
     public void forwardCookies(final Request request) {
         if (request != null) {
-            final String host = Browser.getHost(request.getURI());
+            final String host = Browser.getHost(request.getURL());
             final Cookies cookies = this.getCookies().get(host);
             if (cookies != null) {
                 final Cookies requestCookies = request.getCookies();
@@ -1058,8 +979,8 @@ public class Browser {
         return this.allowedResponseCodes;
     }
 
-    public static String getBaseURL(final URI uri) throws URISyntaxException {
-        final URI baseURI = new URI(uri.getScheme(), null, Browser.getHostFromURI(uri), uri.getPort(), uri.getPath(), null, null);
+    public static String getBaseURL(final URL url) throws MalformedURLException {
+        final URL baseURI = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath());
         final String base;
         if (baseURI.getPath() != null) {
             base = new Regex(baseURI.toString(), "(https?://.+)/").getMatch(0);
@@ -1073,14 +994,10 @@ public class Browser {
         }
     }
 
-    public String getBaseURL() throws IOException {
+    public String getBaseURL() throws MalformedURLException {
         final Request lRequest = this.getRequest();
         if (lRequest != null) {
-            try {
-                return Browser.getBaseURL(lRequest.getURI());
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
-            }
+            return Browser.getBaseURL(lRequest.getURL());
         }
         return null;
     }
@@ -1298,7 +1215,7 @@ public class Browser {
 
     public String getHost() {
         final Request lRequest = this.getRequest();
-        return lRequest == null ? null : Browser.getHost(lRequest.getURI(), false);
+        return lRequest == null ? null : Browser.getHost(lRequest.getURL(), false);
     }
 
     public URLConnectionAdapter getHttpConnection() {
@@ -1403,22 +1320,9 @@ public class Browser {
         return lRequest == null ? null : lRequest.getUrl();
     }
 
-    public URI getURI() {
+    public URL _getURL() {
         final Request lRequest = this.getRequest();
-        return lRequest == null ? null : lRequest.getURI();
-    }
-
-    public static String fixURL(final String url) {
-        if (url != null) {
-            final String ret = Encoding.urlEncode_light(url);
-            if (StringUtils.equals(ret, url)) {
-                return url;
-            } else {
-                return ret;
-            }
-        } else {
-            return url;
-        }
+        return lRequest == null ? null : lRequest.getURL();
     }
 
     /**
@@ -1426,7 +1330,7 @@ public class Browser {
      *
      * @throws BrowserException
      */
-    public URI getURI(String location) throws IOException {
+    public URL getURL(String location) throws IOException {
         if (location == null) {
             location = this.getRedirectLocation();
         }
@@ -1434,20 +1338,17 @@ public class Browser {
             throw new NullPointerException("location is null");
         }
         try {
-            final String fixedLocation = Browser.fixURL(location);
-            return new URL(fixedLocation).toURI();
-        } catch (final IOException e) {
+            return new URL(location);
+        } catch (final MalformedURLException e) {
             try {
                 final Request lRequest = this.getRequest();
                 if (lRequest == null || lRequest.getHttpConnection() == null) {
                     throw new IOException("no request available");
                 }
-                return new URI(Browser.parseLocation(lRequest.getURI(), location));
-            } catch (final URISyntaxException e2) {
+                return new URL(Browser.parseLocation(lRequest.getURL(), location));
+            } catch (final MalformedURLException e2) {
                 throw new IOException(e2);
             }
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
         }
     }
 
@@ -1561,7 +1462,7 @@ public class Browser {
 
     /**
      * Opens a Post Connection based on a variable HashMap
-     * 
+     *
      * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
      */
     @Deprecated
@@ -1571,7 +1472,7 @@ public class Browser {
 
     /**
      * OPens a new Post connection based on a query string
-     * 
+     *
      * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
      */
     @Deprecated
@@ -1599,9 +1500,9 @@ public class Browser {
             nextRequest.setReadTimeout(this.getReadTimeout());
 
             final boolean allowRefererURL;
-            if (sourceRequest != null && StringUtils.startsWithCaseInsensitive(sourceRequest.getURI().getScheme(), "https")) {
+            if (sourceRequest != null && StringUtils.startsWithCaseInsensitive(sourceRequest.getURL().getProtocol(), "https")) {
                 // http://allben.net/post/2009/02/25/Null-Url-Referrer-going-from-HTTPS-to-HTTP
-                allowRefererURL = StringUtils.startsWithCaseInsensitive(nextRequest.getURI().getScheme(), "https");
+                allowRefererURL = StringUtils.startsWithCaseInsensitive(nextRequest.getURL().getProtocol(), "https");
             } else {
                 allowRefererURL = true;
             }
@@ -1634,7 +1535,7 @@ public class Browser {
                     final URLConnectionAdapter connection;
                     try {
                         if (request.getProxy() == null) {
-                            final List<HTTPProxy> proxies = this.selectProxies(request.getURI());
+                            final List<HTTPProxy> proxies = this.selectProxies(request.getURL());
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
@@ -1717,7 +1618,7 @@ public class Browser {
 
     /**
      * loads a new page (post)
-     * 
+     *
      * @deprecated Use {@link #postPage(String, QueryInfo)} instead
      */
     @Deprecated
@@ -1727,7 +1628,7 @@ public class Browser {
 
     /**
      * loads a new page (POST)
-     * 
+     *
      * @deprecated Use {@link #postPage(String, QueryInfo)} or {@link #postPageRaw(String, String) instead
      */
     @Deprecated
@@ -1754,7 +1655,7 @@ public class Browser {
         return this.getPage(request);
     }
 
-    protected List<HTTPProxy> selectProxies(final URI uri) throws IOException {
+    protected List<HTTPProxy> selectProxies(final URL url) throws IOException {
         final ProxySelectorInterface selector;
         if (this.proxy != null) {
             selector = this.proxy;
@@ -1768,12 +1669,12 @@ public class Browser {
         }
         final List<HTTPProxy> list;
         try {
-            list = selector.getProxiesByURI(uri);
+            list = selector.getProxiesByURL(url);
         } catch (Throwable e) {
             throw new NoGateWayException(selector, e);
         }
         if (list == null || list.size() == 0) {
-            throw new NoGateWayException(selector, "No Gateway or Proxy Found: " + uri);
+            throw new NoGateWayException(selector, "No Gateway or Proxy Found: " + url);
         }
         return list;
 
@@ -1987,7 +1888,7 @@ public class Browser {
     @Deprecated
     /**
      * for usage in plugins for stable compatibility only
-     * 
+     *
      * @param threadProxy
      */
     public void setProxy(final ProxySelectorInterface threadProxy) {
@@ -2057,7 +1958,7 @@ public class Browser {
 
     public void updateCookies(final Request request) {
         if (request != null && request.hasCookies()) {
-            final String host = Browser.getHost(request.getURI());
+            final String host = Browser.getHost(request.getURL());
             Cookies cookies = this.getCookies().get(host);
             if (cookies == null) {
                 cookies = new Cookies();

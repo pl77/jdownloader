@@ -18,7 +18,7 @@ package jd.http.requests;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
+import java.net.URL;
 
 import jd.http.Request;
 
@@ -47,8 +47,8 @@ public class DeleteRequest extends Request {
         super(url);
     }
 
-    public DeleteRequest(final URI uri) throws IOException {
-        super(uri);
+    public DeleteRequest(final URL url) throws IOException {
+        super(url);
     }
 
     @Override

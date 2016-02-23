@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 
 import jd.http.Request;
@@ -48,8 +48,8 @@ public class PostFormDataRequest extends Request {
         this.formDatas = new ArrayList<FormData>();
     }
 
-    public PostFormDataRequest(final URI uri) throws IOException {
-        super(uri);
+    public PostFormDataRequest(final URL url) throws IOException {
+        super(url);
         this.generateBoundary();
         this.formDatas = new ArrayList<FormData>();
     }

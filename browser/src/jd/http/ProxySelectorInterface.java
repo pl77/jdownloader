@@ -1,14 +1,14 @@
 package jd.http;
 
 import java.io.IOException;
-import java.net.URI;
+import java.net.URL;
 import java.util.List;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 
 public interface ProxySelectorInterface {
 
-    List<HTTPProxy> getProxiesByURI(URI uri);
+    List<HTTPProxy> getProxiesByURL(URL uri);
 
     /**
      * the selector may request a new connection for the given url, or ask for proxy auth information. if there is a new connection option

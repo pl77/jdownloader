@@ -18,10 +18,15 @@ package jd.http.requests;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import jd.http.QueryInfo;
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
+import jd.parser.html.Form;
 
 import org.appwork.utils.KeyValueEntry;
 import org.appwork.utils.KeyValueStringEntry;
@@ -29,11 +34,6 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
-
-import jd.http.QueryInfo;
-import jd.http.Request;
-import jd.http.URLConnectionAdapter;
-import jd.parser.html.Form;
 
 public class PostRequest extends Request {
     private static enum SEND {
@@ -72,8 +72,8 @@ public class PostRequest extends Request {
         super(url);
     }
 
-    public PostRequest(final URI uri) throws IOException {
-        super(uri);
+    public PostRequest(final URL url) throws IOException {
+        super(url);
     }
 
     public void addAll(final HashMap<String, String> post) {

@@ -1,7 +1,7 @@
 package jd.http.requests;
 
 import java.io.IOException;
-import java.net.URI;
+import java.net.URL;
 
 import jd.http.Request;
 import jd.parser.html.Form;
@@ -22,8 +22,8 @@ public class PutRequest extends PostRequest {
         super(url);
     }
 
-    public PutRequest(final URI uri) throws IOException {
-        super(uri);
+    public PutRequest(final URL url) throws IOException {
+        super(url);
     }
 
     @Override

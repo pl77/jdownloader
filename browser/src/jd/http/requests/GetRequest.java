@@ -18,8 +18,8 @@ package jd.http.requests;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import jd.http.Request;
 
@@ -52,8 +52,8 @@ public class GetRequest extends Request {
         super(url);
     }
 
-    public GetRequest(final URI uri) throws IOException {
-        super(uri);
+    public GetRequest(final URL url) throws IOException {
+        super(url);
     }
 
     @Override

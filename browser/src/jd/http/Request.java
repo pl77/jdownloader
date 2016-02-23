@@ -21,8 +21,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.CharacterCodingException;
 import java.util.List;
@@ -189,7 +187,7 @@ public abstract class Request {
 
     protected HTTPProxy            proxy;
 
-    protected URI                  uri;
+    protected URL                  url;
 
     protected String               customCharset  = null;
 
@@ -210,7 +208,7 @@ public abstract class Request {
     }
 
     protected Request(final Request cloneRequest) {
-        this.setURI(cloneRequest.getURI());
+        this.setURL(cloneRequest.getURL());
         this.setCustomCharset(cloneRequest.getCustomCharset());
         this.setReadTimeout(cloneRequest.getReadTimeout());
         this.setConnectTimeout(cloneRequest.getConnectTimeout());
@@ -227,32 +225,32 @@ public abstract class Request {
         } else {
             this.setHeaders(this.getDefaultRequestHeader());
         }
-        this.setAuth(cloneRequest.getURI());
+        this.setAuth(cloneRequest.getURL());
     }
 
-    protected void setAuth(final URI uri) {
-        final String userInfo = uri != null ? uri.getUserInfo() : null;
+    protected void setAuth(final URL url) {
+        final String userInfo = url != null ? url.getUserInfo() : null;
         if (StringUtils.isNotEmpty(userInfo)) {
             this.getHeaders().put("Authorization", "Basic " + Encoding.Base64Encode(userInfo));
         }
     }
 
-    public Request(final URI uri) throws IOException {
-        this.setURI(uri);
+    public Request(final URL url) throws IOException {
+        this.setURL(url);
         this.setHeaders(this.getDefaultRequestHeader());
-        this.setAuth(uri);
+        this.setAuth(url);
     }
 
     public Request(final String url) throws IOException {
-        this(Browser.constructURI(url));
+        this(new URL(url));
     }
 
     public Request(final URLConnectionAdapter con) throws IOException {
         this.httpConnection = con;
-        try {
-            this.setURI(con.getURL().toURI());
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
+        if (con.getRequest() != null) {
+            this.setURL(con.getRequest().getURL());
+        } else {
+            this.setURL(con.getURL());
         }
         this.requested = true;
         this.collectCookiesFromConnection();
@@ -266,7 +264,7 @@ public abstract class Request {
         final List<String> cookieHeaders = this.httpConnection.getHeaderFields("Set-Cookie");
         if (cookieHeaders != null && cookieHeaders.size() > 0) {
             final String date = this.httpConnection.getHeaderField("Date");
-            final String host = Browser.getHost(this.httpConnection.getRequest().getURI());
+            final String host = Browser.getHost(this.httpConnection.getRequest().getURL());
             final Cookies requestCookies = this.getCookies();
             for (int i = 0; i < cookieHeaders.size(); i++) {
                 final String header = cookieHeaders.get(i);
@@ -529,12 +527,11 @@ public abstract class Request {
             loc = Encoding.UTF8Decode(loc, "ISO-8859-1");
         }
         try {
-            final String fixedLocation = Browser.fixURL(loc);
-            return new URL(fixedLocation).toString();
+            return new URL(loc).toString();
         } catch (final Exception e) {
             if (request != null) {
                 try {
-                    return Browser.parseLocation(request.getURI(), loc);
+                    return Browser.parseLocation(request.getURL(), loc);
                 } catch (final Throwable wtf) {
                     return null;
                 }
@@ -587,15 +584,15 @@ public abstract class Request {
 
     public String getUrl() {
         try {
-            return Browser.getURI(this.getURI(), true, false, false).toString();
+            return Browser.getURL(this.getURL(), true, false, false).toString();
         } catch (final IOException e) {
             ThrowUncheckedException.throwUncheckedException(e);
             return null;
         }
     }
 
-    public URI getURI() {
-        return this.uri;
+    public URL getURL() {
+        return this.url;
     }
 
     protected boolean hasCookies() {
@@ -627,7 +624,7 @@ public abstract class Request {
     }
 
     private void openConnection() throws IOException {
-        this.httpConnection = HTTPConnectionFactory.createHTTPConnection(Browser.getURI(this.getURI(), true, false, false).toURL(), this.getProxy());
+        this.httpConnection = HTTPConnectionFactory.createHTTPConnection(Browser.getURL(this.getURL(), true, false, false), this.getProxy());
         this.httpConnection.setRequest(this);
         this.httpConnection.setReadTimeout(this.getReadTimeout());
         this.httpConnection.setConnectTimeout(this.getConnectTimeout());
@@ -744,8 +741,8 @@ public abstract class Request {
         }
     }
 
-    protected void setURI(final URI uri) {
-        this.uri = uri;
+    protected void setURL(final URL url) {
+        this.url = url;
     }
 
     @Override
