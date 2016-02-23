@@ -96,68 +96,6 @@ public class Browser {
         return Browser.GLOBAL_PROXY;
     }
 
-    // private static String removeURLPathTraversal(String path) {
-    // if (path == null || !path.contains("./")) {
-    // return path;
-    // }
-    // final boolean endsWithSlash = path.endsWith("/");
-    // final String pathParts[] = path.split("/");
-    // for (int i = 0; i < pathParts.length; i++) {
-    // if (".".equals(pathParts[i])) {
-    // pathParts[i] = null;
-    // } else if ("..".equals(pathParts[i])) {
-    // if (i > 0) {
-    // int j = i - 1;
-    // while (true && j > 0) {
-    // if (pathParts[j] != null) {
-    // pathParts[j] = null;
-    // break;
-    // }
-    // j--;
-    // }
-    // }
-    // pathParts[i] = null;
-    // } else if (i > 0 && pathParts[i].length() == 0) {
-    // pathParts[i] = "/";
-    // }
-    // }
-    // StringBuilder ret = new StringBuilder();
-    // for (final String pathPart : pathParts) {
-    // if (pathPart != null) {
-    // if ("/".equals(pathPart) || pathPart.length() == 0) {
-    // ret.append("/");
-    // } else {
-    // if (ret.length() > 0 && ret.charAt(ret.length() - 1) != '/') {
-    // ret.append("/");
-    // }
-    // ret.append(pathPart);
-    // }
-    // }
-    // }
-    // if (endsWithSlash && (ret.length() == 0 || ret.charAt(ret.length() - 1) != '/')) {
-    // ret.append("/");
-    // }
-    // return ret.toString();
-    // }
-    // if (StringUtils.isNotEmpty(pathPart) && (pathPart.contains("//") || pathPart.contains("./"))) {
-    // pathPart = Browser.removeURLPathMultipleSlash(pathPart, removeDoubleSlash);
-    // pathPart = Browser.removeURLPathTraversal(pathPart);
-    // }
-    // private static String removeURLPathMultipleSlash(String path, boolean removeDoubleSlash) {
-    // if (path == null || !path.contains("//")) {
-    // return path;
-    // }
-    // if (removeDoubleSlash) {
-    // /**
-    // * http: // webmasters.stackexchange.com/questions/8354/what-does-the-double-slash-mean-in-urls
-    // */
-    // path = path.replaceAll("/{2,}", "/");
-    // } else {
-    // path = path.replaceAll("/{3,}", "/");
-    // }
-    // return path;
-    // }
-    //
     public static int getGlobalReadTimeout() {
         return Browser.TIMEOUT_READ;
     }
