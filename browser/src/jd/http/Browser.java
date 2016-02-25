@@ -257,7 +257,8 @@ public class Browser {
         }
     }
 
-    public static String parseLocation(final URL url, final String location) {
+    public static String parseLocation(final URL url, final String loc) {
+        final String location = loc.replaceAll(" ", "%20");
         try {
             if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc

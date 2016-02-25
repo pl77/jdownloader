@@ -521,11 +521,7 @@ public abstract class Request {
         if (StringUtils.isEmpty(location)) {
             return null;
         }
-        String loc = location;
-        final String contentType = request == null || request.httpConnection == null ? null : request.httpConnection.getHeaderField("Content-Type");
-        if (StringUtils.containsIgnoreCase(contentType, "UTF-8")) {
-            loc = Encoding.UTF8Decode(loc, "ISO-8859-1");
-        }
+        final String loc = location.replaceAll(" ", "%20");
         try {
             return new URL(loc).toString();
         } catch (final Exception e) {
