@@ -33,15 +33,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import jd.http.requests.FormData;
-import jd.http.requests.GetRequest;
-import jd.http.requests.HeadRequest;
-import jd.http.requests.PostFormDataRequest;
-import jd.http.requests.PostRequest;
-import jd.parser.Regex;
-import jd.parser.html.Form;
-import jd.parser.html.InputField;
-
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.KeyValueStringEntry;
@@ -51,6 +42,15 @@ import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
+
+import jd.http.requests.FormData;
+import jd.http.requests.GetRequest;
+import jd.http.requests.HeadRequest;
+import jd.http.requests.PostFormDataRequest;
+import jd.http.requests.PostRequest;
+import jd.parser.Regex;
+import jd.parser.html.Form;
+import jd.parser.html.InputField;
 
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
@@ -737,7 +737,8 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
+     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
+     * 
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -1419,7 +1420,7 @@ public class Browser {
         return this.openPostConnection(url, Request.parseQuery(post));
     }
 
-    private URLConnectionAdapter openPostConnection(String url, QueryInfo query) throws IOException {
+    public URLConnectionAdapter openPostConnection(String url, QueryInfo query) throws IOException {
         return this.openRequestConnection(this.createPostRequest(url, query));
     }
 

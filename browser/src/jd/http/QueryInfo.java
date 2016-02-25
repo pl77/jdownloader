@@ -79,7 +79,7 @@ public class QueryInfo {
         return ret;
     }
 
-    public void addAndReplace(String key, String value) {
+    public QueryInfo addAndReplace(String key, String value) {
         final int index = this.remove(key);
         if (index < 0) {
             // add new
@@ -88,6 +88,7 @@ public class QueryInfo {
             // replace
             this.list.add(index, new KeyValueStringEntry(key, value));
         }
+        return this;
     }
 
     /**

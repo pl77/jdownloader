@@ -24,12 +24,12 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 
-import jd.http.Request;
-import jd.http.URLConnectionAdapter;
-
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
+
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
 
 /**
  * Extending the Request class, this class is able to to HTML Formdata Posts.
@@ -38,7 +38,7 @@ import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
  */
 public class PostFormDataRequest extends Request {
 
-    private String                         boundary;
+    protected String                       boundary;
     private final java.util.List<FormData> formDatas;
     private String                         encodeType = "multipart/form-data";
 
@@ -58,7 +58,7 @@ public class PostFormDataRequest extends Request {
         this.formDatas.add(fd);
     }
 
-    private void generateBoundary() {
+    protected void generateBoundary() {
         final long range = 999999999999999l - 100000000000000l;
         final long rand = (long) (Math.random() * range) + 100000000000000l;
         this.boundary = "---------------------" + rand;
@@ -119,7 +119,7 @@ public class PostFormDataRequest extends Request {
         this.encodeType = encodeType;
     }
 
-    private void write(final FormData formData, final OutputStream output) throws IOException {
+    protected void write(final FormData formData, final OutputStream output) throws IOException {
         final OutputStreamWriter writer = new OutputStreamWriter(output);
         writer.write(this.boundary);
         writer.write("\r\n");
