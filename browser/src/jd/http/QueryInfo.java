@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -172,6 +173,15 @@ public class QueryInfo {
 
     public void addAll(List<KeyValueStringEntry> post) {
         this.list.addAll(post);
+    }
+
+    public LinkedHashMap<String, String> toMap() {
+        LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();
+
+        for (KeyValueStringEntry e : this.list) {
+            ret.put(e.getKey(), e.getValue());
+        }
+        return ret;
     }
 
 }
