@@ -99,11 +99,10 @@ public class QueryInfo {
      * @return
      */
     public int remove(String key) {
-        KeyValueStringEntry value;
         int first = -1;
         int i = 0;
         for (final Iterator<KeyValueStringEntry> it = this.list.iterator(); it.hasNext();) {
-            value = it.next();
+            final KeyValueStringEntry value = it.next();
             if (StringUtils.equals(value.getKey(), key)) {
                 it.remove();
                 if (first < 0) {
@@ -143,9 +142,8 @@ public class QueryInfo {
         final ArrayList<KeyValueStringEntry> lst = new ArrayList<KeyValueStringEntry>(this.list);
         while (true) {
             final QueryInfo map = new QueryInfo();
-            KeyValueStringEntry es;
             for (final Iterator<KeyValueStringEntry> it = lst.iterator(); it.hasNext();) {
-                es = it.next();
+                final KeyValueStringEntry es = it.next();
                 if (!map.containsKey(es.getKey())) {
                     map.add(es.getKey(), es.getValue());
                     it.remove();
@@ -176,8 +174,7 @@ public class QueryInfo {
     }
 
     public LinkedHashMap<String, String> toMap() {
-        LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();
-
+        final LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();
         for (KeyValueStringEntry e : this.list) {
             ret.put(e.getKey(), e.getValue());
         }
