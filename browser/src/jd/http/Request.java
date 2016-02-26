@@ -28,6 +28,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import jd.nutils.encoding.Encoding;
+
 import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
@@ -41,8 +43,6 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
-
-import jd.nutils.encoding.Encoding;
 
 public abstract class Request {
     // public static int MAX_REDIRECTS = 30;
@@ -75,7 +75,6 @@ public abstract class Request {
      * @return
      * @throws MalformedURLException
      */
-
     public static QueryInfo parseQuery(String query) throws MalformedURLException {
         if (query == null) {
             return null;
@@ -91,8 +90,7 @@ public abstract class Request {
             return ret;
         }
         query = query.trim();
-
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         String key = null;
         for (int i = 0; i < query.length(); i++) {
             char c = query.charAt(i);
@@ -100,21 +98,23 @@ public abstract class Request {
             // The characters slash ("/") and question mark ("?") may represent data
             // within the query component.
             if (c == '?' && i == 0) {
-                sb.delete(0, sb.length());
+                sb.setLength(0);
             } else if (c == '&') {
-                ret.add(key, sb.toString());
-                sb.delete(0, sb.length());
+                if (key != null || sb.length() > 0) {
+                    ret.add(key, sb.toString());
+                }
+                sb.setLength(0);
                 key = null;
             } else if (c == '=') {
                 key = sb.toString();
-                sb.delete(0, sb.length());
+                sb.setLength(0);
             } else {
                 sb.append(c);
             }
         }
-        ret.add(key, sb.toString());
-        sb.delete(0, sb.length());
-
+        if (key != null || sb.length() > 0) {
+            ret.add(key, sb.toString());
+        }
         return ret;
 
     }
