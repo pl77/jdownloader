@@ -28,8 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jd.nutils.encoding.Encoding;
-
 import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
@@ -43,6 +41,8 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
+
+import jd.nutils.encoding.Encoding;
 
 public abstract class Request {
     // public static int MAX_REDIRECTS = 30;
@@ -90,15 +90,33 @@ public abstract class Request {
         if (query == null) {
             return ret;
         }
-        final String[][] split = new Regex(query.trim(), "&?(.*?)=(.*?)($|&(?=.*?=.+))").getMatches();
-        if (split != null) {
-            final int splitLength = split.length;
-            for (int i = 0; i < splitLength; i++) {
-                ret.add(split[i][0], split[i][1]);
+        query = query.trim();
 
+        StringBuilder sb = new StringBuilder();
+        String key = null;
+        for (int i = 0; i < query.length(); i++) {
+            char c = query.charAt(i);
+            // https://tools.ietf.org/html/rfc3986
+            // The characters slash ("/") and question mark ("?") may represent data
+            // within the query component.
+            if (c == '?' && i == 0) {
+                sb.delete(0, sb.length());
+            } else if (c == '&') {
+                ret.add(key, sb.toString());
+                sb.delete(0, sb.length());
+                key = null;
+            } else if (c == '=') {
+                key = sb.toString();
+                sb.delete(0, sb.length());
+            } else {
+                sb.append(c);
             }
         }
+        ret.add(key, sb.toString());
+        sb.delete(0, sb.length());
+
         return ret;
+
     }
 
     public static byte[] read(final URLConnectionAdapter con, int readLimit) throws IOException {
