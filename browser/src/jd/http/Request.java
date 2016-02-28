@@ -105,7 +105,7 @@ public abstract class Request {
                 }
                 sb.setLength(0);
                 key = null;
-            } else if (c == '='&&key==null) {
+            } else if (c == '=' && key == null) {
                 key = sb.toString();
                 sb.setLength(0);
             } else {
@@ -538,7 +538,7 @@ public abstract class Request {
     public static String getLocation(final String location, final Request request) {
         if (StringUtils.isEmpty(location)) {
             return null;
-        }        
+        }
         try {
             return new URL(location.replaceAll(" ", "%20")).toString();
         } catch (final Exception e) {
