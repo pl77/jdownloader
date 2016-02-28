@@ -129,7 +129,7 @@ public class Form {
             baseurl = null;
         } else {
             try {
-                baseurl = new URL(baseURL);
+                baseurl = new URL(baseURL.replaceAll(" ", "%20"));
             } catch (final MalformedURLException e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }

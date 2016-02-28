@@ -260,7 +260,7 @@ public abstract class Request {
     }
 
     public Request(final String url) throws IOException {
-        this(new URL(url));
+        this(new URL(url.replaceAll(" ", "%20")));
     }
 
     public Request(final URLConnectionAdapter con) throws IOException {
@@ -538,14 +538,13 @@ public abstract class Request {
     public static String getLocation(final String location, final Request request) {
         if (StringUtils.isEmpty(location)) {
             return null;
-        }
-        final String loc = location.replaceAll(" ", "%20");
+        }        
         try {
-            return new URL(loc).toString();
+            return new URL(location.replaceAll(" ", "%20")).toString();
         } catch (final Exception e) {
             if (request != null) {
                 try {
-                    return Browser.parseLocation(request.getURL(), loc);
+                    return Browser.parseLocation(request.getURL(), location);
                 } catch (final Throwable wtf) {
                     return null;
                 }

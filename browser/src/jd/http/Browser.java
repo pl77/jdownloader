@@ -1276,9 +1276,9 @@ public class Browser {
         }
         if (location == null) {
             throw new NullPointerException("location is null");
-        }
+        }        
         try {
-            return new URL(location);
+            return new URL(location.replaceAll(" ", "%20"));
         } catch (final MalformedURLException e) {
             try {
                 final Request lRequest = this.getRequest();
