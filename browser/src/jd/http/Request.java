@@ -105,7 +105,7 @@ public abstract class Request {
                 }
                 sb.setLength(0);
                 key = null;
-            } else if (c == '=') {
+            } else if (c == '='&&key==null) {
                 key = sb.toString();
                 sb.setLength(0);
             } else {
