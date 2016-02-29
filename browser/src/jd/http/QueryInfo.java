@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
 
+import jd.nutils.encoding.Encoding;
+
 public class QueryInfo {
 
     private final List<KeyValueStringEntry> list = new ArrayList<KeyValueStringEntry>();
@@ -179,6 +181,11 @@ public class QueryInfo {
             ret.put(e.getKey(), e.getValue());
         }
         return ret;
+    }
+
+    public QueryInfo append(String key, String value, boolean urlencode) {
+        this.addAndReplace(key, urlencode ? Encoding.urlEncode(value) : value);
+        return this;
     }
 
 }
