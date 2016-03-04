@@ -362,15 +362,7 @@ public class Encoding {
         final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < url.length(); i++) {
             final char ch = url.charAt(i);
-            if (ch == '|') {
-                sb.append("%7C");
-            } else if (ch == '\\') {
-                sb.append("%5C");
-            } else if (ch == '[') {
-                sb.append("%5B");
-            } else if (ch == ']') {
-                sb.append("%5D");
-            } else if (ch == ' ') {
+            if (ch == ' ') {
                 sb.append("%20");
             } else if (ch >= 33 && ch <= 38) {
                 sb.append(ch);
