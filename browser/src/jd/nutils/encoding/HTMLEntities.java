@@ -11,13 +11,13 @@ import org.appwork.utils.StringUtils;
  * - info@tecnick.com<br>
  * Project homepage: <a href="http://htmlentities.sourceforge.net" target="_blank">http://htmlentities.sourceforge.net</a><br>
  * License: http://www.gnu.org/copyleft/lesser.html LGPL
- *
+ * 
  * @author Nicola Asuni [www.tecnick.com].
  * @version 1.0.004
- *
- *
+ * 
+ * 
  *          Changes by JD-Team:
- *
+ * 
  *          added htmlTotal Method
  */
 public class HTMLEntities {
@@ -52,7 +52,7 @@ public class HTMLEntities {
 
     /**
      * Get the html entities translation table.
-     *
+     * 
      * @return translation table
      */
     public static Object[][] getEntitiesTable() {
@@ -61,7 +61,7 @@ public class HTMLEntities {
 
     /**
      * Replace &amp; characters with &amp;amp; HTML entities.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced characters
@@ -72,7 +72,7 @@ public class HTMLEntities {
 
     /**
      * Replace &lt; &gt; characters with &amp;lt; &amp;gt; entities.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced characters
@@ -85,7 +85,7 @@ public class HTMLEntities {
 
     /**
      * Replace double quotes characters with HTML entities.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced double quotes
@@ -99,7 +99,7 @@ public class HTMLEntities {
 
     /**
      * Convert special and extended characters into HTML entitities.
-     *
+     * 
      * @param str
      *            input string
      * @return formatted string
@@ -115,15 +115,12 @@ public class HTMLEntities {
             HTMLEntities.initializeEntitiesTables();
         }
 
-        final StringBuilder buf = new StringBuilder(); // the otput string
-        // buffer
+        final StringBuilder buf = new StringBuilder(); // the output string buffer
 
         for (int i = 0; i < str.length(); ++i) {
             final char ch = str.charAt(i);
             final String entity = HTMLEntities.htmlentities_map.get(new Integer(ch)); // get
-            // equivalent
-            // html
-            // entity
+            // equivalent html entity
             if (entity == null) { // if entity has not been found
                 if (ch > 128) { // check if is an extended character
                     buf.append("&#" + (int) ch + ";"); // convert extended
@@ -142,7 +139,7 @@ public class HTMLEntities {
 
     /**
      * Replace single and double quotes characters with HTML entities.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced quotes
@@ -155,13 +152,13 @@ public class HTMLEntities {
 
     /**
      * Replace single quotes characters with HTML entities.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced single quotes
      */
     public static String htmlSingleQuotes(String str) {
-        str = str.replaceAll("[\']", "&rsquo;");
+        str = str.replaceAll("'", "&rsquo;");
         str = str.replaceAll("&#039;", "&rsquo;");
         str = str.replaceAll("&#145;", "&rsquo;");
         str = str.replaceAll("&#146;", "&rsquo;");
@@ -199,7 +196,7 @@ public class HTMLEntities {
 
     /**
      * Replace &amp;amp; HTML entities with &amp; characters.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced entities
@@ -210,7 +207,7 @@ public class HTMLEntities {
 
     /**
      * Replace &amp;lt; &amp;gt; entities with &lt; &gt; characters.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced entities
@@ -223,7 +220,7 @@ public class HTMLEntities {
 
     /**
      * Replace single quotes HTML entities with equivalent character.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced single quotes
@@ -234,7 +231,7 @@ public class HTMLEntities {
 
     /**
      * Convert HTML entities to special and extended unicode characters equivalents.
-     *
+     * 
      * @param str
      *            input string
      * @return formatted string
@@ -244,11 +241,14 @@ public class HTMLEntities {
         if (str == null) {
             return null;
         }
+
         // initialize html translation maps table the first time is called
         if (HTMLEntities.htmlentities_map.isEmpty()) {
             HTMLEntities.initializeEntitiesTables();
         }
+
         final StringBuilder buf = new StringBuilder();
+
         for (int i = 0; i < str.length(); ++i) {
             final char ch = str.charAt(i);
             if (ch == '&') {
@@ -317,7 +317,7 @@ public class HTMLEntities {
 
     /**
      * Replace single and double quotes HTML entities with equivalent characters.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced quotes
@@ -330,13 +330,16 @@ public class HTMLEntities {
 
     /**
      * Replace single quotes HTML entities with equivalent character.
-     *
+     * 
      * @param str
      *            the input string
      * @return string with replaced single quotes
      */
     public static String unhtmlSingleQuotes(final String str) {
-        return str.replaceAll("&rsquo;", "\'");
+        //        lsquo   ‘   U+2018 (8216)   HTML 4.0    HTMLspecial ISOnum  left single quotation mark
+        //        rsquo   ’   U+2019 (8217)   HTML 4.0    HTMLspecial ISOnum  right single quotation mark
+        //        apos    '   U+0027 (39) XML 1.0 apostrophe (apostrophe-quote)
+        return str.replaceAll("&rsquo;", "'").replaceAll("&apos;", "'");
     }
 
     /**

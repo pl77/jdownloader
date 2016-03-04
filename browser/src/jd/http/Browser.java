@@ -238,28 +238,28 @@ public class Browser {
             if (includeUserInfo && url.getUserInfo() != null) {
                 sb.append(url.getUserInfo());
                 sb.append("@");
-            }
+        }
             sb.append(url.getHost());
             if (url.getPort() != -1) {
                 sb.append(":");
                 sb.append(url.getPort());
-            }
+    }
             if (url.getPath() != null) {
                 sb.append(url.getPath());
-            } else {
+        } else {
                 sb.append("/");
             }
             if (includeQuery && url.getQuery() != null) {
                 sb.append("?");
                 sb.append(url.getQuery());
-            }
+                    }
             if (includeRef && url.getRef() != null) {
                 sb.append("#");
                 sb.append(url.getRef());
-            }
+                }
             return new URL(sb.toString());
+            }
         }
-    }
 
     public static String parseLocation(final URL url, final String loc) {
         final String location = loc.replaceAll(" ", "%20");
@@ -533,35 +533,35 @@ public class Browser {
         }
     }
 
-    private String                   acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
+    private String                           acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
-    private int                      connectTimeout   = -1;
+    private int                              connectTimeout   = -1;
 
-    private HashMap<String, Cookies> cookies          = new HashMap<String, Cookies>();
+    private HashMap<String, Cookies>         cookies          = new HashMap<String, Cookies>();
 
-    private boolean                  cookiesExclusive = true;
+    private boolean                          cookiesExclusive = true;
 
     private Object                   currentURL       = null;
 
-    private String                   customCharset    = null;
-    private boolean                  debug            = false;
-    private boolean                  doRedirects      = false;
-    private RequestHeader            headers;
-    private int                      limit            = 2 * 1024 * 1024;
-    private LogInterface             logger           = null;
-    private ProxySelectorInterface   proxy;
-    private int                      readTimeout      = -1;
-    private Request                  request;
-    private HashMap<String, Integer> requestIntervalLimitMap;
+    private String                           customCharset    = null;
+    private boolean                          debug            = false;
+    private boolean                          doRedirects      = false;
+    private RequestHeader                    headers;
+    private int                              limit            = 2 * 1024 * 1024;
+    private LogInterface                     logger           = null;
+    private ProxySelectorInterface           proxy;
+    private int                              readTimeout      = -1;
+    private Request                          request;
+    private HashMap<String, Integer>         requestIntervalLimitMap;
 
-    private HashMap<String, Long>    requestTimeMap;
+    private HashMap<String, Long>            requestTimeMap;
 
-    private boolean                  verbose          = false;
+    private boolean                          verbose          = false;
 
     public Browser() {
         final Thread currentThread = Thread.currentThread();
@@ -672,7 +672,12 @@ public class Browser {
                 if (sourceBase != null) {
                     /* take baseURL in case we've found one in current request */
                     new URL(sourceBase.trim());
-                    base = sourceBase;
+                    // simple validation, we should only allow base to current domain! -raztoki20160304
+                    final String domainHostBase = base != null ? Browser.getHost(Request.getLocation(base, lRequest)) : null;
+                    final String domainSourceBase = Browser.getHost(Request.getLocation(sourceBase, lRequest));
+                    if (domainHostBase != null && domainSourceBase != null && domainHostBase.equals(domainSourceBase)) {
+                        base = sourceBase;
+                    }
                 }
             }
         } catch (final Throwable e) {
@@ -740,9 +745,8 @@ public class Browser {
 
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
-     *
+     * 
      * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
-     *
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -1107,11 +1111,11 @@ public class Browser {
         this.getPage(downloadURL);
         return this.getForms();
     }
-
+    
     /**
-     *
+     * 
      * same as getFormbyAction
-     *
+     * 
      * @author raztoki
      * @since JD2
      * @param action
@@ -1126,10 +1130,10 @@ public class Browser {
         }
         return results.toArray(new Form[results.size()]);
     }
-
+    
     /**
      * same as getFormbyActionRegex
-     *
+     * 
      * @author raztoki
      * @since JD2
      * @param action
@@ -1280,21 +1284,21 @@ public class Browser {
         }
         if (location == null) {
             throw new NullPointerException("location is null");
-        }
+        }        
         try {
             return new URL(location.replaceAll(" ", "%20"));
         } catch (final MalformedURLException e) {
             try {
-                final Request lRequest = this.getRequest();
-                if (lRequest == null || lRequest.getHttpConnection() == null) {
+            final Request lRequest = this.getRequest();
+            if (lRequest == null || lRequest.getHttpConnection() == null) {
                     throw new IOException("no request available");
-                }
+            }
                 return new URL(Browser.parseLocation(lRequest.getURL(), location));
             } catch (final MalformedURLException e2) {
                 throw new IOException(e2);
-            }
-        }
-    }
+                        }
+                        }
+                    }
 
     public boolean isCookiesExclusive() {
         return this.cookiesExclusive;
@@ -1406,7 +1410,7 @@ public class Browser {
 
     /**
      * Opens a Post Connection based on a variable HashMap
-     *
+     * 
      * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
      */
     @Deprecated
@@ -1416,7 +1420,7 @@ public class Browser {
 
     /**
      * OPens a new Post connection based on a query string
-     *
+     * 
      * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
      */
     @Deprecated
@@ -1562,7 +1566,7 @@ public class Browser {
 
     /**
      * loads a new page (post)
-     *
+     * 
      * @deprecated Use {@link #postPage(String, QueryInfo)} instead
      */
     @Deprecated
@@ -1572,7 +1576,7 @@ public class Browser {
 
     /**
      * loads a new page (POST)
-     *
+     * 
      * @deprecated Use {@link #postPage(String, QueryInfo)} or {@link #postPageRaw(String, String) instead
      */
     @Deprecated
@@ -1770,7 +1774,7 @@ public class Browser {
             }
             if (lCurrentURL != null && lCurrentURL instanceof Request) {
                 return ((Request) lCurrentURL).getUrl();
-            }
+        }
             return this.getURL();
         } else {
             return refererURLHeader;
@@ -1832,7 +1836,7 @@ public class Browser {
     @Deprecated
     /**
      * for usage in plugins for stable compatibility only
-     *
+     * 
      * @param threadProxy
      */
     public void setProxy(final ProxySelectorInterface threadProxy) {
