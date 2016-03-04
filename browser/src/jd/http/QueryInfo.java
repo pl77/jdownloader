@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jd.nutils.encoding.Encoding;
+
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
-
-import jd.nutils.encoding.Encoding;
 
 public class QueryInfo {
 
