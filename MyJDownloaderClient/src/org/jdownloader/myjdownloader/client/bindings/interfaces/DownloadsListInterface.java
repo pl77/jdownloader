@@ -39,6 +39,7 @@ import java.util.List;
 import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 import org.jdownloader.myjdownloader.client.bindings.PriorityStorable;
+import org.jdownloader.myjdownloader.client.bindings.SkipReasonStorable;
 import org.jdownloader.myjdownloader.client.bindings.UrlDisplayTypeStorable;
 import org.jdownloader.myjdownloader.client.bindings.downloadlist.DownloadLinkQuery;
 import org.jdownloader.myjdownloader.client.bindings.downloadlist.DownloadLinkStorable;
@@ -130,4 +131,6 @@ public interface DownloadsListInterface extends Linkable {
     boolean setDownloadPassword(long[] linkIds, long[] packageIds, String pass);
 
     boolean forceDownload(long[] linkIds, long[] packageIds);
+
+    boolean unskip(long[] packageIds, long[] linkIds, SkipReasonStorable.Reason filterByReason);
 }
