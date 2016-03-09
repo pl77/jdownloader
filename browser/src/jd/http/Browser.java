@@ -264,7 +264,9 @@ public class Browser {
     public static String parseLocation(final URL url, final String loc) {
         final String location = loc.replaceAll(" ", "%20");
         try {
-            if (location.matches("^:\\d+/.+")) {
+            if (location.matches("^https?://.+")) {
+                return location;
+            } else if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc
                 final String newLocation = url.getProtocol() + "://" + url.getHost() + location;
                 return newLocation;
@@ -295,6 +297,19 @@ public class Browser {
                 } else {
                     return dummyURL.toString() + location;
                 }
+            } else if (location.startsWith("&")) {
+                final URL dummyURL = Browser.getURL(url, true, false, false);
+                final String query = location.substring(1);
+                if (StringUtils.isEmpty(query)) {
+                    return dummyURL.toString();
+                } else {
+                    if (dummyURL.getQuery() == null) {
+                        return dummyURL.toString() + "?" + query;
+                    } else {
+                        return dummyURL.toString() + "&" + query;
+                    }
+                }
+                // TODO: add support for location.startsWith("#")
             } else {
                 return Browser.getBaseURL(url) + location;
             }
@@ -654,56 +669,53 @@ public class Browser {
      * @throws Exception
      */
     public Request createFormRequest(final Form form) throws Exception {
-        String base = null;
-        String action = null;
+        URL base = null;
         final Request lRequest = this.getRequest();
         if (lRequest != null) {
             /* take current url as base url */
-            base = lRequest.getUrl();
+            base = lRequest.getURL();
         }
         try {
             // we have no method to validate html tags.. could be faked, or multiples
             final String baseTag = this.getRegex("<\\s*base\\s+[^>]*>").getMatch(-1);
             if (baseTag != null) {
-                String sourceBase = new Regex(baseTag, "href=(\"|')(.+?)\\1").getMatch(1);
+                String sourceBase = new Regex(baseTag, "href\\s*=\\s*(\"|')(.+?)\\1").getMatch(1);
                 if (sourceBase == null) {
                     sourceBase = new Regex(baseTag, "\\s+href\\s*=([^\\s]+)").getMatch(0);
                 }
                 if (sourceBase != null) {
                     /* take baseURL in case we've found one in current request */
-                    new URL(sourceBase.trim());
+                    final URL sourceBaseURL = new URL(sourceBase.trim());
                     // simple validation, we should only allow base to current domain! -raztoki20160304
-                    final String domainHostBase = base != null ? Browser.getHost(Request.getLocation(base, lRequest)) : null;
+                    final String domainHostBase = base != null ? Browser.getHost(Request.getLocation(base.toString(), lRequest)) : null;
                     final String domainSourceBase = Browser.getHost(Request.getLocation(sourceBase, lRequest));
                     if (domainHostBase != null && domainSourceBase != null && domainHostBase.equals(domainSourceBase)) {
-                        base = sourceBase;
+                        base = sourceBaseURL;
                     }
                 }
             }
         } catch (final Throwable e) {
         }
-        action = form.getAction(base);
-        if (action == null) {
+        final String formAction = form.getAction(base);
+        if (formAction == null) {
             throw new NullPointerException("no valid action url");
         }
         // action = action;
         switch (form.getMethod()) {
         case GET:
+            final String getAction;
             final String varString = form.getPropertyString();
             if (varString != null && !varString.matches("[\\s]*")) {
-                if (action.matches(".*\\?.+")) {
-                    action += "&";
-                } else if (action.matches("[^\\?]*")) {
-                    action += "?";
-                }
-                action += varString;
+                getAction = Browser.parseLocation(new URL(formAction), "&" + varString);
+            } else {
+                getAction = formAction;
             }
-            return this.createGetRequest(action);
+            return this.createGetRequest(getAction);
         case POST:
             if (form.getEncoding() == null || !form.getEncoding().toLowerCase().endsWith("form-data")) {
-                return this.createPostRequest(action, form.getRequestVariables(), form.getEncoding());
+                return this.createPostRequest(formAction, form.getRequestVariables(), form.getEncoding());
             } else {
-                final PostFormDataRequest request = this.createPostFormDataRequest(action);
+                final PostFormDataRequest request = this.createPostFormDataRequest(formAction);
                 if (form.getEncoding() != null) {
                     request.setEncodeType(form.getEncoding());
                 }

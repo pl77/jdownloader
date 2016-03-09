@@ -16,7 +16,6 @@
 
 package jd.parser.html;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,12 +27,13 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.appwork.utils.KeyValueStringEntry;
-import org.appwork.utils.StringUtils;
-
+import jd.http.Browser;
 import jd.nutils.encoding.HTMLEntities;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
+
+import org.appwork.utils.KeyValueStringEntry;
+import org.appwork.utils.StringUtils;
 
 public class Form {
 
@@ -123,70 +123,25 @@ public class Form {
         return this.action;
     }
 
-    public String getAction(final String baseURL) {
-        URL baseurl = null;
-        if (baseURL == null) {
-            baseurl = null;
+    public String getAction(final URL base) {
+        final String formAction = this.getAction();
+        final boolean baseIsHTTPs = base != null && "https".equalsIgnoreCase(base.getProtocol());
+        final boolean actionIsHTTPs = formAction != null && formAction.startsWith("https://");
+        final boolean actionIsHTTP = formAction != null && formAction.startsWith("http://");
+        final String ret;
+        if (base != null && StringUtils.isNotEmpty(this.action)) {
+            ret = Browser.parseLocation(base, this.action);
+        } else if (StringUtils.isNotEmpty(this.action) && this.action.matches("^https?://.+")) {
+            ret = this.action.replaceAll(" ", "%20");
+        } else if (base != null && StringUtils.isEmpty(this.action)) {
+            ret = base.toString();
         } else {
-            try {
-                baseurl = new URL(baseURL.replaceAll(" ", "%20"));
-            } catch (final MalformedURLException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-            }
+            ret = null;
         }
-        String ret = this.action;
-        final boolean baseIsHTTPs = baseURL != null && baseURL.startsWith("https");
-        final boolean actionIsHTTPs = ret != null && ret.startsWith("https://");
-        final boolean actionIsHTTP = ret != null && ret.startsWith("http://");
-        if (this.action == null || this.action.matches("[\\s]*")) {
-            if (baseurl == null) {
-                return null;
-            }
-            ret = baseurl.toString();
-        } else if (!ret.matches("https?://.*")) {
-            if (baseurl == null) {
-                return null;
-            }
-            if (ret.charAt(0) == '/') {
-                if (baseurl.getPort() > 0 && baseurl.getPort() != 80) {
-                    ret = "http://" + baseurl.getHost() + ":" + baseurl.getPort() + ret;
-                } else {
-                    ret = "http://" + baseurl.getHost() + ret;
-                }
-            } else if (ret.charAt(0) == '&') {
-                final String base = baseurl.toString();
-                if (base.matches("http://.*/.*")) {
-                    ret = base + ret;
-                } else {
-                    ret = base + "/" + ret;
-                }
-            } else if (ret.charAt(0) == '?') {
-                final String base = baseurl.toString();
-                if (base.matches("http://.*/.*")) {
-                    ret = base.replaceFirst("\\?.*", "") + ret;
-                } else {
-                    ret = base + "/" + ret;
-                }
-            } else if (ret.charAt(0) == '#') {
-                final String base = baseurl.toString();
-                if (base.matches("http://.*/.*")) {
-                    ret = base + ret;
-                } else {
-                    ret = base + "/" + ret;
-                }
-            } else {
-                final String base = baseurl.toString();
-                if (base.matches("https?://.*/.*")) {
-                    ret = base.substring(0, base.lastIndexOf("/")) + "/" + ret;
-                } else {
-                    ret = base + "/" + ret;
-                }
-            }
-        }
-        if (baseIsHTTPs) {
+        if (ret != null && baseIsHTTPs) {
             if (actionIsHTTPs || actionIsHTTP == false) {
                 /* only keep https when action does use https or not specified, but do NOT change formAction(http) to https */
-                ret = ret.replaceFirst("http://", "https://");
+                return ret.replaceFirst("http://", "https://");
             }
         }
         return ret;

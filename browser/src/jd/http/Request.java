@@ -28,6 +28,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import jd.nutils.encoding.Encoding;
+
 import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
@@ -41,8 +43,6 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
-
-import jd.nutils.encoding.Encoding;
 
 public abstract class Request {
     // public static int MAX_REDIRECTS = 30;
@@ -538,19 +538,20 @@ public abstract class Request {
     public static String getLocation(final String location, final Request request) {
         if (StringUtils.isEmpty(location)) {
             return null;
-        }
-        try {
-            return new URL(location.replaceAll(" ", "%20")).toString();
-        } catch (final Exception e) {
-            if (request != null) {
-                try {
-                    return Browser.parseLocation(request.getURL(), location);
-                } catch (final Throwable wtf) {
-                    return null;
+        } else {
+            try {
+                return new URL(location.replaceAll(" ", "%20")).toString();
+            } catch (final Exception e) {
+                if (request != null) {
+                    try {
+                        return Browser.parseLocation(request.getURL(), location);
+                    } catch (final Throwable wtf) {
+                        return null;
+                    }
                 }
             }
+            return null;
         }
-        return null;
     }
 
     public HTTPProxy getProxy() {
