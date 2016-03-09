@@ -552,7 +552,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -700,7 +700,6 @@ public class Browser {
         if (formAction == null) {
             throw new NullPointerException("no valid action url");
         }
-        // action = action;
         switch (form.getMethod()) {
         case GET:
             final String getAction;
