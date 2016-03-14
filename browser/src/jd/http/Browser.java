@@ -376,7 +376,9 @@ public class Browser {
                     sb.append("?");
                     if (StringUtils.isNotEmpty(url.getQuery())) {
                         sb.append(url.getQuery());
-                        sb.append("&");
+                        if (!url.getQuery().endsWith("&")) {
+                            sb.append("&");
+                        }
                     }
                     sb.append(query);
                     return sb.toString();
@@ -624,7 +626,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
