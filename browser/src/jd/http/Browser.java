@@ -167,6 +167,9 @@ public class Browser {
             return null;
         }
         String ret = uri.getHost();
+        if (Browser.HOST_IP_PATTERN2.matcher(ret).matches()) {
+            return ret;
+        }
         if (ret != null && includeSubDomains == false) {
             /* cut off all subdomains */
             final PublicSuffixList psl = PublicSuffixList.getInstance();
@@ -261,25 +264,79 @@ public class Browser {
         }
     }
 
+    public static URL fixPathTraversal(final URL url) throws MalformedURLException {
+        if (url != null && (StringUtils.contains(url.getPath(), "../") || StringUtils.contains(url.getPath(), "./"))) {
+            final String pathParts[] = url.getPath().split("/");
+            for (int i = 0; i < pathParts.length; i++) {
+                if (".".equals(pathParts[i])) {
+                    pathParts[i] = null;
+                } else if ("..".equals(pathParts[i])) {
+                    if (i > 0) {
+                        int j = i - 1;
+                        while (true && j > 0) {
+                            if (pathParts[j] != null) {
+                                pathParts[j] = null;
+                                break;
+                            }
+                            j--;
+                        }
+                    }
+                    pathParts[i] = null;
+                } else if (i > 0 && pathParts[i].length() == 0) {
+                    pathParts[i] = "/";
+                }
+            }
+            final StringBuilder sb = new StringBuilder();
+            sb.append(url.getProtocol());
+            sb.append("://");
+            if (url.getUserInfo() != null) {
+                sb.append(url.getUserInfo());
+                sb.append("@");
+            }
+            sb.append(url.getHost());
+            if (url.getPort() != -1) {
+                sb.append(":");
+                sb.append(url.getPort());
+            }
+            sb.append("/");
+            for (int i = 0; i < pathParts.length; i++) {
+                final String pathPart = pathParts[i];
+                if (pathPart != null) {
+                    if (pathPart.length() > 0 && !"/".equals(pathPart)) {
+                        sb.append(pathPart);
+                        if (i != pathParts.length - 1 && '/' != sb.charAt(sb.length() - 1)) {
+                            sb.append("/");
+                        }
+                    }
+                }
+            }
+            if (url.getQuery() != null) {
+                sb.append("?");
+                sb.append(url.getQuery());
+            }
+            if (url.getRef() != null) {
+                sb.append("#");
+                sb.append(url.getRef());
+            }
+            return new URL(sb.toString());
+        }
+        return url;
+    }
+
     public static String parseLocation(final URL url, final String loc) {
         final String location = loc.replaceAll(" ", "%20");
         try {
             if (location.matches("^https?://.+")) {
-                return location;
+                final URL dummyURL = new URL(location);
+                return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc
-                final String newLocation = url.getProtocol() + "://" + url.getHost() + location;
-                return newLocation;
+                final URL dummyURL = new URL(url.getProtocol() + "://" + url.getHost() + location);
+                return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("//")) {
-                final URL dummyURI = new URL("http:" + location);
-                if (dummyURI.getHost() != null) {
-                    // first check if http://loc has a valid host
-                    // scheme + loc
-                    final String newLocation = url.getProtocol() + ":" + location;
-                    return newLocation;
-                } else {
-                    throw new WTFException("FIXME:location=" + location);
-                }
+                // scheme + loc
+                final URL dummyURL = new URL(url.getProtocol() + ":" + location);
+                return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("/")) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(url.getProtocol()).append("://");
@@ -288,68 +345,45 @@ public class Browser {
                     sb.append(":").append(url.getPort());
                 }
                 sb.append(location);
-                return sb.toString();
+                final URL dummyURL = new URL(sb.toString());
+                return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("?")) {
                 final URL dummyURL = Browser.getURL(url, false, false, false);
                 final String query = location.substring(1);
                 if (StringUtils.isEmpty(query)) {
                     return dummyURL.toString();
                 } else {
-                    return dummyURL.toString() + ("".equals(dummyURL.getPath()) ? "/" : "") +  location;
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(dummyURL.toString());
+                    if (StringUtils.isEmpty(dummyURL.getPath())) {
+                        sb.append("/");
+                    }
+                    sb.append(location);
+                    return sb.toString();
                 }
             } else if (location.startsWith("&")) {
-                final URL dummyURL = Browser.getURL(url, true, false, false);
                 final String query = location.substring(1);
                 if (StringUtils.isEmpty(query)) {
+                    final URL dummyURL = Browser.getURL(url, true, false, false);
                     return dummyURL.toString();
                 } else {
-                    if (dummyURL.getQuery() == null) {
-                        return dummyURL.toString() + "?" + query;
-                    } else {
-                        return dummyURL.toString() + "&" + query;
+                    final URL dummyURL = Browser.getURL(url, false, false, false);
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(dummyURL.toString());
+                    if (StringUtils.isEmpty(dummyURL.getPath())) {
+                        sb.append("/");
                     }
-                }
-            } 
-            else if (location.startsWith("../")) { 
-                // change of path, relative to base or current url.
-                final String urlPath = url.getPath();
-                
-                String[] splitLocation = new Regex(location, "([^/]+)").getColumn(0);
-                String[] splitUrlpath =  new Regex(urlPath, "/([^/]+)").getColumn(0);
-                final StringBuilder sb = new StringBuilder();
-                int i = 0;
-                for (final String s : splitLocation) {
-                    final String stringLocation = splitLocation[i];
-                    if ("..".equals(stringLocation)) {
-                        splitUrlpath[i] = "";
-                        splitLocation[i] = "";
-                        i++;
-                        continue;
-                    } else {
-                        break;
-                    } 
-                }
-                
-                for (final String s: splitUrlpath) {
-                    if ("".equals(s)) {
-                        continue;
+                    sb.append("?");
+                    if (StringUtils.isNotEmpty(url.getQuery())) {
+                        sb.append(url.getQuery());
+                        sb.append("&");
                     }
-                    sb.append("/" + s);
+                    sb.append(query);
+                    return sb.toString();
                 }
-                for (final String s: splitLocation) {
-                    if ("".equals(s)) {
-                        continue;
-                    }
-                    sb.append("/" + s);
-                }
-                return  url.getProtocol() + "://" + url.getHost() + sb.toString();
-            }
-                
-            //else if (location.startsWith("#")) { 
-                // TODO: add support for location.startsWith("#")
-//            }
-            else {
-                return Browser.getBaseURL(url) + location;
+            } else {
+                final URL dummyURL = new URL(Browser.getBaseURL(url) + location);
+                return Browser.fixPathTraversal(dummyURL).toString();
             }
         } catch (MalformedURLException e) {
             throw new WTFException("FIXME:location=" + location, e);
@@ -995,8 +1029,9 @@ public class Browser {
         final Request lRequest = this.getRequest();
         if (lRequest != null) {
             return Browser.getBaseURL(lRequest.getURL());
+        } else {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -1332,20 +1367,16 @@ public class Browser {
             location = this.getRedirectLocation();
         }
         if (location == null) {
-            throw new NullPointerException("location is null");
+            throw new IllegalArgumentException("location is null");
         }
         try {
-            return new URL(location.replaceAll(" ", "%20"));
+            return Browser.fixPathTraversal(new URL(location.replaceAll(" ", "%20")));
         } catch (final MalformedURLException e) {
-            try {
-                final Request lRequest = this.getRequest();
-                if (lRequest == null || lRequest.getHttpConnection() == null) {
-                    throw new IOException("no request available");
-                }
-                return new URL(Browser.parseLocation(lRequest.getURL(), location));
-            } catch (final MalformedURLException e2) {
-                throw new IOException(e2);
+            final Request lRequest = this.getRequest();
+            if (lRequest == null || lRequest.getHttpConnection() == null) {
+                throw new IOException("no request available");
             }
+            return new URL(Browser.parseLocation(lRequest.getURL(), location));
         }
     }
 

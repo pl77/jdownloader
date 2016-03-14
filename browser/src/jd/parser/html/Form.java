@@ -16,6 +16,7 @@
 
 package jd.parser.html;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,7 +145,11 @@ public class Form {
                 return ret.replaceFirst("http://", "https://");
             }
         }
-        return ret;
+        try {
+            return Browser.fixPathTraversal(new URL(ret)).toString();
+        } catch (MalformedURLException e) {
+            return ret;
+        }
     }
 
     /**

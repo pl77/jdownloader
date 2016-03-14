@@ -540,7 +540,7 @@ public abstract class Request {
             return null;
         } else {
             try {
-                return new URL(location.replaceAll(" ", "%20")).toString();
+                return Browser.fixPathTraversal(new URL(location.replaceAll(" ", "%20"))).toString();
             } catch (final Exception e) {
                 if (request != null) {
                     try {
