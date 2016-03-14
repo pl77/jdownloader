@@ -295,7 +295,7 @@ public class Browser {
                 if (StringUtils.isEmpty(query)) {
                     return dummyURL.toString();
                 } else {
-                    return dummyURL.toString() + location;
+                    return dummyURL.toString() + ("".equals(dummyURL.getPath()) ? "/" : "") +  location;
                 }
             } else if (location.startsWith("&")) {
                 final URL dummyURL = Browser.getURL(url, true, false, false);
@@ -309,8 +309,46 @@ public class Browser {
                         return dummyURL.toString() + "&" + query;
                     }
                 }
+            } 
+            else if (location.startsWith("../")) { 
+                // change of path, relative to base or current url.
+                final String urlPath = url.getPath();
+                
+                String[] splitLocation = new Regex(location, "([^/]+)").getColumn(0);
+                String[] splitUrlpath =  new Regex(urlPath, "/([^/]+)").getColumn(0);
+                final StringBuilder sb = new StringBuilder();
+                int i = 0;
+                for (final String s : splitLocation) {
+                    final String stringLocation = splitLocation[i];
+                    if ("..".equals(stringLocation)) {
+                        splitUrlpath[i] = "";
+                        splitLocation[i] = "";
+                        i++;
+                        continue;
+                    } else {
+                        break;
+                    } 
+                }
+                
+                for (final String s: splitUrlpath) {
+                    if ("".equals(s)) {
+                        continue;
+                    }
+                    sb.append("/" + s);
+                }
+                for (final String s: splitLocation) {
+                    if ("".equals(s)) {
+                        continue;
+                    }
+                    sb.append("/" + s);
+                }
+                return  url.getProtocol() + "://" + url.getHost() + sb.toString();
+            }
+                
+            //else if (location.startsWith("#")) { 
                 // TODO: add support for location.startsWith("#")
-            } else {
+//            }
+            else {
                 return Browser.getBaseURL(url) + location;
             }
         } catch (MalformedURLException e) {
