@@ -96,9 +96,15 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
                 filter.resolve(response);
             });
             apiRequest.fail(function (error) {
-                if (error.responseText) {
-                    filter.reject(JSON.parse(error.responseText));
-                } else {
+                try {
+                    if (error.responseText) {
+                        filter.reject(JSON.parse(error.responseText));
+                    } else {
+                        filter.reject({
+                            type: "UNKNOWN_ERROR"
+                        });
+                    }
+                } catch (e) {
                     filter.reject({
                         type: "UNKNOWN_ERROR"
                     });
