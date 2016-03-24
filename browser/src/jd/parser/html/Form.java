@@ -354,35 +354,36 @@ public class Form {
     }
 
     private void parseHeader(final String[][] headerEntries) {
-        for (final String[] entry : headerEntries) {
-            final String key;
-            final String value;
-            if (entry.length == 4) {
-                key = entry[0];
-                value = entry[2];
-            } else {
-                key = entry[0];
-                value = entry[1];
-            }
-            final String lowvalue = value.toLowerCase(Locale.ENGLISH);
-            if (key.equalsIgnoreCase("action")) {
-                this.setAction(HTMLEntities.unhtmlentities(value));
-            } else if (key.equalsIgnoreCase("enctype")) {
-                this.setEncoding(value);
-            } else if (key.equalsIgnoreCase("method")) {
-                if (lowvalue.matches(".*post.*")) {
-                    this.setMethod(MethodType.POST);
-                } else if (lowvalue.matches(".*get.*")) {
-                    this.setMethod(MethodType.GET);
+        if (headerEntries != null) {
+            for (final String[] entry : headerEntries) {
+                final String key;
+                final String value;
+                if (entry.length == 4) {
+                    key = entry[0];
+                    value = entry[2];
                 } else {
-                    /* fallback */
-                    this.setMethod(MethodType.POST);
+                    key = entry[0];
+                    value = entry[1];
                 }
-            } else {
-                this.setProperty(key, value);
+                final String lowvalue = value.toLowerCase(Locale.ENGLISH);
+                if (key.equalsIgnoreCase("action")) {
+                    this.setAction(HTMLEntities.unhtmlentities(value));
+                } else if (key.equalsIgnoreCase("enctype")) {
+                    this.setEncoding(value);
+                } else if (key.equalsIgnoreCase("method")) {
+                    if (lowvalue.matches(".*post.*")) {
+                        this.setMethod(MethodType.POST);
+                    } else if (lowvalue.matches(".*get.*")) {
+                        this.setMethod(MethodType.GET);
+                    } else {
+                        /* fallback */
+                        this.setMethod(MethodType.POST);
+                    }
+                } else {
+                    this.setProperty(key, value);
+                }
             }
         }
-
     }
 
     private final void parseInputFields() {
