@@ -384,6 +384,7 @@ public class Browser {
                     return sb.toString();
                 }
             } else if (location.startsWith("#") || StringUtils.isEmpty(location)) {
+                // ignore empty location or anchor
                 return Browser.fixPathTraversal(url).toString();
             } else {
                 final URL dummyURL = new URL(Browser.getBaseURL(url) + location);
@@ -628,7 +629,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
