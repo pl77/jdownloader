@@ -35,36 +35,56 @@ package org.jdownloader.myjdownloader.client.json;
 
 public class CaptchaChallenge {
     private String captchaResponse;
-    
+
     private String captchaChallenge;
-    
+
     private String image;
-    
+
+    private String context;
+
     public CaptchaChallenge(/* STorable */) {
     }
-    
+
     public String getCaptchaChallenge() {
         return this.captchaChallenge;
     }
-    
+
     public String getCaptchaResponse() {
         return this.captchaResponse;
     }
-    
+
     public String getImage() {
         return this.image;
     }
-    
+
     public void setCaptchaChallenge(final String captchaChallenge) {
         this.captchaChallenge = captchaChallenge;
     }
-    
+
     public void setCaptchaResponse(final String captchaResponse) {
         this.captchaResponse = captchaResponse;
     }
-    
+
     public void setImage(final String image) {
         this.image = image;
     }
-    
+
+    /**
+     * by setting the context, a plugin can predefine the context for this captcha. like "host.com File jpgs.rar / Try 1 from 5 "
+     * 
+     * @param context
+     */
+    public String getContext() {
+        return this.context;
+    }
+
+    /**
+     * by setting the context, a plugin can predefine the context for this captcha. like "host.com File jpgs.rar / Try 1 from 5 "
+     * 
+     * @param context
+     */
+    public void setContext(String context) {
+        this.context = context;
+    }
+
 }
