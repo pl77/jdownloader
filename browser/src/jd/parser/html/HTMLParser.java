@@ -31,6 +31,7 @@ import jd.nutils.encoding.Encoding;
 import jd.parser.Regex;
 
 import org.appwork.utils.Application;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Hex;
 
 public class HTMLParser {
@@ -509,8 +510,11 @@ public class HTMLParser {
 
         protected LinkedHashSet<String> exportResults() {
             final LinkedHashSet<String> ret = new LinkedHashSet<String>();
-            for (HtmlParserCharSequence result : this.getResults()) {
-                ret.add(result.toURL());
+            for (final HtmlParserCharSequence result : this.getResults()) {
+                final String url = result.toURL();
+                if (StringUtils.isNotEmpty(url)) {
+                    ret.add(url);
+                }
             }
             return ret;
         }
@@ -1052,7 +1056,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
