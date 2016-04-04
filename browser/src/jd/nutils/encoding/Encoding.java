@@ -349,46 +349,54 @@ public class Encoding {
         return str;
     }
 
-    /**
-     * URI Parser does not like '[' and ']', so we encode them as well
-     *
-     * @param url
-     * @return
-     */
     public static String urlEncode_light(final String url) {
         if (url == null) {
             return null;
         }
-        final StringBuffer sb = new StringBuffer();
+        boolean urlEncodeLight = false;
         for (int i = 0; i < url.length(); i++) {
             final char ch = url.charAt(i);
             if (ch == ' ') {
-                sb.append("%20");
+                urlEncodeLight = true;
+                break;
             } else if (ch >= 33 && ch <= 38) {
-                sb.append(ch);
-                continue;
             } else if (ch >= 40 && ch <= 59) {
-                sb.append(ch);
-                continue;
             } else if (ch == 61) {
-                sb.append(ch);
-                continue;
             } else if (ch >= 63 && ch <= 95) {
-                sb.append(ch);
-                continue;
             } else if (ch >= 97 && ch <= 126) {
-                sb.append(ch);
-                continue;
             } else {
-                try {
-                    sb.append(URLEncoder.encode(String.valueOf(ch), "UTF-8"));
-                } catch (final Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-                    return url;
-                }
+                urlEncodeLight = true;
+                break;
             }
         }
-        return sb.toString();
+        if (urlEncodeLight) {
+            final StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < url.length(); i++) {
+                final char ch = url.charAt(i);
+                if (ch == ' ') {
+                    sb.append("%20");
+                } else if (ch >= 33 && ch <= 38) {
+                    sb.append(ch);
+                } else if (ch >= 40 && ch <= 59) {
+                    sb.append(ch);
+                } else if (ch == 61) {
+                    sb.append(ch);
+                } else if (ch >= 63 && ch <= 95) {
+                    sb.append(ch);
+                } else if (ch >= 97 && ch <= 126) {
+                    sb.append(ch);
+                } else {
+                    try {
+                        sb.append(URLEncoder.encode(String.valueOf(ch), "UTF-8"));
+                    } catch (final Exception e) {
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        break;
+                    }
+                }
+            }
+            return sb.toString();
+        }
+        return url;
     }
 
     /**

@@ -434,6 +434,11 @@ public class HTMLParser {
             }
         }
 
+        public String toURL() {
+            final String ret = this.toString();
+            return Encoding.urlEncode_light(ret);
+        }
+
         public HtmlParserCharSequence trim() {
             int len = this.length();
             int st = 0;
@@ -505,7 +510,7 @@ public class HTMLParser {
         protected LinkedHashSet<String> exportResults() {
             final LinkedHashSet<String> ret = new LinkedHashSet<String>();
             for (HtmlParserCharSequence result : this.getResults()) {
-                ret.add(result.toString());
+                ret.add(result.toURL());
             }
             return ret;
         }
@@ -967,7 +972,7 @@ public class HTMLParser {
             final HtmlParserCharSequence url2 = new HtmlParserCharSequence(url);
             final HtmlParserCharSequence ret = HTMLParser.decodeURLParamEncodedURL(url2);
             if (url2 != ret) {
-                url = url2.toString();
+                url = url2.toURL();
             }
         }
         return url;

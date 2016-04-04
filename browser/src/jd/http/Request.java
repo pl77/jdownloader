@@ -332,16 +332,15 @@ public abstract class Request {
     }
 
     public String getCharsetFromMetaTags() {
-        String parseFrom = null;
-        if (this.htmlCode == null && this.responseBytes != null) {
+        final String parseFrom;
+        if (this.htmlCode == null && this.responseBytes != null && this.responseBytes.length > 0) {
             parseFrom = new String(this.responseBytes);
         } else if (this.htmlCode != null) {
             parseFrom = this.htmlCode;
-        }
-        if (parseFrom == null) {
+        } else {
             return null;
         }
-        String charSetMetaTag = new Regex(parseFrom, "http-equiv=\"Content-Type\"[^<>]+content=\"[^\"]+charset=(.*?)\"").getMatch(0);
+        String charSetMetaTag = new Regex(parseFrom, "http-equiv=\"?Content-Type\"?[^<>]+content=\"?[^\"]+charset=([^\"<>]+)").getMatch(0);
         if (charSetMetaTag == null) {
             charSetMetaTag = new Regex(parseFrom, "meta charset=\"(.*?)\"").getMatch(0);
         }
