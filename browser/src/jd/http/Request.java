@@ -340,7 +340,7 @@ public abstract class Request {
         } else {
             return null;
         }
-        String charSetMetaTag = new Regex(parseFrom, "http-equiv=\"?Content-Type\"?[^<>]+content=\"?[^\"]+charset=([^\"<>]+)").getMatch(0);
+        String charSetMetaTag = new Regex(parseFrom, "http-equiv=(\"|'|)Content-Type(\\1)[^<>]+content=(\"|')?[^\"]+charset=([^\"<>]+)").getMatch(3);
         if (charSetMetaTag == null) {
             charSetMetaTag = new Regex(parseFrom, "meta charset=\"(.*?)\"").getMatch(0);
         }
