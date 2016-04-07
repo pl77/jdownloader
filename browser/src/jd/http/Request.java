@@ -82,7 +82,7 @@ public abstract class Request {
         final QueryInfo ret = new QueryInfo();
         if (StringUtils.startsWithCaseInsensitive(query, "https://") || StringUtils.startsWithCaseInsensitive(query, "http://")) {
             try {
-                query = new URL(query).getQuery();
+                query = Browser.createURL(query).getQuery();
             } catch (final IOException e) {
             }
         }
@@ -260,7 +260,7 @@ public abstract class Request {
     }
 
     public Request(final String url) throws IOException {
-        this(new URL(url.replaceAll(" ", "%20")));
+        this(Browser.createURL(url));
     }
 
     public Request(final URLConnectionAdapter con) throws IOException {
@@ -539,7 +539,7 @@ public abstract class Request {
             return null;
         } else {
             try {
-                return Browser.fixPathTraversal(new URL(location.replaceAll(" ", "%20"))).toString();
+                return Browser.fixPathTraversal(Browser.createURL(location)).toString();
             } catch (final Exception e) {
                 if (request != null) {
                     try {

@@ -122,7 +122,7 @@ public class Browser {
         }
         final String trimURL = url.trim();
         try {
-            return Browser.getHost(new URL(trimURL), includeSubDomains);
+            return Browser.getHost(Browser.createURL(trimURL), includeSubDomains);
         } catch (Throwable e) {
         }
         /* direct ip with protocol */
@@ -247,7 +247,7 @@ public class Browser {
                 sb.append(":");
                 sb.append(url.getPort());
             }
-            if (url.getPath() != null) {
+            if (!StringUtils.isEmpty(url.getPath())) {
                 sb.append(url.getPath());
             } else {
                 sb.append("/");
@@ -260,8 +260,37 @@ public class Browser {
                 sb.append("#");
                 sb.append(url.getRef());
             }
-            return new URL(sb.toString());
+            return Browser.createURL(sb.toString());
         }
+    }
+
+    public static URL createURL(final String url) throws MalformedURLException {
+        URL ret = new URL(url.trim().replaceAll(" ", "%20"));
+        if (StringUtils.isEmpty(ret.getPath())) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(ret.getProtocol());
+            sb.append("://");
+            if (ret.getUserInfo() != null) {
+                sb.append(ret.getUserInfo());
+                sb.append("@");
+            }
+            sb.append(ret.getHost());
+            if (ret.getPort() != -1) {
+                sb.append(":");
+                sb.append(ret.getPort());
+            }
+            sb.append("/");
+            if (ret.getQuery() != null) {
+                sb.append("?");
+                sb.append(ret.getQuery());
+            }
+            if (ret.getRef() != null) {
+                sb.append("#");
+                sb.append(ret.getRef());
+            }
+            ret = new URL(sb.toString());
+        }
+        return ret;
     }
 
     public static URL fixPathTraversal(final URL url) throws MalformedURLException {
@@ -318,7 +347,7 @@ public class Browser {
                 sb.append("#");
                 sb.append(url.getRef());
             }
-            return new URL(sb.toString());
+            return Browser.createURL(sb.toString());
         }
         return url;
     }
@@ -327,15 +356,15 @@ public class Browser {
         final String location = loc.trim().replaceAll(" ", "%20");
         try {
             if (location.matches("^https?://.+")) {
-                final URL dummyURL = new URL(location);
+                final URL dummyURL = Browser.createURL(location);
                 return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.matches("^:\\d+/.+")) {
                 // scheme + host + loc
-                final URL dummyURL = new URL(url.getProtocol() + "://" + url.getHost() + location);
+                final URL dummyURL = Browser.createURL(url.getProtocol() + "://" + url.getHost() + location);
                 return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("//")) {
                 // scheme + loc
-                final URL dummyURL = new URL(url.getProtocol() + ":" + location);
+                final URL dummyURL = Browser.createURL(url.getProtocol() + ":" + location);
                 return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("/")) {
                 final StringBuilder sb = new StringBuilder();
@@ -345,7 +374,7 @@ public class Browser {
                     sb.append(":").append(url.getPort());
                 }
                 sb.append(location);
-                final URL dummyURL = new URL(sb.toString());
+                final URL dummyURL = Browser.createURL(sb.toString());
                 return Browser.fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("?")) {
                 final URL dummyURL = Browser.getURL(url, false, false, false);
@@ -387,7 +416,7 @@ public class Browser {
                 // ignore empty location or anchor
                 return Browser.fixPathTraversal(url).toString();
             } else {
-                final URL dummyURL = new URL(Browser.getBaseURL(url) + location);
+                final URL dummyURL = Browser.createURL(Browser.getBaseURL(url) + location);
                 return Browser.fixPathTraversal(dummyURL).toString();
             }
         } catch (MalformedURLException e) {
@@ -762,7 +791,7 @@ public class Browser {
                 }
                 if (sourceBase != null) {
                     /* take baseURL in case we've found one in current request */
-                    final URL sourceBaseURL = new URL(sourceBase.trim());
+                    final URL sourceBaseURL = Browser.createURL(sourceBase.trim());
                     // simple validation, we should only allow base to current domain! -raztoki20160304
                     final String domainHostBase = base != null ? Browser.getHost(Request.getLocation(base.toString(), lRequest)) : null;
                     final String domainSourceBase = Browser.getHost(Request.getLocation(sourceBase, lRequest));
@@ -782,7 +811,7 @@ public class Browser {
             final String getAction;
             final String varString = form.getPropertyString();
             if (varString != null && !varString.matches("[\\s]*")) {
-                getAction = Browser.parseLocation(new URL(formAction), "&" + varString);
+                getAction = Browser.parseLocation(Browser.createURL(formAction), "&" + varString);
             } else {
                 getAction = formAction;
             }
@@ -1375,13 +1404,13 @@ public class Browser {
             throw new IllegalArgumentException("location is null");
         }
         try {
-            return Browser.fixPathTraversal(new URL(location.replaceAll(" ", "%20")));
+            return Browser.fixPathTraversal(Browser.createURL(location.replaceAll(" ", "%20")));
         } catch (final MalformedURLException e) {
             final Request lRequest = this.getRequest();
             if (lRequest == null || lRequest.getHttpConnection() == null) {
                 throw new IOException("no request available");
             }
-            return new URL(Browser.parseLocation(lRequest.getURL(), location));
+            return Browser.createURL(Browser.parseLocation(lRequest.getURL(), location));
         }
     }
 
