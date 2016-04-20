@@ -35,9 +35,12 @@ package org.jdownloader.myjdownloader.client.bindings.interfaces;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.jdownloader.myjdownloader.client.bindings.AccountQuery;
 import org.jdownloader.myjdownloader.client.bindings.AccountStorable;
+import org.jdownloader.myjdownloader.client.bindings.BasicAuthenticationStorable;
+import org.jdownloader.myjdownloader.client.bindings.BasicAuthenticationStorable.Type;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
 
 @ClientApiNameSpace(AccountInterface.NAMESPACE)
@@ -47,6 +50,8 @@ public interface AccountInterface extends Linkable {
     public boolean addAccount(String premiumHoster, String username, String password);
 
     public ArrayList<AccountStorable> listAccounts(AccountQuery query);
+
+    public List<BasicAuthenticationStorable> listBasicAuth();
 
     public ArrayList<String> listPremiumHoster();
 
@@ -61,6 +66,10 @@ public interface AccountInterface extends Linkable {
     boolean setUserNameAndPassword(long accountId, String username, String password);
 
     String getPremiumHosterUrl(String hoster);
-    
+
     void refreshAccounts(long[] ids);
+
+    boolean addBasicAuth(Type type, String hostmask, String username, String password);
+
+    boolean removeBasicAuths(final long[] ids);
 }
