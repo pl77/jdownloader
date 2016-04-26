@@ -338,7 +338,7 @@ public abstract class Request {
                 if (cookie.isExpired()) {
                     continue;
                 }
-                if (secure && Boolean.FALSE.equals(cookie.isSecure())) {
+                if (!secure && Boolean.TRUE.equals(cookie.isSecure())) {
                     continue;
                 }
                 if (buffer.length() > 0) {
