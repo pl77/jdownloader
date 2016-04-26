@@ -16,6 +16,7 @@
 
 package jd.http;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -24,42 +25,120 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import jd.parser.Regex;
 
+import org.appwork.utils.StringUtils;
+
 public class Cookies {
 
+    public static Cookies parseSetCookies(final Request request) throws IOException {
+        final URLConnectionAdapter httpConnection = request.getHttpConnection();
+        final String date = httpConnection.getHeaderField("Date");
+        final List<String> setCookies = httpConnection.getHeaderFields("Set-Cookie");
+        final Cookies ret = new Cookies();
+        if (setCookies != null && setCookies.size() > 0) {
+            final String host = Browser.getHost(request.getURL());
+            final String currentPath;
+            if (StringUtils.isEmpty(request.getURL().getPath())) {
+                currentPath = "/";
+            } else {
+                final String tmp = new Regex(request.getURL().getPath(), "(/.+)/").getMatch(0);
+                if (tmp == null) {
+                    currentPath = "/";
+                } else {
+                    currentPath = tmp;
+                }
+            }
+            for (int i = 0; i < setCookies.size(); i++) {
+                final String setCookie = setCookies.get(i);
+                final Cookie cookie = new Cookie();
+                cookie.setHost(host);
+                cookie.setPath(currentPath);
+                cookie.setHostTime(date);
+                final StringTokenizer st = new StringTokenizer(setCookie, ";");
+                while (st.hasMoreTokens()) {
+                    final String cookieelement = st.nextToken().trim();
+                    /* Key and Value */
+                    final String st2[] = new Regex(cookieelement, "(.*?)=(.*)").getRow(0);
+                    final String key;
+                    final String value;
+                    if (st2 == null || st2.length == 0) {
+                        break;
+                    } else if (st2.length == 1) {
+                        key = st2[0].trim();
+                        value = null;
+                    } else if (st2.length == 2) {
+                        key = st2[0].trim();
+                        value = st2[1].trim();
+                    } else {
+                        continue;
+                    }
+                    if (key != null) {
+                        if ("path".equalsIgnoreCase(key)) {
+                            cookie.setPath(value);
+                        } else if ("expires".equalsIgnoreCase(key)) {
+                            cookie.setExpires(value);
+                        } else if ("domain".equalsIgnoreCase(key)) {
+                            cookie.setDomain(value);
+                        } else if ("secure".equalsIgnoreCase(key)) {
+                            cookie.setSecure(true);
+                        } else if ("HttpOnly".equalsIgnoreCase(key)) {
+                            // HttpOnly
+                        } else if ("Max-Age".equalsIgnoreCase(key)) {
+                            // Max-Age
+                        } else {
+                            if (cookie.getKey() == null) {
+                                cookie.setKey(key);
+                                cookie.setValue(value);
+                            }
+                        }
+                    }
+                }
+                if (cookie.getKey() != null) {
+                    ret.add(cookie);
+                }
+            }
+        }
+        return ret;
+    }
+
     public static Cookies parseCookies(final String cookieString, final String host, final String serverTime, boolean isSetCookie) {
-        final Cookies cookies = new Cookies();
-
         final String header = cookieString;
-
         String path = null;
         String expires = null;
         String domain = null;
+        boolean secure = false;
         final LinkedHashMap<String, String> tmp = new LinkedHashMap<String, String>();
         /* Cookie individual elements */
         final StringTokenizer st = new StringTokenizer(header, ";");
-
         while (st.hasMoreTokens()) {
-            String key = null;
-            String value = null;
             final String cookieelement = st.nextToken().trim();
             /* Key and Value */
             final String st2[] = new Regex(cookieelement, "(.*?)=(.*)").getRow(0);
+            final String key;
+            final String value;
             if (st2 == null || st2.length == 0) {
-                key = null;
+                break;
             } else if (st2.length == 1) {
                 key = st2[0].trim();
+                value = null;
             } else if (st2.length == 2) {
                 key = st2[0].trim();
                 value = st2[1].trim();
+            } else {
+                continue;
             }
-
             if (key != null) {
-                if (key.equalsIgnoreCase("path")) {
+                if ("path".equalsIgnoreCase(key)) {
                     path = value;
-                } else if (key.equalsIgnoreCase("expires")) {
+                } else if ("expires".equalsIgnoreCase(key)) {
                     expires = value;
-                } else if (key.equalsIgnoreCase("domain")) {
+                } else if ("domain".equalsIgnoreCase(key)) {
                     domain = value;
+                } else if ("secure".equalsIgnoreCase(key)) {
+                    secure = true;
+                } else if ("HttpOnly".equalsIgnoreCase(key)) {
+                    // HttpOnly
+                } else if ("Max-Age".equalsIgnoreCase(key)) {
+                    // Max-Age
                 } else {
                     if (!isSetCookie || tmp.size() == 0) {
                         /**
@@ -68,11 +147,9 @@ public class Cookies {
                         tmp.put(key, value);
                     }
                 }
-            } else {
-                break;
             }
         }
-
+        final Cookies cookies = new Cookies();
         for (final Entry<String, String> next : tmp.entrySet()) {
             /*
              * no cookies are cookies without a value
@@ -87,6 +164,7 @@ public class Cookies {
                 cookie.setValue(next.getValue());
                 cookie.setKey(next.getKey());
                 cookie.setHostTime(serverTime);
+                cookie.setSecure(secure);
             }
         }
         return cookies;
@@ -116,8 +194,10 @@ public class Cookies {
     }
 
     public void add(final Cookies newcookies) {
-        for (final Cookie cookie : newcookies.getCookies()) {
-            this.add(cookie);
+        if (newcookies != null) {
+            for (final Cookie cookie : newcookies.getCookies()) {
+                this.add(cookie);
+            }
         }
     }
 
@@ -156,7 +236,7 @@ public class Cookies {
 
     /**
      * Removes Cookie from current session, based on keyName
-     * 
+     *
      * @author raztoki
      * @since JD2
      * */

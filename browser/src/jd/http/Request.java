@@ -45,27 +45,6 @@ import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
 
 public abstract class Request {
-    // public static int MAX_REDIRECTS = 30;
-
-    public static String getCookieString(final Cookies cookies) {
-        if (cookies == null || cookies.isEmpty()) {
-            return null;
-        }
-        final StringBuilder buffer = new StringBuilder();
-        for (final Cookie cookie : cookies.getCookies()) {
-            // Pfade sollten verarbeitet werden...TODO
-            if (cookie.isExpired()) {
-                continue;
-            }
-            if (buffer.length() > 0) {
-                buffer.append("; ");
-            }
-            buffer.append(cookie.getKey());
-            buffer.append("=");
-            buffer.append(cookie.getValue());
-        }
-        return buffer.toString();
-    }
 
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
@@ -271,24 +250,11 @@ public abstract class Request {
             this.setURL(con.getURL());
         }
         this.requested = true;
-        this.collectCookiesFromConnection();
+        this.getCookies().add(Cookies.parseSetCookies(this));
     }
 
     public Request cloneRequest() {
         throw new WTFException("Not Implemented");
-    }
-
-    private void collectCookiesFromConnection() {
-        final List<String> cookieHeaders = this.httpConnection.getHeaderFields("Set-Cookie");
-        if (cookieHeaders != null && cookieHeaders.size() > 0) {
-            final String date = this.httpConnection.getHeaderField("Date");
-            final String host = Browser.getHost(this.httpConnection.getRequest().getURL());
-            final Cookies requestCookies = this.getCookies();
-            for (int i = 0; i < cookieHeaders.size(); i++) {
-                final String header = cookieHeaders.get(i);
-                requestCookies.add(Cookies.parseCookies(header, host, date, true));
-            }
-        }
     }
 
     /**
@@ -303,7 +269,7 @@ public abstract class Request {
                     this.postRequest();
                     this.httpConnection.finalizeConnect();
                     try {
-                        this.collectCookiesFromConnection();
+                        this.getCookies().add(Cookies.parseSetCookies(this));
                     } catch (final NullPointerException e) {
                         throw new IOException("Malformed url?", e);
                     }
@@ -363,7 +329,28 @@ public abstract class Request {
     }
 
     public String getCookieString() {
-        return Request.getCookieString(this.cookies);
+        final Cookies lCookies = this.cookies;
+        if (lCookies != null && !lCookies.isEmpty()) {
+            final boolean secure = "https".equalsIgnoreCase(this.getURL().getProtocol());
+            final StringBuilder buffer = new StringBuilder();
+            for (final Cookie cookie : lCookies.getCookies()) {
+                // Pfade sollten verarbeitet werden...TODO
+                if (cookie.isExpired()) {
+                    continue;
+                }
+                if (secure && Boolean.FALSE.equals(cookie.isSecure())) {
+                    continue;
+                }
+                if (buffer.length() > 0) {
+                    buffer.append("; ");
+                }
+                buffer.append(cookie.getKey());
+                buffer.append("=");
+                buffer.append(cookie.getValue());
+            }
+            return buffer.toString();
+        }
+        return null;
     }
 
     public String getCustomCharset() {

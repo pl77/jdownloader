@@ -22,13 +22,21 @@ import java.util.Locale;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.formatter.TimeFormatter;
 
-
 public class Cookie {
 
-    private String path         = null;
-    private String host         = null;
-    private String value        = null;
-    private String key          = null;
+    private String  path   = null;
+    private String  host   = null;
+    private String  value  = null;
+    private String  key    = null;
+    private Boolean secure = null;
+
+    public Boolean isSecure() {
+        return this.secure;
+    }
+
+    public void setSecure(Boolean secure) {
+        this.secure = secure;
+    }
 
     private String domain       = null;
     private long   hostTime     = -1;
@@ -63,11 +71,14 @@ public class Cookie {
         if (!StringUtils.equals(this.getKey(), other.getKey())) {
             return false;
         }
+        if (!StringUtils.equals(this.getPath(), other.getPath())) {
+            return false;
+        }
         /*
          * domain property is not used at the moment, that's why we ignore it
-         *
+         * 
          * TODO: add proper support once a service really uses this feature
-         *
+         * 
          * if (!StringUtils.equalsIgnoreCase(this.getDomain(), other.getDomain())) { return false; }
          */
         return true;
@@ -160,7 +171,7 @@ public class Cookie {
             return;
         }
         this.expireTime = -1;
-              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cookie: no Format for " + expires + " found!");
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cookie: no Format for " + expires + " found!");
         return;
     }
 
@@ -185,7 +196,7 @@ public class Cookie {
             return;
         }
         this.hostTime = -1;
-              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cookie: no Format for " + date + " found!");
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cookie: no Format for " + date + " found!");
         return;
     }
 
