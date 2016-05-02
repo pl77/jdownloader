@@ -486,7 +486,7 @@ public abstract class Request {
         final String location = this.location;
         if (location == null) {
             if (this.httpConnection != null) {
-                final String locationHeader = this.httpConnection.getHeaderField("Location");
+                final String locationHeader = this.httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_LOCATION);
                 if (StringUtils.isEmpty(locationHeader)) {
                     /* check if we have an old-school refresh header */
                     final String refresh = this.httpConnection.getHeaderField("refresh");
