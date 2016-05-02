@@ -69,7 +69,9 @@ public interface AccountInterface extends Linkable {
 
     void refreshAccounts(long[] ids);
 
-    boolean addBasicAuth(Type type, String hostmask, String username, String password);
+    long addBasicAuth(Type type, String hostmask, String username, String password);
 
     boolean removeBasicAuths(final long[] ids);
+
+    boolean updateBasicAuth(BasicAuthenticationStorable updatedEntry);
 }

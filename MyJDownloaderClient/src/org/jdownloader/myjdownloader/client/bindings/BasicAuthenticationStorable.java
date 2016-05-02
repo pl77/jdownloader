@@ -32,10 +32,10 @@ public class BasicAuthenticationStorable extends AbstractJsonData {
         this.lastValidated = lastValidated;
     }
 
-    private long    lastValidated = -1;
-    private boolean enabled       = true;
+    private long    lastValidated;
+    private Boolean enabled;
 
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
@@ -79,8 +79,17 @@ public class BasicAuthenticationStorable extends AbstractJsonData {
         this.id = id;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     private String username;
-    private Type   type = Type.HTTP;
+    private String password;
+    private Type   type;
     private String hostmask;
     private long   id;
 }
