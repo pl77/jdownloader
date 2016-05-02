@@ -28,13 +28,13 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jd.http.Browser;
 import jd.nutils.encoding.HTMLEntities;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
 
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.URLHelper;
 
 public class Form {
 
@@ -131,7 +131,7 @@ public class Form {
         final boolean actionIsHTTP = formAction != null && formAction.startsWith("http://");
         final String ret;
         if (base != null && StringUtils.isNotEmpty(this.action)) {
-            ret = Browser.parseLocation(base, this.action);
+            ret = URLHelper.parseLocation(base, this.action);
         } else if (StringUtils.isNotEmpty(this.action) && this.action.matches("^https?://.+")) {
             ret = this.action.replaceAll(" ", "%20");
         } else if (base != null && StringUtils.isEmpty(this.action)) {
@@ -146,7 +146,7 @@ public class Form {
             }
         }
         try {
-            return Browser.fixPathTraversal(new URL(ret)).toString();
+            return URLHelper.fixPathTraversal(new URL(ret)).toString();
         } catch (MalformedURLException e) {
             return ret;
         }
