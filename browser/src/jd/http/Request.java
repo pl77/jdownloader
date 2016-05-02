@@ -37,6 +37,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
+import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
@@ -61,7 +62,7 @@ public abstract class Request {
         final QueryInfo ret = new QueryInfo();
         if (StringUtils.startsWithCaseInsensitive(query, "https://") || StringUtils.startsWithCaseInsensitive(query, "http://")) {
             try {
-                query = Browser.createURL(query).getQuery();
+                query = URLHelper.createURL(query).getQuery();
             } catch (final IOException e) {
             }
         }
@@ -239,7 +240,7 @@ public abstract class Request {
     }
 
     public Request(final String url) throws IOException {
-        this(Browser.createURL(url));
+        this(URLHelper.createURL(url));
     }
 
     public Request(final URLConnectionAdapter con) throws IOException {
@@ -526,11 +527,11 @@ public abstract class Request {
             return null;
         } else {
             try {
-                return Browser.fixPathTraversal(Browser.createURL(location)).toString();
+                return URLHelper.fixPathTraversal(URLHelper.createURL(location)).toString();
             } catch (final Exception e) {
                 if (request != null) {
                     try {
-                        return Browser.parseLocation(request.getURL(), location);
+                        return URLHelper.parseLocation(request.getURL(), location);
                     } catch (final Throwable wtf) {
                         return null;
                     }
@@ -584,7 +585,7 @@ public abstract class Request {
 
     public String getUrl() {
         try {
-            return Browser.getURL(this.getURL(), true, false, false).toString();
+            return URLHelper.getURL(this.getURL(), true, false, false).toString();
         } catch (final IOException e) {
             ThrowUncheckedException.throwUncheckedException(e);
             return null;
@@ -624,7 +625,7 @@ public abstract class Request {
     }
 
     private void openConnection() throws IOException {
-        this.httpConnection = HTTPConnectionFactory.createHTTPConnection(Browser.getURL(this.getURL(), true, false, false), this.getProxy());
+        this.httpConnection = HTTPConnectionFactory.createHTTPConnection(URLHelper.getURL(this.getURL(), true, false, false), this.getProxy());
         this.httpConnection.setRequest(this);
         this.httpConnection.setReadTimeout(this.getReadTimeout());
         this.httpConnection.setConnectTimeout(this.getConnectTimeout());

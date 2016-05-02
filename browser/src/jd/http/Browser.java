@@ -33,16 +33,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import org.appwork.exceptions.WTFException;
-import org.appwork.net.protocol.http.HTTPConstants;
-import org.appwork.utils.KeyValueStringEntry;
-import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.ConsoleLogImpl;
-import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.net.PublicSuffixList;
-import org.appwork.utils.net.httpconnection.HTTPProxy;
-import org.appwork.utils.net.httpconnection.ProxyAuthException;
-
 import jd.http.requests.FormData;
 import jd.http.requests.GetRequest;
 import jd.http.requests.HeadRequest;
@@ -51,6 +41,16 @@ import jd.http.requests.PostRequest;
 import jd.parser.Regex;
 import jd.parser.html.Form;
 import jd.parser.html.InputField;
+
+import org.appwork.net.protocol.http.HTTPConstants;
+import org.appwork.utils.KeyValueStringEntry;
+import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.ConsoleLogImpl;
+import org.appwork.utils.logging2.LogInterface;
+import org.appwork.utils.net.PublicSuffixList;
+import org.appwork.utils.net.URLHelper;
+import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.net.httpconnection.ProxyAuthException;
 
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
@@ -122,7 +122,7 @@ public class Browser {
         }
         final String trimURL = url.trim();
         try {
-            return Browser.getHost(Browser.createURL(trimURL), includeSubDomains);
+            return Browser.getHost(URLHelper.createURL(trimURL), includeSubDomains);
         } catch (Throwable e) {
         }
         /* direct ip with protocol */
@@ -227,202 +227,6 @@ public class Browser {
     private int[]          allowedResponseCodes     = new int[0];
 
     private static boolean VERBOSE                  = false;
-
-    public static URL getURL(final URL url, final boolean includeQuery, final boolean includeUserInfo, final boolean includeRef) throws MalformedURLException {
-        final boolean modifyQuery = includeQuery == false && url.getQuery() != null;
-        final boolean modifyUserInfo = includeUserInfo == false && url.getUserInfo() != null;
-        final boolean modifyRef = includeRef == false && url.getRef() != null;
-        if (!modifyQuery && !modifyUserInfo && !modifyRef) {
-            return url;
-        } else {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(url.getProtocol());
-            sb.append("://");
-            if (includeUserInfo && url.getUserInfo() != null) {
-                sb.append(url.getUserInfo());
-                sb.append("@");
-            }
-            sb.append(url.getHost());
-            if (url.getPort() != -1) {
-                sb.append(":");
-                sb.append(url.getPort());
-            }
-            if (!StringUtils.isEmpty(url.getPath())) {
-                sb.append(url.getPath());
-            } else {
-                sb.append("/");
-            }
-            if (includeQuery && url.getQuery() != null) {
-                sb.append("?");
-                sb.append(url.getQuery());
-            }
-            if (includeRef && url.getRef() != null) {
-                sb.append("#");
-                sb.append(url.getRef());
-            }
-            return Browser.createURL(sb.toString());
-        }
-    }
-
-    public static URL createURL(final String url) throws MalformedURLException {
-        URL ret = new URL(url.trim().replaceAll(" ", "%20"));
-        if (StringUtils.isEmpty(ret.getPath())) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(ret.getProtocol());
-            sb.append("://");
-            if (ret.getUserInfo() != null) {
-                sb.append(ret.getUserInfo());
-                sb.append("@");
-            }
-            sb.append(ret.getHost());
-            if (ret.getPort() != -1) {
-                sb.append(":");
-                sb.append(ret.getPort());
-            }
-            sb.append("/");
-            if (ret.getQuery() != null) {
-                sb.append("?");
-                sb.append(ret.getQuery());
-            }
-            if (ret.getRef() != null) {
-                sb.append("#");
-                sb.append(ret.getRef());
-            }
-            ret = new URL(sb.toString());
-        }
-        return ret;
-    }
-
-    public static URL fixPathTraversal(final URL url) throws MalformedURLException {
-        if (url != null && (StringUtils.contains(url.getPath(), "../") || StringUtils.contains(url.getPath(), "./"))) {
-            final String pathParts[] = url.getPath().split("/");
-            for (int i = 0; i < pathParts.length; i++) {
-                if (".".equals(pathParts[i])) {
-                    pathParts[i] = null;
-                } else if ("..".equals(pathParts[i])) {
-                    if (i > 0) {
-                        int j = i - 1;
-                        while (true && j > 0) {
-                            if (pathParts[j] != null) {
-                                pathParts[j] = null;
-                                break;
-                            }
-                            j--;
-                        }
-                    }
-                    pathParts[i] = null;
-                } else if (i > 0 && pathParts[i].length() == 0) {
-                    pathParts[i] = "/";
-                }
-            }
-            final StringBuilder sb = new StringBuilder();
-            sb.append(url.getProtocol());
-            sb.append("://");
-            if (url.getUserInfo() != null) {
-                sb.append(url.getUserInfo());
-                sb.append("@");
-            }
-            sb.append(url.getHost());
-            if (url.getPort() != -1) {
-                sb.append(":");
-                sb.append(url.getPort());
-            }
-            sb.append("/");
-            for (int i = 0; i < pathParts.length; i++) {
-                final String pathPart = pathParts[i];
-                if (pathPart != null) {
-                    if (pathPart.length() > 0 && !"/".equals(pathPart)) {
-                        sb.append(pathPart);
-                        if (i != pathParts.length - 1 && '/' != sb.charAt(sb.length() - 1)) {
-                            sb.append("/");
-                        }
-                    }
-                }
-            }
-            if (url.getQuery() != null) {
-                sb.append("?");
-                sb.append(url.getQuery());
-            }
-            if (url.getRef() != null) {
-                sb.append("#");
-                sb.append(url.getRef());
-            }
-            return Browser.createURL(sb.toString());
-        }
-        return url;
-    }
-
-    public static String parseLocation(final URL url, final String loc) {
-        final String location = loc.trim().replaceAll(" ", "%20");
-        try {
-            if (location.matches("^https?://.+")) {
-                final URL dummyURL = Browser.createURL(location);
-                return Browser.fixPathTraversal(dummyURL).toString();
-            } else if (location.matches("^:\\d+/.+")) {
-                // scheme + host + loc
-                final URL dummyURL = Browser.createURL(url.getProtocol() + "://" + url.getHost() + location);
-                return Browser.fixPathTraversal(dummyURL).toString();
-            } else if (location.startsWith("//")) {
-                // scheme + loc
-                final URL dummyURL = Browser.createURL(url.getProtocol() + ":" + location);
-                return Browser.fixPathTraversal(dummyURL).toString();
-            } else if (location.startsWith("/")) {
-                final StringBuilder sb = new StringBuilder();
-                sb.append(url.getProtocol()).append("://");
-                sb.append(url.getHost());
-                if (url.getPort() != -1) {
-                    sb.append(":").append(url.getPort());
-                }
-                sb.append(location);
-                final URL dummyURL = Browser.createURL(sb.toString());
-                return Browser.fixPathTraversal(dummyURL).toString();
-            } else if (location.startsWith("?")) {
-                final URL dummyURL = Browser.getURL(url, false, false, false);
-                final String query = location.substring(1);
-                if (StringUtils.isEmpty(query)) {
-                    return dummyURL.toString();
-                } else {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append(dummyURL.toString());
-                    if (StringUtils.isEmpty(dummyURL.getPath())) {
-                        sb.append("/");
-                    }
-                    sb.append(location);
-                    return sb.toString();
-                }
-            } else if (location.startsWith("&")) {
-                final String query = location.substring(1);
-                if (StringUtils.isEmpty(query)) {
-                    final URL dummyURL = Browser.getURL(url, true, false, false);
-                    return dummyURL.toString();
-                } else {
-                    final URL dummyURL = Browser.getURL(url, false, false, false);
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append(dummyURL.toString());
-                    if (StringUtils.isEmpty(dummyURL.getPath())) {
-                        sb.append("/");
-                    }
-                    sb.append("?");
-                    if (StringUtils.isNotEmpty(url.getQuery())) {
-                        sb.append(url.getQuery());
-                        if (!url.getQuery().endsWith("&")) {
-                            sb.append("&");
-                        }
-                    }
-                    sb.append(query);
-                    return sb.toString();
-                }
-            } else if (location.startsWith("#") || StringUtils.isEmpty(location)) {
-                // ignore empty location or anchor
-                return Browser.fixPathTraversal(url).toString();
-            } else {
-                final URL dummyURL = Browser.createURL(Browser.getBaseURL(url) + location);
-                return Browser.fixPathTraversal(dummyURL).toString();
-            }
-        } catch (MalformedURLException e) {
-            throw new WTFException("FIXME:location=" + location, e);
-        }
-    }
 
     /**
      * Lädt über eine URLConnection eine Datei herunter. Zieldatei ist file.
@@ -791,7 +595,7 @@ public class Browser {
                 }
                 if (sourceBase != null) {
                     /* take baseURL in case we've found one in current request */
-                    final URL sourceBaseURL = Browser.createURL(sourceBase.trim());
+                    final URL sourceBaseURL = URLHelper.createURL(sourceBase.trim());
                     // simple validation, we should only allow base to current domain! -raztoki20160304
                     final String domainHostBase = base != null ? Browser.getHost(Request.getLocation(base.toString(), lRequest)) : null;
                     final String domainSourceBase = Browser.getHost(Request.getLocation(sourceBase, lRequest));
@@ -811,7 +615,7 @@ public class Browser {
             final String getAction;
             final String varString = form.getPropertyString();
             if (varString != null && !varString.matches("[\\s]*")) {
-                getAction = Browser.parseLocation(Browser.createURL(formAction), "&" + varString);
+                getAction = URLHelper.parseLocation(URLHelper.createURL(formAction), "&" + varString);
             } else {
                 getAction = formAction;
             }
@@ -863,8 +667,8 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
-     * 
+     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
+     *
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -1045,25 +849,10 @@ public class Browser {
         return this.allowedResponseCodes;
     }
 
-    public static String getBaseURL(final URL url) throws MalformedURLException {
-        final URL baseURI = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath());
-        final String base;
-        if (baseURI.getPath() != null) {
-            base = new Regex(baseURI.toString(), "(https?://.+)/").getMatch(0);
-        } else {
-            base = baseURI.toString();
-        }
-        if (base.endsWith("/")) {
-            return base;
-        } else {
-            return base + "/";
-        }
-    }
-
     public String getBaseURL() throws MalformedURLException {
         final Request lRequest = this.getRequest();
         if (lRequest != null) {
-            return Browser.getBaseURL(lRequest.getURL());
+            return URLHelper.getBaseURL(lRequest.getURL());
         } else {
             return null;
         }
@@ -1405,13 +1194,13 @@ public class Browser {
             throw new IllegalArgumentException("location is null");
         }
         try {
-            return Browser.fixPathTraversal(Browser.createURL(location.replaceAll(" ", "%20")));
+            return URLHelper.fixPathTraversal(URLHelper.createURL(location.replaceAll(" ", "%20")));
         } catch (final MalformedURLException e) {
             final Request lRequest = this.getRequest();
             if (lRequest == null || lRequest.getHttpConnection() == null) {
                 throw new IOException("no request available");
             }
-            return Browser.createURL(Browser.parseLocation(lRequest.getURL(), location));
+            return URLHelper.createURL(URLHelper.parseLocation(lRequest.getURL(), location));
         }
     }
 
