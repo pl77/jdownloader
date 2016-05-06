@@ -47,6 +47,26 @@ import org.appwork.utils.os.CrossSystem;
 
 public abstract class Request {
 
+    public static String getCookieString(final Cookies cookies) {
+        if (cookies == null || cookies.isEmpty()) {
+            return null;
+        }
+        final StringBuilder buffer = new StringBuilder();
+        for (final Cookie cookie : cookies.getCookies()) {
+            // Pfade sollten verarbeitet werden...TODO
+            if (cookie.isExpired()) {
+                continue;
+            }
+            if (buffer.length() > 0) {
+                buffer.append("; ");
+            }
+            buffer.append(cookie.getKey());
+            buffer.append("=");
+            buffer.append(cookie.getValue());
+        }
+        return buffer.toString();
+    }
+
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
      *
@@ -526,19 +546,19 @@ public abstract class Request {
         if (StringUtils.isEmpty(location)) {
             return null;
         } else {
-            try {
+        try {
                 return URLHelper.fixPathTraversal(URLHelper.createURL(location)).toString();
-            } catch (final Exception e) {
-                if (request != null) {
-                    try {
+        } catch (final Exception e) {
+            if (request != null) {
+                try {
                         return URLHelper.parseLocation(request.getURL(), location);
-                    } catch (final Throwable wtf) {
-                        return null;
-                    }
+                } catch (final Throwable wtf) {
+                    return null;
                 }
             }
-            return null;
         }
+        return null;
+    }
     }
 
     public HTTPProxy getProxy() {
