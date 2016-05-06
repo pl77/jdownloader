@@ -47,24 +47,28 @@ import org.appwork.utils.os.CrossSystem;
 
 public abstract class Request {
 
-    public static String getCookieString(final Cookies cookies) {
-        if (cookies == null || cookies.isEmpty()) {
-            return null;
-        }
-        final StringBuilder buffer = new StringBuilder();
-        for (final Cookie cookie : cookies.getCookies()) {
-            // Pfade sollten verarbeitet werden...TODO
-            if (cookie.isExpired()) {
-                continue;
+    public static String getCookieString(final Cookies cookies, URL url) {
+        if (cookies != null && !cookies.isEmpty()) {
+            final boolean secure = "https".equalsIgnoreCase(url.getProtocol());
+            final StringBuilder buffer = new StringBuilder();
+            for (final Cookie cookie : cookies.getCookies()) {
+                // Pfade sollten verarbeitet werden...TODO
+                if (cookie.isExpired()) {
+                    continue;
+                }
+                if (!secure && Boolean.TRUE.equals(cookie.isSecure())) {
+                    continue;
+                }
+                if (buffer.length() > 0) {
+                    buffer.append("; ");
+                }
+                buffer.append(cookie.getKey());
+                buffer.append("=");
+                buffer.append(cookie.getValue());
             }
-            if (buffer.length() > 0) {
-                buffer.append("; ");
-            }
-            buffer.append(cookie.getKey());
-            buffer.append("=");
-            buffer.append(cookie.getValue());
+            return buffer.toString();
         }
-        return buffer.toString();
+        return null;
     }
 
     /**
@@ -350,28 +354,7 @@ public abstract class Request {
     }
 
     public String getCookieString() {
-        final Cookies lCookies = this.cookies;
-        if (lCookies != null && !lCookies.isEmpty()) {
-            final boolean secure = "https".equalsIgnoreCase(this.getURL().getProtocol());
-            final StringBuilder buffer = new StringBuilder();
-            for (final Cookie cookie : lCookies.getCookies()) {
-                // Pfade sollten verarbeitet werden...TODO
-                if (cookie.isExpired()) {
-                    continue;
-                }
-                if (!secure && Boolean.TRUE.equals(cookie.isSecure())) {
-                    continue;
-                }
-                if (buffer.length() > 0) {
-                    buffer.append("; ");
-                }
-                buffer.append(cookie.getKey());
-                buffer.append("=");
-                buffer.append(cookie.getValue());
-            }
-            return buffer.toString();
-        }
-        return null;
+        return Request.getCookieString(this.cookies, this.getURL());
     }
 
     public String getCustomCharset() {
@@ -546,19 +529,19 @@ public abstract class Request {
         if (StringUtils.isEmpty(location)) {
             return null;
         } else {
-        try {
+            try {
                 return URLHelper.fixPathTraversal(URLHelper.createURL(location)).toString();
-        } catch (final Exception e) {
-            if (request != null) {
-                try {
+            } catch (final Exception e) {
+                if (request != null) {
+                    try {
                         return URLHelper.parseLocation(request.getURL(), location);
-                } catch (final Throwable wtf) {
-                    return null;
+                    } catch (final Throwable wtf) {
+                        return null;
+                    }
                 }
             }
+            return null;
         }
-        return null;
-    }
     }
 
     public HTTPProxy getProxy() {
