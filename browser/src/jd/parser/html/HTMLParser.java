@@ -1081,7 +1081,7 @@ public class HTMLParser {
         /* we replace the complete br tag with a newline */
         data = data.replaceAll(Pattern.compile("<br.*?>"), "\r\n");
         /* remove word breaks */
-        data = data.replaceAll(Pattern.compile("<wbr>"), "");
+        data = data.replaceAll(Pattern.compile("<wbr.*?>"), "");
         /* remove HTML Tags */
         data = data.replaceAll(Pattern.compile("</?(i|b|u|s)>"), "");
         /*
