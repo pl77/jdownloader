@@ -854,8 +854,8 @@ public class Browser {
         if (lRequest != null) {
             return URLHelper.getBaseURL(lRequest.getURL());
         } else {
-            return null;
-        }
+        return null;
+    }
     }
 
     /**
@@ -1196,10 +1196,10 @@ public class Browser {
         try {
             return URLHelper.fixPathTraversal(URLHelper.createURL(location.replaceAll(" ", "%20")));
         } catch (final MalformedURLException e) {
-            final Request lRequest = this.getRequest();
-            if (lRequest == null || lRequest.getHttpConnection() == null) {
-                throw new IOException("no request available");
-            }
+                final Request lRequest = this.getRequest();
+                if (lRequest == null || lRequest.getHttpConnection() == null) {
+                    throw new IOException("no request available");
+                }
             return URLHelper.createURL(URLHelper.parseLocation(lRequest.getURL(), location));
         }
     }
@@ -1622,7 +1622,6 @@ public class Browser {
         if (this.cookiesExclusive == b) {
             return;
         }
-        this.cookiesExclusive = b;
         if (b) {
             this.cookies.clear();
             for (final Entry<String, Cookies> next : Browser.COOKIES.entrySet()) {
@@ -1633,6 +1632,8 @@ public class Browser {
         } else {
             this.cookies.clear();
         }
+        // this needs to be last so you can drop to frame, in test situations. Otherwise this reference is destroyed.
+        this.cookiesExclusive = b;
     }
 
     /**
@@ -1772,7 +1773,7 @@ public class Browser {
         if (request == null) {
             this.currentURL = null;
         } else {
-            this.currentURL = request;
+            this.currentURL = request.getUrl();
         }
         this.updateCookies(request);
         this.request = request;
