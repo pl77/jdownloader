@@ -709,7 +709,6 @@ public abstract class Request {
     }
 
     public void setHtmlCode(final String htmlCode) {
-
         this.responseBytes = null;
         this.htmlCode = htmlCode;
         this.requested = true;
