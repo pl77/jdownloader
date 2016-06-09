@@ -33,15 +33,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import jd.http.requests.FormData;
-import jd.http.requests.GetRequest;
-import jd.http.requests.HeadRequest;
-import jd.http.requests.PostFormDataRequest;
-import jd.http.requests.PostRequest;
-import jd.parser.Regex;
-import jd.parser.html.Form;
-import jd.parser.html.InputField;
-
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
@@ -51,6 +42,15 @@ import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
+
+import jd.http.requests.FormData;
+import jd.http.requests.GetRequest;
+import jd.http.requests.HeadRequest;
+import jd.http.requests.PostFormDataRequest;
+import jd.http.requests.PostRequest;
+import jd.parser.Regex;
+import jd.parser.html.Form;
+import jd.parser.html.InputField;
 
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
@@ -667,8 +667,9 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
+     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
      *
+     * 
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -854,8 +855,8 @@ public class Browser {
         if (lRequest != null) {
             return URLHelper.getBaseURL(lRequest.getURL());
         } else {
-        return null;
-    }
+            return null;
+        }
     }
 
     /**
@@ -874,7 +875,7 @@ public class Browser {
         return cookie != null ? cookie.getValue() : null;
     }
 
-    private HashMap<String, Cookies> getCookies() {
+    public HashMap<String, Cookies> getCookies() {
         return this.cookiesExclusive ? this.cookies : Browser.COOKIES;
     }
 
@@ -1196,10 +1197,10 @@ public class Browser {
         try {
             return URLHelper.fixPathTraversal(URLHelper.createURL(location.replaceAll(" ", "%20")));
         } catch (final MalformedURLException e) {
-                final Request lRequest = this.getRequest();
-                if (lRequest == null || lRequest.getHttpConnection() == null) {
-                    throw new IOException("no request available");
-                }
+            final Request lRequest = this.getRequest();
+            if (lRequest == null || lRequest.getHttpConnection() == null) {
+                throw new IOException("no request available");
+            }
             return URLHelper.createURL(URLHelper.parseLocation(lRequest.getURL(), location));
         }
     }
