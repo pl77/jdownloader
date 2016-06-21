@@ -80,9 +80,9 @@ public class Cookie {
         }
         /*
          * domain property is not used at the moment, that's why we ignore it
-         *
+         * 
          * TODO: add proper support once a service really uses this feature
-         *
+         * 
          * if (!StringUtils.equalsIgnoreCase(this.getDomain(), other.getDomain())) { return false; }
          */
         return true;
@@ -228,10 +228,10 @@ public class Cookie {
     }
 
     protected synchronized void update(final Cookie cookie2) {
-        this.setCreationTime(cookie2.creationTime);
-        this.setExpireDate(cookie2.expireTime);
-        this.setValue(cookie2.value);
-        this.setHostTime(cookie2.hostTime);
+        this.setCreationTime(cookie2.getCreationTime());
+        this.setExpireDate(cookie2.getExpireDate());
+        this.setValue(cookie2.getValue());
+        this.setHostTime(cookie2.getHostTime());
     }
 
 }

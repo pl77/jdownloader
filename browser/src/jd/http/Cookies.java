@@ -84,6 +84,16 @@ public class Cookies {
                             // HttpOnly
                         } else if ("Max-Age".equalsIgnoreCase(key)) {
                             // Max-Age
+                            try {
+                                // RFC 6265, section 5.2.2
+                                final long maxAge = Long.parseLong(value);
+                                if (maxAge <= 0) {
+                                    cookie.setExpireDate(1l);// 01/01/1970
+                                } else if (cookie.getHostTime() > 0) {
+                                    cookie.setExpireDate(cookie.getHostTime() + maxAge * 1000l);
+                                }
+                            } catch (final Throwable e) {
+                            }
                         } else {
                             if (cookie.getKey() == null) {
                                 cookie.setKey(key);
