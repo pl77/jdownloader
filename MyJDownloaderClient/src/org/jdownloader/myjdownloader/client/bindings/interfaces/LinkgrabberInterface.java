@@ -40,6 +40,7 @@ import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Action
 import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Mode;
 import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.SelectionType;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
+import org.jdownloader.myjdownloader.client.bindings.LinkCollectingJobStorable;
 import org.jdownloader.myjdownloader.client.bindings.LinkVariantStorable;
 import org.jdownloader.myjdownloader.client.bindings.PriorityStorable;
 import org.jdownloader.myjdownloader.client.bindings.UrlDisplayTypeStorable;
@@ -75,9 +76,9 @@ public interface LinkgrabberInterface extends Linkable {
 
     void moveLinks(long[] linkIds, long afterLinkID, long destPackageID);
 
-    void addLinks(AddLinksQuery query);
+    LinkCollectingJobStorable addLinks(AddLinksQuery query);
 
-    void addContainer(String type, String content);
+    LinkCollectingJobStorable addContainer(String type, String content);
 
     LinkVariantStorable[] getVariants(long linkid);
 
@@ -109,7 +110,9 @@ public interface LinkgrabberInterface extends Linkable {
     boolean clearList();
 
     boolean setDownloadPassword(long[] linkIds, long[] packageIds, String pass);
-    
+
     boolean abort();
+
+    boolean isCollecting();
 
 }
