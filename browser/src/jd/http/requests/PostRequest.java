@@ -23,17 +23,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import jd.http.QueryInfo;
-import jd.http.Request;
-import jd.http.URLConnectionAdapter;
-import jd.parser.html.Form;
-
 import org.appwork.utils.KeyValueEntry;
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
+import org.appwork.utils.parser.UrlQuery;
+
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
+import jd.parser.html.Form;
 
 public class PostRequest extends Request {
     private static enum SEND {
@@ -43,7 +43,7 @@ public class PostRequest extends Request {
         NOTHING
     }
 
-    public static java.util.List<KeyValueStringEntry> queryToVariableList(final QueryInfo post) {
+    public static java.util.List<KeyValueStringEntry> queryToVariableList(final UrlQuery post) {
         if (post == null) {
             return null;
         }

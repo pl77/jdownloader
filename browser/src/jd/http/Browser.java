@@ -42,6 +42,7 @@ import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
+import org.appwork.utils.parser.UrlQuery;
 
 import jd.http.requests.FormData;
 import jd.http.requests.GetRequest;
@@ -667,17 +668,17 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, QueryInfo, String)
+     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
      *
      * 
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
-        return this.createPostRequest(url, QueryInfo.get(post), encoding);
+        return this.createPostRequest(url, UrlQuery.get(post), encoding);
 
     }
 
-    public PostRequest createPostRequest(String url, QueryInfo post, final String encoding) throws IOException {
+    public PostRequest createPostRequest(String url, UrlQuery post, final String encoding) throws IOException {
         final PostRequest request = new PostRequest(this.getURL(url));
         if (post != null) {
             request.addAll(post.list());
@@ -700,7 +701,7 @@ public class Browser {
     /**
      * Creates a new POstrequest based on a variable HashMap
      */
-    public PostRequest createPostRequest(final String url, final QueryInfo post) throws IOException {
+    public PostRequest createPostRequest(final String url, final UrlQuery post) throws IOException {
         return this.createPostRequest(url, post.list(), null);
     }
 
@@ -1316,24 +1317,24 @@ public class Browser {
     /**
      * Opens a Post Connection based on a variable HashMap
      *
-     * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
+     * @deprecated Use {@link #openPostConnection(String, UrlQuery)} instead
      */
     @Deprecated
     public URLConnectionAdapter openPostConnection(final String url, final LinkedHashMap<String, String> post) throws IOException {
-        return this.openRequestConnection(this.createPostRequest(url, QueryInfo.get(post)));
+        return this.openRequestConnection(this.createPostRequest(url, UrlQuery.get(post)));
     }
 
     /**
      * OPens a new Post connection based on a query string
      *
-     * @deprecated Use {@link #openPostConnection(String, QueryInfo)} instead
+     * @deprecated Use {@link #openPostConnection(String, UrlQuery)} instead
      */
     @Deprecated
     public URLConnectionAdapter openPostConnection(final String url, final String post) throws IOException {
         return this.openPostConnection(url, Request.parseQuery(post));
     }
 
-    public URLConnectionAdapter openPostConnection(String url, QueryInfo query) throws IOException {
+    public URLConnectionAdapter openPostConnection(String url, UrlQuery query) throws IOException {
         return this.openRequestConnection(this.createPostRequest(url, query));
     }
 
@@ -1472,24 +1473,24 @@ public class Browser {
     /**
      * loads a new page (post)
      *
-     * @deprecated Use {@link #postPage(String, QueryInfo)} instead
+     * @deprecated Use {@link #postPage(String, UrlQuery)} instead
      */
     @Deprecated
     public String postPage(final String url, final LinkedHashMap<String, String> post) throws IOException {
-        return this.postPage(url, QueryInfo.get(post));
+        return this.postPage(url, UrlQuery.get(post));
     }
 
     /**
      * loads a new page (POST)
      *
-     * @deprecated Use {@link #postPage(String, QueryInfo)} or {@link #postPageRaw(String, String) instead
+     * @deprecated Use {@link #postPage(String, UrlQuery)} or {@link #postPageRaw(String, String) instead
      */
     @Deprecated
     public String postPage(final String url, final String post) throws IOException {
         return this.postPage(url, Request.parseQuery(post));
     }
 
-    public String postPage(String url, QueryInfo queryInfo) throws IOException {
+    public String postPage(String url, UrlQuery queryInfo) throws IOException {
         return this.getPage(this.createPostRequest(url, queryInfo));
     }
 

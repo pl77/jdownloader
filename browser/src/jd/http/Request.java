@@ -42,6 +42,7 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
+import org.appwork.utils.parser.UrlQuery;
 
 import jd.nutils.encoding.Encoding;
 
@@ -73,53 +74,16 @@ public abstract class Request {
 
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
-     *
+     * 
+     * @deprecated Use UrlQuery.parse instead
      * @param query
      *            kann ein reines query ein (&key=value) oder eine url mit query
      * @return
      * @throws MalformedURLException
      */
-    public static QueryInfo parseQuery(String query) throws MalformedURLException {
-        if (query == null) {
-            return null;
-        }
-        final QueryInfo ret = new QueryInfo();
-        if (StringUtils.startsWithCaseInsensitive(query, "https://") || StringUtils.startsWithCaseInsensitive(query, "http://")) {
-            try {
-                query = URLHelper.createURL(query).getQuery();
-            } catch (final IOException e) {
-            }
-        }
-        if (query == null) {
-            return ret;
-        }
-        query = query.trim();
-        final StringBuilder sb = new StringBuilder();
-        String key = null;
-        for (int i = 0; i < query.length(); i++) {
-            char c = query.charAt(i);
-            // https://tools.ietf.org/html/rfc3986
-            // The characters slash ("/") and question mark ("?") may represent data
-            // within the query component.
-            if (c == '?' && i == 0) {
-                sb.setLength(0);
-            } else if (c == '&') {
-                if (key != null || sb.length() > 0) {
-                    ret.add(key, sb.toString());
-                }
-                sb.setLength(0);
-                key = null;
-            } else if (c == '=' && key == null) {
-                key = sb.toString();
-                sb.setLength(0);
-            } else {
-                sb.append(c);
-            }
-        }
-        if (key != null || sb.length() > 0) {
-            ret.add(key, sb.toString());
-        }
-        return ret;
+    @Deprecated
+    public static UrlQuery parseQuery(String query) throws MalformedURLException {
+        return UrlQuery.parse(query);
 
     }
 
