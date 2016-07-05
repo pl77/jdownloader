@@ -28,12 +28,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import jd.nutils.encoding.Encoding;
+
 import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
@@ -43,8 +46,6 @@ import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.parser.UrlQuery;
-
-import jd.nutils.encoding.Encoding;
 
 public abstract class Request {
 
@@ -74,7 +75,7 @@ public abstract class Request {
 
     /**
      * Gibt eine Hashmap mit allen key:value pairs im query zurück
-     * 
+     *
      * @deprecated Use UrlQuery.parse instead
      * @param query
      *            kann ein reines query ein (&key=value) oder eine url mit query
@@ -89,7 +90,17 @@ public abstract class Request {
 
     public static byte[] read(final URLConnectionAdapter con, int readLimit) throws IOException {
         readLimit = Math.max(0, readLimit);
-        final InputStream is = con.getInputStream();
+        InputStream is = null;
+        try {
+            is = con.getInputStream();
+        } catch (final IOException e) {
+            if (con.getHeaderField(HTTPConstants.HEADER_RESPONSE_LOCATION) == null) {
+                throw e;
+            }
+            // ignore exception in case there is a location header
+            // workaround for stupid firewall/av systems that mess with connections
+            LoggerFactory.getDefaultLogger().log(e);
+        }
         if (is == null) {
             // TODO: check if we have to close con here
             return null;
