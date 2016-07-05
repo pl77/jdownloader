@@ -89,7 +89,6 @@ public abstract class Request {
     }
 
     public static byte[] read(final URLConnectionAdapter con, int readLimit) throws IOException {
-        readLimit = Math.max(0, readLimit);
         InputStream is = null;
         try {
             is = con.getInputStream();
@@ -106,6 +105,7 @@ public abstract class Request {
             return null;
         }
         try {
+            final int limit = Math.max(0, readLimit);
             if (HTTPConnection.RequestMethod.HEAD.equals(con.getRequestMethod())) {
                 if (is.read() != -1) {
                     throw new IOException("HeadRequest with content!?");
@@ -126,8 +126,8 @@ public abstract class Request {
                     final byte[] buffer = new byte[32767];
                     while ((len = is.read(buffer)) != -1) {
                         if (len > 0) {
-                            if (bos.size() + len > readLimit) {
-                                throw new IOException("Content-length too big " + (bos.size() + len) + " >= " + readLimit);
+                            if (bos.size() + len > limit) {
+                                throw new IOException("Content-length too big " + (bos.size() + len) + " >= " + limit);
                             }
                             bos.write(buffer, 0, len);
                         }
