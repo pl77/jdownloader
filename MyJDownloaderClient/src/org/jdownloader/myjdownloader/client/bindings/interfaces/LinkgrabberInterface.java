@@ -34,13 +34,16 @@
 package org.jdownloader.myjdownloader.client.bindings.interfaces;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.jdownloader.myjdownloader.client.bindings.AddLinksQuery;
 import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Action;
 import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.Mode;
 import org.jdownloader.myjdownloader.client.bindings.CleanupActionOptions.SelectionType;
 import org.jdownloader.myjdownloader.client.bindings.ClientApiNameSpace;
+import org.jdownloader.myjdownloader.client.bindings.JobLinkCrawlerStorable;
 import org.jdownloader.myjdownloader.client.bindings.LinkCollectingJobStorable;
+import org.jdownloader.myjdownloader.client.bindings.LinkCrawlerJobQuery;
 import org.jdownloader.myjdownloader.client.bindings.LinkVariantStorable;
 import org.jdownloader.myjdownloader.client.bindings.PriorityStorable;
 import org.jdownloader.myjdownloader.client.bindings.UrlDisplayTypeStorable;
@@ -114,5 +117,9 @@ public interface LinkgrabberInterface extends Linkable {
     boolean abort();
 
     boolean isCollecting();
+
+    boolean abort(long jobId);
+
+    List<JobLinkCrawlerStorable> queryLinkCrawlerJobs(final LinkCrawlerJobQuery query);
 
 }
