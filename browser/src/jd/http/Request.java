@@ -340,18 +340,8 @@ public abstract class Request {
 
     protected RequestHeader getDefaultRequestHeader(final URL url) {
         final RequestHeader headers = new RequestHeader();
-        switch (CrossSystem.getOSFamily()) {
-        case WINDOWS:
-            headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0");
-            break;
-        case MAC:
-            headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
-            break;
-        case LINUX:
-        default:
-            headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0");
-            break;
-        }
+
+        headers.put("User-Agent", this.getSuggestedUserAgent());
         headers.put("Accept", this.getSuggestedAcceptHeader(url));
         headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
@@ -363,6 +353,48 @@ public abstract class Request {
         headers.put("Cache-Control", "no-cache");
         // headers.put("Pragma", "no-cache");
         return headers;
+    }
+
+    protected String getSuggestedUserAgent() {
+        final String archString = CrossSystem.getARCHString();
+        final String osString;
+        switch (CrossSystem.getOS()) {
+        case FREEBSD:
+            osString = "FreeBSD";
+            break;
+        case DRAGONFLYBSD:
+            osString = "DragonFly";
+            break;
+        case OPENBSD:
+            osString = "OpenBSD";
+            break;
+        case NETBSD:
+            osString = "NetBSD";
+            break;
+        case LINUX:
+            osString = "Linux";
+            break;
+        default:
+            osString = null;
+            break;
+        }
+
+        if (archString != null && osString != null) {
+            return "Mozilla/5.0 (X11; U; " + osString.trim() + " " + archString.trim() + "; rv:44.0) Gecko/20100101 Firefox/44.0";
+        } else {
+            switch (CrossSystem.getOSFamily()) {
+            case WINDOWS:
+                return "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0";
+            case MAC:
+                return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
+            default:
+                if (CrossSystem.is64BitArch()) {
+                    return "Mozilla/5.0 (X11; U; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0";
+                } else {
+                    return "Mozilla/5.0 (X11; U; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0";
+                }
+            }
+        }
     }
 
     protected String getSuggestedAcceptHeader(final URL url) {

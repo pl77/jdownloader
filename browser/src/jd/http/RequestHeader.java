@@ -26,22 +26,22 @@ import org.appwork.utils.net.HeaderCollection;
 public class RequestHeader implements Iterable<HTTPHeader> {
     /**
      * For more header fields see
-     * 
+     *
      * @link(http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14).
      */
     private boolean                dominant = false;
-    
+
     private final HeaderCollection headers  = new HeaderCollection();
-    
+
     public RequestHeader() {
         this.headers.getAllowedDuplicatedKeys().clear();
     }
-    
+
     public RequestHeader(final Map<String, String> headers) {
         this();
         this.putAll(headers);
     }
-    
+
     public RequestHeader(final RequestHeader requestHeader) {
         this();
         if (requestHeader != null) {
@@ -49,71 +49,80 @@ public class RequestHeader implements Iterable<HTTPHeader> {
             this.dominant = requestHeader.dominant;
         }
     }
-    
+
     public void clear() {
         this.headers.clear();
     }
-    
+
     @Override
     public RequestHeader clone() {
         return new RequestHeader(this);
     }
-    
+
     public boolean contains(final String key) {
         return this.headers.get(key) != null;
     }
-    
+
     public String get(final String key) {
         final HTTPHeader header = this.headers.get(key);
-        if (header != null) { return header.getValue(); }
+        if (header != null) {
+            return header.getValue();
+        }
         return null;
     }
-    
+
     public boolean isDominant() {
         return this.dominant;
     }
-    
+
     @Override
     public Iterator<HTTPHeader> iterator() {
         return this.headers.iterator();
     }
-    
+
     public void put(final HTTPHeader header) {
         this.headers.add(header);
     }
-    
+
     public void put(final String key, final String value) {
         this.put(new HTTPHeader(key, value));
     }
-    
+
     public void putAll(final Map<String, String> properties) {
         for (final Entry<String, String> entry : properties.entrySet()) {
             this.put(entry.getKey(), entry.getValue());
         }
     }
-    
+
     public void putAll(final RequestHeader headers) {
         for (final HTTPHeader header : headers) {
             this.put(header);
         }
     }
-    
+
     public String remove(final String key) {
         final HTTPHeader header = this.headers.get(key);
-        if (header != null && this.headers.remove(header)) { return header.getValue(); }
+        if (header != null && this.headers.remove(header)) {
+            return header.getValue();
+        }
         return null;
     }
-    
+
     /**
      * if a header is dominant, it will not get merged with existing headers. It will replace it completely
-     * 
+     *
      * @param dominant
      */
     public void setDominant(final boolean dominant) {
         this.dominant = dominant;
     }
-    
+
     public int size() {
         return this.headers.size();
+    }
+
+    @Override
+    public String toString() {
+        return this.headers.toString();
     }
 }
