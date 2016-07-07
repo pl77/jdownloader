@@ -220,7 +220,7 @@ public abstract class Request {
             headers.remove(HTTPConstants.HEADER_REQUEST_REFERER);
             this.setHeaders(headers);
         } else {
-            this.setHeaders(this.getDefaultRequestHeader());
+            this.setHeaders(this.getDefaultRequestHeader(this.getURL()));
         }
         this.setAuth(cloneRequest.getURL());
     }
@@ -234,7 +234,7 @@ public abstract class Request {
 
     public Request(final URL url) throws IOException {
         this.setURL(url);
-        this.setHeaders(this.getDefaultRequestHeader());
+        this.setHeaders(this.getDefaultRequestHeader(this.getURL()));
         this.setAuth(url);
     }
 
@@ -336,7 +336,9 @@ public abstract class Request {
         return this.customCharset;
     }
 
-    protected RequestHeader getDefaultRequestHeader() {
+    protected static final String DEFAULTACCEPTHEADER = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+
+    protected RequestHeader getDefaultRequestHeader(final URL url) {
         final RequestHeader headers = new RequestHeader();
         switch (CrossSystem.getOSFamily()) {
         case WINDOWS:
@@ -350,7 +352,7 @@ public abstract class Request {
             headers.put("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0");
             break;
         }
-        headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        headers.put("Accept", this.getSuggestedAcceptHeader(url));
         headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
             /* deflate only java >=1.6 */
@@ -361,6 +363,22 @@ public abstract class Request {
         headers.put("Cache-Control", "no-cache");
         // headers.put("Pragma", "no-cache");
         return headers;
+    }
+
+    protected String getSuggestedAcceptHeader(final URL url) {
+        if (url != null && url.getPath() != null) {
+            final String path = url.getPath();
+            if (path.matches(".+(jpg|jpeg)$")) {
+                return "image/jpeg,image/*;q=0.8,*/*;q=0.5";
+            } else if (path.matches(".+png$")) {
+                return "image/png,image/*;q=0.8,*/*;q=0.5";
+            } else if (path.matches(".+gif$")) {
+                return "image/gif,image/*;q=0.8,*/*;q=0.5";
+            } else if (path.matches(".+tiff?$")) {
+                return "image/tiff,image/*;q=0.8,*/*;q=0.5";
+            }
+        }
+        return Request.DEFAULTACCEPTHEADER;
     }
 
     public RequestHeader getHeaders() {
