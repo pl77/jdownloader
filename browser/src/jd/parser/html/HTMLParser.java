@@ -555,7 +555,7 @@ public class HTMLParser {
 
     static {
         try {
-            HTMLParser.mp = Pattern.compile("(\\\\\"|\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|\\1|<|>|\r|\n|\f|\t|$|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            HTMLParser.mp = Pattern.compile("(\\\\\"|\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|\\1|<|>|\\[/|\r|\n|\f|\t|$|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         } catch (final Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
@@ -1056,7 +1056,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
