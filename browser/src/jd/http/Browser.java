@@ -1384,7 +1384,7 @@ public class Browser {
                     try {
                         Browser.waitForPageAccess(this, request);
                     } catch (final InterruptedException e) {
-                        throw new IOException("requestIntervalTime Exception");
+                        throw new BrowserException("requestIntervalTime Exception", request, e);
                     }
                     final URLConnectionAdapter connection;
                     try {
