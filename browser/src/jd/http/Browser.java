@@ -579,7 +579,7 @@ public class Browser {
      * @return
      * @throws Exception
      */
-    public Request createFormRequest(final Form form) throws Exception {
+    public Request createFormRequest(final Form form) throws IOException {
         URL base = null;
         final Request lRequest = this.getRequest();
         if (lRequest != null) {
@@ -710,6 +710,28 @@ public class Browser {
      */
     public PostRequest createPostRequest(final String url, final String post) throws MalformedURLException, IOException {
         return this.createPostRequest(url, Request.parseQuery(post));
+    }
+
+    public String followRedirect() throws IOException {
+        return this.followRedirect(false);
+    }
+
+    public String followRedirect(final boolean followAllRedirects) throws IOException {
+        final Request lRequest = this.getRequest();
+        if (lRequest == null) {
+            throw new IllegalStateException("Request is null");
+        }
+        if (lRequest.getLocation() != null) {
+            if (lRequest.getHtmlCode() == null) {
+                this.loadConnection(lRequest.getHttpConnection());
+            }
+            final Request redirectRequest = this.createRedirectFollowingRequest(this.request);
+            return this.loadConnection(this.openRequestConnection(redirectRequest, followAllRedirects)).getHTMLSource();
+        }
+        if (lRequest.getHtmlCode() != null) {
+            return lRequest.getHTMLSource();
+        }
+        return this.loadConnection(lRequest.getHttpConnection()).getHTMLSource();
     }
 
     /**
@@ -1798,7 +1820,7 @@ public class Browser {
         this.verbose = b;
     }
 
-    public String submitForm(final Form form) throws Exception {
+    public String submitForm(final Form form) throws IOException {
         return this.getPage(this.createFormRequest(form));
     }
 
