@@ -16,6 +16,7 @@
 
 package jd.parser.html;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,8 @@ import jd.parser.Regex;
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Hex;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.utils.net.URLHelper;
 
 public class HTMLParser {
 
@@ -588,6 +591,9 @@ public class HTMLParser {
     final private static Pattern                hdotsPattern                = Pattern.compile("h.{2,3}://", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                specialReplacePattern       = Pattern.compile("'", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    final private static Pattern                urlReplaceBracketOpen       = Pattern.compile("\\(", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern                urlReplaceBracketClose      = Pattern.compile("\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     final private static Pattern                missingHTTPPattern          = Pattern.compile("^www\\.", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -942,12 +948,24 @@ public class HTMLParser {
                 }
             }
         }
-        /* ! is allowed so we convert back %21 to ! */
-        // input = input.replaceAll(HTMLParser.specialReplace2Pattern, "!");
-        /* ' must be %27 encoded */
-        input = input.replaceAll(HTMLParser.specialReplacePattern, "%27");
-        /* spaces must be %20 encoded */
-        return input.replaceAll(HTMLParser.singleSpacePattern, "%20");
+        try {
+            final URL url = new URL(input.toString());
+            final String originalPath = url.getPath();
+            if (originalPath != null) {
+                String path = originalPath;
+                path = HTMLParser.urlReplaceBracketOpen.matcher(path).replaceAll("%28");
+                path = HTMLParser.urlReplaceBracketClose.matcher(path).replaceAll("%29");
+                path = HTMLParser.specialReplacePattern.matcher(path).replaceAll("%27");
+                path = HTMLParser.singleSpacePattern.matcher(path).replaceAll("%20");
+                if (!originalPath.equals(path)) {
+                    final String ret = URLHelper.createURL(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), path, url.getQuery(), url.getRef());
+                    return new HtmlParserCharSequence(ret);
+                }
+            }
+        } catch (Throwable e) {
+            LoggerFactory.getDefaultLogger().log(e);
+        }
+        return input;
     }
 
     private final static LinkedHashMap<Pattern, String> URLDECODE = new LinkedHashMap<Pattern, String>();
