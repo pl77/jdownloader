@@ -963,7 +963,9 @@ public class HTMLParser {
                 }
             }
         } catch (Throwable e) {
-            LoggerFactory.getDefaultLogger().log(e);
+            if (!input.toString().matches("^" + protocolPrefixes + ".+")) {
+                LoggerFactory.getDefaultLogger().log(e);
+            }
         }
         return input;
     }
@@ -972,6 +974,7 @@ public class HTMLParser {
     static {
         // has to be first. to allow for multiple double encode of % eg. %253A%252F%252F
         HTMLParser.URLDECODE.put(Pattern.compile("%25"), "%");
+        // rest can be in any order
         HTMLParser.URLDECODE.put(Pattern.compile("%2F"), "/");
         HTMLParser.URLDECODE.put(Pattern.compile("%3A"), ":");
         HTMLParser.URLDECODE.put(Pattern.compile("%3F"), "?");
