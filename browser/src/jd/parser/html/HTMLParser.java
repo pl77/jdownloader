@@ -963,7 +963,7 @@ public class HTMLParser {
                 }
             }
         } catch (Throwable e) {
-            if (!input.toString().matches("^" + protocolPrefixes + ".+")) {
+            if (!input.matches(Pattern.compile("^" + HTMLParser.protocolPrefixes + ".+"))) {
                 LoggerFactory.getDefaultLogger().log(e);
             }
         }
@@ -1077,7 +1077,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
