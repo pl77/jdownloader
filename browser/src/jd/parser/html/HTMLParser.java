@@ -544,6 +544,7 @@ public class HTMLParser {
     final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\\\\\"|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\\\\\"|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
     public final static String                  protocolFile                = "file:/";
     final private static String                 protocolPrefixes            = "((?:mega|chrome|directhttp://https?|usenet|flashget|https?viajd|https?|ccf|dlc|ftp|ftpviajd|jd|rsdf|jdlist|youtubev2" + (!Application.isJared(null) ? "|jdlog" : "") + ")://|" + HTMLParser.protocolFile + "|magnet:)";
+
     final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -582,6 +583,7 @@ public class HTMLParser {
     final private static HtmlParserCharSequence directHTTP                  = new HtmlParserCharSequence("directhttp://");
     final private static HtmlParserCharSequence httpviajd                   = new HtmlParserCharSequence("httpviajd://");
     final private static HtmlParserCharSequence httpsviajd                  = new HtmlParserCharSequence("httpsviajd://");
+    final private static HtmlParserCharSequence http                        = new HtmlParserCharSequence("http://");
     final private static Pattern                httpRescue                  = Pattern.compile("h.{2,3}://");
 
     final private static Pattern                tagsPattern                 = Pattern.compile(".*<.*>.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -741,8 +743,8 @@ public class HTMLParser {
             if (baseURL != null && hrefURL != null) {
                 hrefURL = HTMLParser.mergeUrl(baseURL, hrefURL);
             } else {
-                /* no baseURL available, we are unable to try mergeURL */
-                hrefURL = null;
+                /* no baseURL available, lets give a hint with http protocol */
+                hrefURL = HTMLParser.mergeUrl(HTMLParser.http, hrefURL);
             }
         }
         if (protocol != null || (protocol = HTMLParser.getProtocol(hrefURL)) != null) {
@@ -948,6 +950,7 @@ public class HTMLParser {
                 }
             }
         }
+
         try {
             final URL url = new URL(input.toString());
             final String originalPath = url.getPath();
@@ -963,7 +966,8 @@ public class HTMLParser {
                 }
             }
         } catch (Throwable e) {
-            if (!input.matches(Pattern.compile("^" + HTMLParser.protocolPrefixes + ".+"))) {
+            final HtmlParserCharSequence protocol = HTMLParser.getProtocol(input);
+            if (protocol == null) {
                 LoggerFactory.getDefaultLogger().log(e);
             }
         }
@@ -1077,7 +1081,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
