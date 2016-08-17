@@ -46,12 +46,15 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     private Boolean      removeDownloadLinksAfterExtraction = null;
     private Boolean      removeFilesAfterExtraction         = null;
 
-    public ArchiveSettingsStorable(/* Storable */) {
+    public static String createHelpText() {
+        return "Leave Boolean values empty or set them to null if you want JD to use the default value";
+    }
 
+    public ArchiveSettingsStorable(/* Storable */) {
     }
 
     public Boolean getAutoExtract() {
-        return autoExtract;
+        return this.autoExtract;
     }
 
     public void setAutoExtract(Boolean autoExtract) {
@@ -59,7 +62,7 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     }
 
     public String getExtractPath() {
-        return extractPath;
+        return this.extractPath;
     }
 
     public void setExtractPath(String extractPath) {
@@ -67,7 +70,7 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     }
 
     public String getFinalPassword() {
-        return finalPassword;
+        return this.finalPassword;
     }
 
     public void setFinalPassword(String finalPassword) {
@@ -75,7 +78,7 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     }
 
     public List<String> getPasswords() {
-        return passwords;
+        return this.passwords;
     }
 
     public void setPasswords(List<String> passwords) {
@@ -83,7 +86,7 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     }
 
     public Boolean getRemoveDownloadLinksAfterExtraction() {
-        return removeDownloadLinksAfterExtraction;
+        return this.removeDownloadLinksAfterExtraction;
     }
 
     public void setRemoveDownloadLinksAfterExtraction(Boolean removeDownloadLinksAfterExtraction) {
@@ -91,7 +94,7 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     }
 
     public Boolean getRemoveFilesAfterExtraction() {
-        return removeFilesAfterExtraction;
+        return this.removeFilesAfterExtraction;
     }
 
     public void setRemoveFilesAfterExtraction(Boolean removeFilesAfterExtraction) {
@@ -99,7 +102,7 @@ public class ArchiveSettingsStorable extends AbstractJsonData {
     }
 
     public String getArchiveId() {
-        return archiveId;
+        return this.archiveId;
     }
 
     public void setArchiveId(String archiveId) {
