@@ -739,8 +739,8 @@ public class HTMLParser {
             }
         }
         HtmlParserCharSequence protocol = HTMLParser.getProtocol(hrefURL);
-        if (protocol == null) {
-            if (baseURL != null && hrefURL != null) {
+        if (protocol == null && hrefURL != null) {
+            if (baseURL != null) {
                 hrefURL = HTMLParser.mergeUrl(baseURL, hrefURL);
             } else {
                 /* no baseURL available, lets give a hint with http protocol */
@@ -1081,7 +1081,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
