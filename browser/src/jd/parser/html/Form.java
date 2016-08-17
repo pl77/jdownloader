@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.parser.html;
 
 import java.net.MalformedURLException;
@@ -28,20 +27,18 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jd.nutils.encoding.HTMLEntities;
-import jd.parser.Regex;
-import jd.utils.EditDistance;
-
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.URLHelper;
 
-public class Form {
+import jd.nutils.encoding.HTMLEntities;
+import jd.parser.Regex;
+import jd.utils.EditDistance;
 
+public class Form {
     public enum MethodType {
         GET,
         POST
-
     }
 
     /**
@@ -61,11 +58,8 @@ public class Form {
         while (formmatcher.find()) {
             final String total = formmatcher.group(0);
             // System.out.println(inForm);
-
             final Form form = new Form(total);
-
             forms.add(form);
-
         }
         return forms.toArray(new Form[forms.size()]);
     }
@@ -74,18 +68,12 @@ public class Form {
      * Action der Form entspricht auch oft einer URL
      */
     private String                        action;
-
     private java.util.List<InputField>    inputfields;
-
     private String                        htmlcode = null;
-
     private MethodType                    method   = MethodType.GET;
-
     /* default encoding for http forms */
     private String                        encoding = "application/x-www-form-urlencoded";
-
     private InputField                    preferredSubmit;
-
     private final HashMap<String, String> keyValueMap;
 
     public Form() {
@@ -161,7 +149,6 @@ public class Form {
     public String getBestVariable(final String varname) {
         String best = null;
         int bestDist = Integer.MAX_VALUE;
-
         for (final InputField ipf : this.inputfields) {
             final int dist = EditDistance.getLevenshteinDistance(varname, ipf.getKey());
             if (dist < bestDist) {
@@ -202,7 +189,6 @@ public class Form {
             }
         }
         return null;
-
     }
 
     public InputField getInputFieldByType(final String type) {
@@ -212,7 +198,6 @@ public class Form {
             }
         }
         return null;
-
     }
 
     public java.util.List<InputField> getInputFields() {
@@ -260,7 +245,6 @@ public class Form {
             stbuffer.append(ipf.getValue());
         }
         return stbuffer.toString();
-
     }
 
     /**
@@ -340,7 +324,6 @@ public class Form {
 
     private void parse(final String total) {
         this.htmlcode = total;
-
         // form.baseRequest = requestInfo;
         final String header = new Regex(total, "<[\\s]*form(.*?)>").getMatch(0);
         //
@@ -349,7 +332,6 @@ public class Form {
         final String[][] headerEntries2 = new Regex(header, "(\\w+?)\\s*=\\s*([^> \"']+)").getMatches();
         this.parseHeader(headerEntries);
         this.parseHeader(headerEntries2);
-
         this.parseInputFields();
     }
 
@@ -477,7 +459,8 @@ public class Form {
                 return;
             }
         }
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No exact match for submit found! Trying to find best match now!");
+        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No exact match for submit found! Trying to find
+        // best match now!");
         for (final InputField ipf : this.inputfields) {
             if (ipf.getType() != null && ipf.getValue() != null && ipf.getType().equalsIgnoreCase("submit") && ipf.getValue().contains(preferredSubmit)) {
                 this.preferredSubmit = ipf;
@@ -485,12 +468,10 @@ public class Form {
             }
         }
         throw new IllegalArgumentException("No such Submitfield: " + preferredSubmit);
-
     }
 
     public void setProperty(final String key, final String value) {
         this.keyValueMap.put(key, value);
-
     }
 
     @Override
@@ -505,11 +486,9 @@ public class Form {
             ret.append("Method: GET\n");
         }
         for (final InputField ipf : this.inputfields) {
-
             ret.append(ipf.toString());
             ret.append('\n');
         }
-
         ret.append(this.keyValueMap.toString());
         return ret.toString();
     }
@@ -517,5 +496,4 @@ public class Form {
     public boolean removeInputField(InputField f) {
         return this.inputfields.remove(f);
     }
-
 }

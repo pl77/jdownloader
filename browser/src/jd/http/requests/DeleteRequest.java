@@ -13,23 +13,21 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http.requests;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import jd.http.Request;
-
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
+
+import jd.http.Request;
 
 /**
  * The HTTP/1.0 specification defined the GET, POST and HEAD methods and the HTTP/1.1 specification. The GET method requests a
  * representation of the specified resource. Requests using GET should only retrieve data and should have no other effect.
  */
-public class DeleteRequest extends Request {
-
+public class DeleteRequest extends PostRequest {
     public DeleteRequest(final Request cloneRequest) {
         super(cloneRequest);
     }
@@ -51,21 +49,15 @@ public class DeleteRequest extends Request {
         super(url);
     }
 
+
+
     @Override
-    public DeleteRequest cloneRequest() {
+    protected PostRequest cloneRequestRaw() {
         return new DeleteRequest(this);
     }
 
-    /** {@inheritDoc} */
     @Override
-    public long postRequest() throws IOException {
-        return 0;
+    protected RequestMethod getRequestMethod() {
+        return RequestMethod.DELETE;
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void preRequest() throws IOException {
-        this.httpConnection.setRequestMethod(RequestMethod.DELETE);
-    }
-
 }

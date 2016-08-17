@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http.requests;
 
 import java.io.IOException;
@@ -92,13 +91,17 @@ public class PostRequest extends Request {
 
     @Override
     public PostRequest cloneRequest() {
-        final PostRequest ret = new PostRequest(this);
+        final PostRequest ret = this.cloneRequestRaw();
         ret.addAll(this.postVariables);
         ret.sendWHAT = this.sendWHAT;
         ret.postString = this.postString;
         ret.contentType = this.contentType;
         ret.postBytes = this.postBytes;
         return ret;
+    }
+
+    protected PostRequest cloneRequestRaw() {
+        return new PostRequest(this);
     }
 
     public String getPostDataString() {
@@ -186,7 +189,7 @@ public class PostRequest extends Request {
 
     @Override
     public void preRequest() throws IOException {
-        this.httpConnection.setRequestMethod(RequestMethod.POST);
+        this.httpConnection.setRequestMethod(this.getRequestMethod());
         if (this.contentType != null) {
             /* set Content Type */
             this.httpConnection.setRequestProperty("Content-Type", this.contentType);
@@ -207,6 +210,10 @@ public class PostRequest extends Request {
             this.sendWHAT = SEND.NOTHING;
             this.httpConnection.setRequestProperty("Content-Length", "0");
         }
+    }
+
+    protected RequestMethod getRequestMethod() {
+        return RequestMethod.POST;
     }
 
     public void setContentType(final String contentType) {
