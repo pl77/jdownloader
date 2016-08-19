@@ -512,11 +512,22 @@ public abstract class Request {
      */
     protected String location = null;
 
+    protected String getLocationHeader(URLConnectionAdapter httpConnection) {
+        if (httpConnection != null) {
+            final String location = httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_LOCATION);
+            final int responseCode = httpConnection.getResponseCode();
+            if (location != null && (responseCode == 201 || responseCode == 301 || responseCode == 302 || responseCode == 303 || responseCode == 305 || responseCode == 307)) {
+                return location;
+            }
+        }
+        return null;
+    }
+
     public String getLocation() {
         final String location = this.location;
         if (location == null) {
             if (this.httpConnection != null) {
-                final String locationHeader = this.httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_LOCATION);
+                final String locationHeader = this.getLocationHeader(this.httpConnection);
                 if (StringUtils.isEmpty(locationHeader)) {
                     /* check if we have an old-school refresh header */
                     final String refresh = this.httpConnection.getHeaderField("refresh");
