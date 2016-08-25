@@ -17,7 +17,7 @@ public class URLConnectionAdapterHTTPProxyImpl extends HTTPProxyHTTPConnectionIm
 
     /**
      * constructor
-     * 
+     *
      * @param url
      *            the {@link URL}
      * @param proxy
@@ -35,6 +35,16 @@ public class URLConnectionAdapterHTTPProxyImpl extends HTTPProxyHTTPConnectionIm
         } catch (final IOException e) {
             return null;
         }
+    }
+
+    @Override
+    public long[] getRange() {
+        final long[] ret = super.getRange();
+        if (ret == null && this.getResponseCode() == 206) {
+            this.ranges = URLConnectionAdapterDirectImpl.buildFakeContentRange(this);
+            return this.ranges;
+        }
+        return ret;
     }
 
     /** {@inheritDoc} */

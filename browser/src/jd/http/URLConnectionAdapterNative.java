@@ -38,6 +38,16 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
     }
 
     @Override
+    public long[] getRange() {
+        final long[] ret = super.getRange();
+        if (ret == null && this.getResponseCode() == 206) {
+            this.ranges = URLConnectionAdapterDirectImpl.buildFakeContentRange(this);
+            return this.ranges;
+        }
+        return ret;
+    }
+
+    @Override
     public Request getRequest() {
         return this.request;
     }

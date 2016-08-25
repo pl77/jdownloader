@@ -6,7 +6,10 @@ import java.net.URL;
 
 import jd.http.requests.PostFormDataRequest;
 import jd.http.requests.PostRequest;
+import jd.parser.Regex;
 
+import org.appwork.net.protocol.http.HTTPConstants;
+import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 
@@ -17,7 +20,7 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
 
     /**
      * constructor
-     * 
+     *
      * @param url
      *            the {@link URL}
      */
@@ -27,7 +30,7 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
 
     /**
      * constructor
-     * 
+     *
      * @param url
      *            the {@link URL}
      * @param proxy
@@ -45,6 +48,40 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
         } catch (final IOException e) {
             return null;
         }
+    }
+
+    @Override
+    public long[] getRange() {
+        final long[] ret = super.getRange();
+        if (ret == null && this.getResponseCode() == 206) {
+            this.ranges = URLConnectionAdapterDirectImpl.buildFakeContentRange(this);
+            return this.ranges;
+        }
+        return ret;
+    }
+
+    /**
+     * fakes the content-range for servers that don't send it in response but content-length matches requested range and response-code
+     * equals 206
+     *
+     * @param connection
+     * @return
+     */
+    protected static long[] buildFakeContentRange(HTTPConnection connection) {
+        if (connection.getResponseCode() == 206 && connection.getHeaderField(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE) == null) {
+            final long contentLength = connection.getContentLength();
+            final String rangeRequested = connection.getRequestProperty(HTTPConstants.HEADER_REQUEST_RANGE);
+            if (rangeRequested != null && contentLength >= 0) {
+                final String from = new Regex(rangeRequested, "bytes\\s*=\\s*(\\d*)-").getMatch(0);
+                final String to = new Regex(rangeRequested, "bytes\\s*=\\s*.*?-\\s*(\\d*)").getMatch(0);
+                if (from != null && to != null) {
+                    if (contentLength == Long.parseLong(to) - Long.parseLong(from) + 1) {
+                        return new long[] { Long.parseLong(from), Long.parseLong(to), -1 };
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /** {@inheritDoc} */

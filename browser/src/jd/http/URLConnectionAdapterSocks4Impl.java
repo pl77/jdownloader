@@ -20,7 +20,7 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
 
     /**
      * constructor
-     * 
+     *
      * @param url
      *            the {@link URL}
      * @param proxy
@@ -38,6 +38,16 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
         } catch (final IOException e) {
             return null;
         }
+    }
+
+    @Override
+    public long[] getRange() {
+        final long[] ret = super.getRange();
+        if (ret == null && this.getResponseCode() == 206) {
+            this.ranges = URLConnectionAdapterDirectImpl.buildFakeContentRange(this);
+            return this.ranges;
+        }
+        return ret;
     }
 
     /** {@inheritDoc} */
