@@ -9,6 +9,7 @@ import jd.http.requests.PostRequest;
 import jd.parser.Regex;
 
 import org.appwork.net.protocol.http.HTTPConstants;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
@@ -72,11 +73,17 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
             final long contentLength = connection.getContentLength();
             final String rangeRequested = connection.getRequestProperty(HTTPConstants.HEADER_REQUEST_RANGE);
             if (rangeRequested != null && contentLength >= 0) {
-                final String from = new Regex(rangeRequested, "bytes\\s*=\\s*(\\d*)-").getMatch(0);
-                final String to = new Regex(rangeRequested, "bytes\\s*=\\s*.*?-\\s*(\\d*)").getMatch(0);
-                if (from != null && to != null) {
-                    if (contentLength == Long.parseLong(to) - Long.parseLong(from) + 1) {
-                        return new long[] { Long.parseLong(from), Long.parseLong(to), -1 };
+                final String fromByte = new Regex(rangeRequested, "bytes\\s*=\\s*(\\d*)-").getMatch(0);
+                final String toByte = new Regex(rangeRequested, "bytes\\s*=\\s*.*?-\\s*(\\d*)").getMatch(0);
+                if (StringUtils.isNotEmpty(fromByte)) {
+                    if (StringUtils.isNotEmpty(toByte)) {
+                        if (contentLength == Long.parseLong(toByte) - Long.parseLong(fromByte) + 1) {
+                            return new long[] { Long.parseLong(fromByte), Long.parseLong(toByte), -1 };
+                        }
+                    } else {
+                        final long from = Long.parseLong(fromByte);
+                        final long to = from + contentLength - 1;
+                        return new long[] { from, to, to + 1 };
                     }
                 }
             }
