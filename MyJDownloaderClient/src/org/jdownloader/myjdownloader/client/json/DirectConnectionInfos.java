@@ -38,15 +38,24 @@ import java.util.List;
 public class DirectConnectionInfos {
     private List<DirectConnectionInfo> infos                    = null;
     private boolean                    rebindProtectionDetected = false;
+    private String                     mode                     = null;
 
+    public String getMode() {
+        return this.mode;
+    }
+    
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+    
     public boolean isRebindProtectionDetected() {
         return this.rebindProtectionDetected;
     }
-    
+
     public void setRebindProtectionDetected(boolean rebindProtectionDetected) {
         this.rebindProtectionDetected = rebindProtectionDetected;
     }
-    
+
     public DirectConnectionInfos(/* Storable */) {
     }
 
