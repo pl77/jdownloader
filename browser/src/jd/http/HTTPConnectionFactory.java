@@ -18,6 +18,8 @@ public class HTTPConnectionFactory {
                     return new URLConnectionAdapterDirectImpl(url, proxy);
                 case HTTP:
                     return new URLConnectionAdapterHTTPProxyImpl(url, proxy);
+                case HTTPS:
+                    return new URLConnectionAdapterHTTPProxyImpl(url, proxy);
                 case NONE:
                     return new URLConnectionAdapterDirectImpl(url, proxy);
                 case SOCKS4:
