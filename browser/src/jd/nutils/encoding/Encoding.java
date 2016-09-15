@@ -203,7 +203,6 @@ public class Encoding {
             return null;
         }
         str = HTMLEntities.unhtmlentities(str);
-
         str = HTMLEntities.unhtmlAmpersand(str);
         str = HTMLEntities.unhtmlAngleBrackets(str);
         str = HTMLEntities.unhtmlDoubleQuotes(str);
