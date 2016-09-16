@@ -40,6 +40,20 @@ public enum PriorityStorable {
     DEFAULT,
     LOW,
     LOWER,
-    LOWEST
-    
+    LOWEST;
+
+    public static PriorityStorable get(final String priority) {
+        PriorityStorable ret = PriorityStorable.DEFAULT;
+        try {
+            if (priority != null) {
+                ret = PriorityStorable.valueOf(priority);
+            }
+        } catch (final Throwable e) {
+        }
+        if (PriorityStorable.LOW.equals(ret) || PriorityStorable.LOWEST.equals(ret)) {
+            return PriorityStorable.LOWER;
+        } else {
+            return ret;
+        }
+    }
 }
