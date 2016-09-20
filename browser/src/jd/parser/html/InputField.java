@@ -19,6 +19,7 @@ package jd.parser.html;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import jd.nutils.encoding.Encoding;
 import jd.parser.Regex;
@@ -28,6 +29,10 @@ import org.appwork.utils.StringUtils;
 public class InputField {
 
     public static InputField parse(String data) {
+        return InputField.parse(data, -1, null);
+    }
+
+    protected static InputField parse(String data, final long timestamp, List<String> values) {
         // lets make all quotation marks within 'data' the same. As it's hard to make consistent regex 'matches' when quote marks are not
         // the same, without using lazy regex!.
         ArrayList<String> cleanupRegex = new ArrayList<String>();
@@ -82,9 +87,16 @@ public class InputField {
         String key = null;
         String value = null;
         final HashMap<String, String> properties = new HashMap<String, String>();
+        final String valueReplacement = "VALUE-" + timestamp + "-";
         for (String reg : input) {
             String[][] results = new Regex(data, reg).getMatches();
             for (final String[] match : results) {
+                if (values != null && match[1].matches("^" + valueReplacement + "\\d+$")) {
+                    final int index = Integer.parseInt(match[1].substring(valueReplacement.length()));
+                    if (index >= 0 && index < values.size()) {
+                        match[1] = values.get(index);
+                    }
+                }
                 if (match[0].equalsIgnoreCase("type") && type == null) {
                     type = match[1];
                 } else if (match[0].equalsIgnoreCase("name") && key == null) {

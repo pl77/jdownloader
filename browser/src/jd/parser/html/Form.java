@@ -27,13 +27,13 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.appwork.utils.KeyValueStringEntry;
-import org.appwork.utils.StringUtils;
-import org.appwork.utils.net.URLHelper;
-
 import jd.nutils.encoding.HTMLEntities;
 import jd.parser.Regex;
 import jd.utils.EditDistance;
+
+import org.appwork.utils.KeyValueStringEntry;
+import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.URLHelper;
 
 public class Form {
     public enum MethodType {
@@ -332,7 +332,7 @@ public class Form {
         final String[][] headerEntries2 = new Regex(header, "(\\w+?)\\s*=\\s*([^> \"']+)").getMatches();
         this.parseHeader(headerEntries);
         this.parseHeader(headerEntries2);
-        this.parseInputFields();
+        this.parseInputFields(total);
     }
 
     private void parseHeader(final String[][] headerEntries) {
@@ -368,11 +368,38 @@ public class Form {
         }
     }
 
-    private final void parseInputFields() {
+    private final void parseInputFields(final String htmlCode) {
         this.inputfields = new ArrayList<InputField>();
-        final Matcher matcher = Pattern.compile("(?s)(<\\s*(input|textarea|select).*?>)", Pattern.CASE_INSENSITIVE).matcher(this.htmlcode);
+        String escapedHtmlCode = htmlCode;
+        final List<String> values = new ArrayList<String>();
+        final long timeStamp = System.nanoTime();
+        final Pattern value1 = Pattern.compile("(?s)\"(.*?)(?<!\\\\)\"");
+        final Pattern value2 = Pattern.compile("(?s)'(.*?)'");
+        boolean matches = false;
+        while (true) {
+            Matcher matcher = value1.matcher(escapedHtmlCode);
+            matches = matcher.find();
+            if (!matches) {
+                matcher = value2.matcher(escapedHtmlCode);
+                matches = matcher.find();
+            }
+            if (matches) {
+                final String replace = matcher.group(0);
+                final String value = matcher.group(1);
+                if (replace == null) {
+                    break;
+                } else {
+                    final int index = values.size();
+                    values.add(value);
+                    escapedHtmlCode = escapedHtmlCode.replace(replace, "VALUE-" + timeStamp + "-" + index);
+                }
+            } else {
+                break;
+            }
+        }
+        final Matcher matcher = Pattern.compile("(?s)(<\\s*(input|textarea|select).*?>)", Pattern.CASE_INSENSITIVE).matcher(escapedHtmlCode);
         while (matcher.find()) {
-            final InputField nv = InputField.parse(matcher.group(1));
+            final InputField nv = InputField.parse(matcher.group(1), timeStamp, values);
             if (nv != null) {
                 this.addInputField(nv);
             }
