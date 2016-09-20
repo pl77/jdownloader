@@ -180,8 +180,7 @@ public class Encoding {
     }
 
     /**
-     * "http://rapidshare.com&#x2F;&#x66;&#x69;&#x6C;&#x65;&#x73;&#x2F;&#x35;&#x34;&#x35;&#x34;&#x31;&#x34;&#x38;&#x35;&#x2F;&#x63;&#x63;&#x66;&#x32;&#x72;&#x73;&#x64;&#x66;&#x2E;&#x72;&#x61;&#x72;"
-     * ; Wandelt alle hexkodierten zeichen in diesem Format in normalen text um
+     * DO NOT use for URLs!
      *
      * @param str
      * @return decoded string
