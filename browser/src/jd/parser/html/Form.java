@@ -42,11 +42,6 @@ public class Form {
     }
 
     /**
-     *
-     */
-    private static final long serialVersionUID = 5837247484638868257L;
-
-    /**
      * Ein Array mit allen Forms dessen Inhalt dem matcher entspricht. Achtung der Matcher bezieht sich nicht auf die Properties einer Form
      * sondern auf den Text der zwischen der Form steht. DafÃ¼r gibt es die formProperties
      */
