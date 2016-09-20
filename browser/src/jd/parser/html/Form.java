@@ -374,7 +374,7 @@ public class Form {
         final List<String> values = new ArrayList<String>();
         final long timeStamp = System.nanoTime();
         final Pattern value1 = Pattern.compile("(?s)\"(.*?)(?<!\\\\)\"");
-        final Pattern value2 = Pattern.compile("(?s)'(.*?)'");
+        final Pattern value2 = Pattern.compile("(?s)'(.*?)(?<!\\\\)'");
         boolean matches = false;
         while (true) {
             Matcher matcher = value1.matcher(escapedHtmlCode);
