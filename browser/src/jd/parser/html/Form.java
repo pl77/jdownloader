@@ -368,8 +368,8 @@ public class Form {
         String escapedHtmlCode = htmlCode;
         final List<String> values = new ArrayList<String>();
         final long timeStamp = System.nanoTime();
-        final Pattern value1 = Pattern.compile("(?s)\"(.*?)(?<!\\\\)\"");
-        final Pattern value2 = Pattern.compile("(?s)'(.*?)(?<!\\\\)'");
+        final Pattern value1 = Pattern.compile("(?s)(?<!\\\\)\"(.*?)(?<!\\\\)\"");
+        final Pattern value2 = Pattern.compile("(?s)(?<!\\\\)'(.*?)(?<!\\\\)'");
         boolean matches = false;
         while (true) {
             Matcher matcher = value1.matcher(escapedHtmlCode);
@@ -386,7 +386,7 @@ public class Form {
                 } else {
                     final int index = values.size();
                     values.add(value);
-                    escapedHtmlCode = escapedHtmlCode.replace(replace, "VALUE-" + timeStamp + "-" + index);
+                    escapedHtmlCode = escapedHtmlCode.replace(replace, "VALUE-" + timeStamp + "-" + index + " ");
                 }
             } else {
                 break;
