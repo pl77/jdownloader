@@ -442,6 +442,9 @@ public abstract class Request {
                     // application/json default is UTF-8
                     useCS = "UTF-8";
                 }
+                if (StringUtils.contains(contentType, "application/javascript")) {
+                    useCS = "UTF-8";
+                }
             }
             if (StringUtils.isEmpty(useCS)) {
                 useCS = this.getCharsetFromMetaTags();
