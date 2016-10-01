@@ -48,7 +48,7 @@ public class Form {
     public static Form[] getForms(final Object requestInfo) {
         final LinkedList<Form> forms = new LinkedList<Form>();
         // opening and closing within opening tag | opening and closing with traditional tags | opened ended tag (no closing)
-        final Pattern pattern = Pattern.compile("<\\s*form ([^>]*)/\\s*>|<\\s*form(?:>| [^>]*>)(.*?)<\\s*/\\s*form\\s*>|<\\s*form(?:>| [^>]*>)(.+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        final Pattern pattern = Pattern.compile("<\\s*form\\s+([^>]*)/\\s*>|<\\s*form(?:>|\\s+[^>]*>)(.*?)<\\s*/\\s*form\\s*>|<\\s*form(?:>|\\s+[^>]*>)(.+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         final Matcher formmatcher = pattern.matcher(requestInfo.toString().replaceAll("(?s)<!--.*?-->", ""));
         while (formmatcher.find()) {
             final String total = formmatcher.group(0);
