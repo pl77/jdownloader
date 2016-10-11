@@ -113,8 +113,12 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(300);
-        sb.append(this.getRequestInfo());
         final Request req = this.getRequest();
+        if (req != null) {
+            sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
+            sb.append(URLConnectionAdapter.CRLF);
+        }
+        sb.append(this.getRequestInfo());
         if (req != null) {
             if (req instanceof PostRequest) {
                 final String log = ((PostRequest) req).log();

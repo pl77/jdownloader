@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import jd.http.requests.FormData;
@@ -1393,6 +1394,21 @@ public class Browser {
         return this.openRequestConnection(request, this.isFollowingRedirects());
     }
 
+    private final static AtomicLong BROWSERIDS = new AtomicLong(0);
+    private final AtomicLong        requestID  = new AtomicLong(0);
+    private long                    browserID  = -1;
+
+    public synchronized long getBrowserID() {
+        if (this.browserID == -1) {
+            this.browserID = Browser.BROWSERIDS.incrementAndGet();
+        }
+        return this.browserID;
+    }
+
+    protected long getNextRequestID() {
+        return this.requestID.incrementAndGet();
+    }
+
     public URLConnectionAdapter openRequestConnection(Request request, final boolean followRedirects) throws IOException {
         int redirectLoopPrevention = 0;
         final Request originalRequest = request;
@@ -1415,7 +1431,7 @@ public class Browser {
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
-                        connection = request.connect().getHttpConnection();
+                        connection = request.connect(this).getHttpConnection();
                     } finally {
                         this.updateCookies(request);
                         if (this.isDebug()) {

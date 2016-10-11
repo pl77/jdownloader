@@ -196,6 +196,21 @@ public abstract class Request {
 
     protected Boolean              sslTrustALL    = null;
 
+    protected long                 requestID      = -1;
+    protected long                 browserID      = -1;
+
+    public long getBrowserID() {
+        return this.browserID;
+    }
+
+    public long getRequestID() {
+        return this.requestID;
+    }
+
+    protected void setRequestID(long requestID) {
+        this.requestID = requestID;
+    }
+
     public Boolean isSSLTrustALLSet() {
         return this.sslTrustALL;
     }
@@ -255,6 +270,14 @@ public abstract class Request {
 
     public Request cloneRequest() {
         throw new WTFException("Not Implemented");
+    }
+
+    protected Request connect(final Browser br) throws IOException {
+        if (this.requestID == -1 && br != null) {
+            this.browserID = br.getBrowserID();
+            this.requestID = br.getNextRequestID();
+        }
+        return this.connect();
     }
 
     /**
@@ -709,8 +732,9 @@ public abstract class Request {
     public String printHeaders() {
         if (this.httpConnection == null) {
             return null;
+        } else {
+            return this.httpConnection.toString();
         }
-        return this.httpConnection.toString();
     }
 
     public Request read(final boolean keepByteArray) throws IOException {
