@@ -464,7 +464,7 @@ public class Browser {
 
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -1223,7 +1223,7 @@ public class Browser {
         } catch (final MalformedURLException e) {
             final Request lRequest = this.getRequest();
             if (lRequest == null) {
-                throw new IOException("no request available", e);
+                throw new IOException("No request available", e);
             }
             return URLHelper.createURL(URLHelper.parseLocation(lRequest.getURL(), location));
         }
@@ -1278,7 +1278,7 @@ public class Browser {
         }
         try {
             if (requ == null) {
-                throw new IOException("no request available");
+                throw new IOException("No request available");
             } else {
                 this.checkContentLengthLimit(requ);
                 requ.read(this.isKeepResponseContentBytes());
@@ -1848,7 +1848,7 @@ public class Browser {
     public String toString() {
         final Request lRequest = this.getRequest();
         if (lRequest == null) {
-            return "Browser. no request yet";
+            return "Browser. No request yet";
         }
         return lRequest.getHTMLSource();
     }
