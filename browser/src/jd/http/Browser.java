@@ -1277,15 +1277,19 @@ public class Browser {
             };
         }
         try {
-            this.checkContentLengthLimit(requ);
-            requ.read(this.isKeepResponseContentBytes());
-            if (this.isVerbose() && requ != null) {
-                final LogInterface llogger = this.getLogger();
-                if (llogger != null) {
-                    llogger.finest("\r\nBrowserID:" + requ.getBrowserID() + "|RequestID:" + requ.getRequestID() + "|URL:" + requ.getURL() + "\r\n----------------Request Content-------------\r\n" + requ.getHTMLSource() + "\r\n");
+            if (requ == null) {
+                throw new IOException("no request available");
+            } else {
+                this.checkContentLengthLimit(requ);
+                requ.read(this.isKeepResponseContentBytes());
+                if (this.isVerbose() && requ != null) {
+                    final LogInterface llogger = this.getLogger();
+                    if (llogger != null) {
+                        llogger.finest("\r\nBrowserID:" + requ.getBrowserID() + "|RequestID:" + requ.getRequestID() + "|URL:" + requ.getURL() + "\r\n----------------Request Content-------------\r\n" + requ.getHTMLSource() + "\r\n");
+                    }
                 }
+                return requ;
             }
-            return requ;
         } catch (final BrowserException e) {
             throw e;
         } catch (final IOException e) {
