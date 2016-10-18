@@ -1282,7 +1282,7 @@ public class Browser {
             if (this.isVerbose() && requ != null) {
                 final LogInterface llogger = this.getLogger();
                 if (llogger != null) {
-                    llogger.finest("\r\n" + requ.getHTMLSource() + "\r\n");
+                    llogger.finest("\r\nBrowserID:" + requ.getBrowserID() + "|RequestID:" + requ.getRequestID() + "|URL:" + requ.getURL() + "\r\n----------------Request Content-------------\r\n" + requ.getHTMLSource() + "\r\n");
                 }
             }
             return requ;
