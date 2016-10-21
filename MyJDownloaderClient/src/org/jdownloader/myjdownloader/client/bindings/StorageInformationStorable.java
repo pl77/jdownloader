@@ -8,11 +8,11 @@ public class StorageInformationStorable {
     public String getError() {
         return this.error;
     }
-    
+
     public void setError(String error) {
         this.error = error;
     }
-    
+
     public String getPath() {
         return this.path;
     }
@@ -34,10 +34,15 @@ public class StorageInformationStorable {
     }
 
     public void setFree(long free) {
-        this.free = free;
+        if (free < 0) {
+            // unlimited, for example a virtual (distributed) filesystem
+            this.free = -1;
+        } else {
+            this.free = free;
+        }
     }
 
     private long size = -1;
     private long free = -1;
-    
+
 }
