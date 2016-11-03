@@ -26,7 +26,11 @@ public class StorageInformationStorable {
     }
 
     public void setSize(long size) {
-        this.size = size;
+        if (size < 0) {
+            this.size = -1;
+        } else {
+            this.size = size;
+        }
     }
 
     public long getFree() {
