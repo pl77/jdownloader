@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http;
 
 import java.io.File;
@@ -34,15 +33,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
-import jd.http.requests.FormData;
-import jd.http.requests.GetRequest;
-import jd.http.requests.HeadRequest;
-import jd.http.requests.PostFormDataRequest;
-import jd.http.requests.PostRequest;
-import jd.parser.Regex;
-import jd.parser.html.Form;
-import jd.parser.html.InputField;
-
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
@@ -54,10 +44,18 @@ import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.parser.UrlQuery;
 
+import jd.http.requests.FormData;
+import jd.http.requests.GetRequest;
+import jd.http.requests.HeadRequest;
+import jd.http.requests.PostFormDataRequest;
+import jd.http.requests.PostRequest;
+import jd.parser.Regex;
+import jd.parser.html.Form;
+import jd.parser.html.InputField;
+
 public class Browser {
     // we need this class in here due to jdownloader stable 0.9 compatibility
     public class BrowserException extends IOException {
-
         private static final long serialVersionUID = 1509988898224037320L;
         private final Request     request;
 
@@ -77,21 +75,15 @@ public class Browser {
         public Request getRequest() {
             return this.request;
         }
-
     }
 
     private static final HashMap<String, Cookies> COOKIES            = new HashMap<String, Cookies>();
     private static ProxySelectorInterface         GLOBAL_PROXY       = null;
     private static LogInterface                   LOGGER             = new ConsoleLogImpl();
-
     private static HashMap<String, Integer>       REQUEST_INTERVAL_LIMIT_MAP;
-
     private static HashMap<String, Long>          REQUESTTIME_MAP;
-
     private static int                            TIMEOUT_CONNECT    = 30000;
-
     private static int                            TIMEOUT_READ       = 30000;
-
     private Boolean                               defaultSSLTrustALL = null;
 
     public static ProxySelectorInterface _getGlobalProxy() {
@@ -225,9 +217,7 @@ public class Browser {
     }
 
     private boolean        keepResponseContentBytes = false;
-
     private int[]          allowedResponseCodes     = new int[0];
-
     private static boolean VERBOSE                  = false;
 
     /**
@@ -404,7 +394,6 @@ public class Browser {
             Integer globalLimit = null;
             Long localLastRequest = null;
             Long globalLastRequest = null;
-
             if (browser.requestIntervalLimitMap != null) {
                 localLimit = browser.requestIntervalLimitMap.get(host);
                 localLastRequest = browser.requestTimeMap.get(host);
@@ -425,7 +414,6 @@ public class Browser {
             if (globalLimit != null && globalLastRequest == null) {
                 return;
             }
-
             if (globalLimit == null) {
                 globalLimit = 0;
             }
@@ -439,7 +427,6 @@ public class Browser {
                 globalLastRequest = System.currentTimeMillis();
             }
             final long dif = Math.max(localLimit - (System.currentTimeMillis() - localLastRequest), globalLimit - (System.currentTimeMillis() - globalLastRequest));
-
             if (dif > 0) {
                 // System.out.println("Sleep " + dif + " before connect to " +
                 // request.getUrl().getHost());
@@ -461,20 +448,15 @@ public class Browser {
     }
 
     private String                   acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
-
     /*
      * -1 means use default Timeouts
      * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
-
     private HashMap<String, Cookies> cookies          = new HashMap<String, Cookies>();
-
     private boolean                  cookiesExclusive = true;
-
     private Object                   currentURL       = null;
-
     private String                   customCharset    = null;
     private boolean                  debug            = false;
     private boolean                  doRedirects      = false;
@@ -485,9 +467,7 @@ public class Browser {
     private int                      readTimeout      = -1;
     private Request                  request;
     private HashMap<String, Integer> requestIntervalLimitMap;
-
     private HashMap<String, Long>    requestTimeMap;
-
     private boolean                  verbose          = false;
 
     public Browser() {
@@ -546,6 +526,10 @@ public class Browser {
 
     public Browser cloneBrowser() {
         final Browser br = new Browser();
+        return this.cloneBrowser(br);
+    }
+
+    public Browser cloneBrowser(final Browser br) {
         br.requestIntervalLimitMap = this.requestIntervalLimitMap;
         br.requestTimeMap = this.requestTimeMap;
         br.acceptLanguage = this.acceptLanguage;
@@ -651,7 +635,6 @@ public class Browser {
             }
         }
         return null;
-
     }
 
     public GetRequest createGetRequest(String url) throws IOException {
@@ -669,14 +652,14 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
+     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
      *
      *
+     * 
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
         return this.createPostRequest(url, UrlQuery.get(post), encoding);
-
     }
 
     public PostRequest createPostRequest(String url, UrlQuery post, final String encoding) throws IOException {
@@ -786,7 +769,6 @@ public class Browser {
             LogInterface logger = this.getLogger();
             if (logger != null && this.isVerbose()) {
                 logger.log(new IllegalStateException("ResponseCode " + responseCode + " is unsupported!"));
-
             }
             return null;
         }
@@ -1265,7 +1247,6 @@ public class Browser {
             requ = connection.getRequest();
         } else {
             requ = new Request(connection) {
-
                 @Override
                 public long postRequest() throws IOException {
                     return 0;
@@ -1379,7 +1360,6 @@ public class Browser {
             }
             nextRequest.setConnectTimeout(this.getConnectTimeout());
             nextRequest.setReadTimeout(this.getReadTimeout());
-
             final boolean allowRefererURL;
             if (sourceRequest != null && StringUtils.startsWithCaseInsensitive(sourceRequest.getURL().getProtocol(), "https")) {
                 // http://allben.net/post/2009/02/25/Null-Url-Referrer-going-from-HTTPS-to-HTTP
@@ -1445,7 +1425,6 @@ public class Browser {
                                     llogger.finest("\r\n" + request.printHeaders());
                                 } catch (final Throwable e) {
                                     llogger.log(e);
-
                                 }
                             }
                         }
@@ -1573,7 +1552,6 @@ public class Browser {
             throw new NoGateWayException(selector, "No Gateway or Proxy Found: " + url);
         }
         return list;
-
     }
 
     public void setAcceptLanguage(final String acceptLanguage) {
@@ -1587,6 +1565,16 @@ public class Browser {
      */
     public void setAllowedResponseCodes(final int... allowedResponseCodes) {
         this.allowedResponseCodes = allowedResponseCodes;
+    }
+
+    public boolean hasAllowedResponseCode(final int input) {
+        final int[] original = this.getAllowedResponseCodes();
+        for (final int a : original) {
+            if (a == input) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1833,7 +1821,6 @@ public class Browser {
             this.requestIntervalLimitMap = new HashMap<String, Integer>();
         }
         this.requestIntervalLimitMap.put(domain, i);
-
     }
 
     public void setVerbose(final boolean b) {
@@ -1897,5 +1884,4 @@ public class Browser {
     public void setDefaultSSLTrustALL(Boolean defaultSSLTrustALL) {
         this.defaultSSLTrustALL = defaultSSLTrustALL;
     }
-
 }
