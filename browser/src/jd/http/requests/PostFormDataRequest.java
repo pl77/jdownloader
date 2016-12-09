@@ -24,12 +24,12 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
+
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
-
-import jd.http.Request;
-import jd.http.URLConnectionAdapter;
 
 /**
  * Extending the Request class, this class is able to to HTML Formdata Posts.

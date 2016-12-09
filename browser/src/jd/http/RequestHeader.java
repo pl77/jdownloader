@@ -63,12 +63,21 @@ public class RequestHeader implements Iterable<HTTPHeader> {
         return this.headers.get(key) != null;
     }
 
-    public String get(final String key) {
+    public String getValue(final String key) {
         final HTTPHeader header = this.headers.get(key);
         if (header != null) {
             return header.getValue();
         }
         return null;
+    }
+
+    @Deprecated
+    public String get(final String key) {
+        return this.getValue(key);
+    }
+
+    public HTTPHeader getHeader(final String key) {
+        return this.headers.get(key);
     }
 
     public boolean isDominant() {

@@ -97,6 +97,11 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
         return this.getContentLength();
     }
 
+    @Override
+    protected boolean isRequiresOutputStream() {
+        return super.isRequiresOutputStream() || this.request != null && this.request.requireOutputStream();
+    }
+
     /** {@inheritDoc} */
     @Override
     public Request getRequest() {

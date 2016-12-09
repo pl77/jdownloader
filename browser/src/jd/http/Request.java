@@ -320,6 +320,10 @@ public abstract class Request {
         }
     }
 
+    protected boolean requireOutputStream() {
+        return false;
+    }
+
     public String getCharsetFromMetaTags() {
         final String parseFrom;
         if (this.htmlCode == null && this.responseBytes != null && this.responseBytes.length > 0) {

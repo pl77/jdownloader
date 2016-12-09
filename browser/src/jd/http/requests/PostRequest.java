@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import jd.http.Request;
+import jd.http.URLConnectionAdapter;
+import jd.parser.html.Form;
+
 import org.appwork.utils.KeyValueEntry;
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.StringUtils;
@@ -29,10 +33,6 @@ import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.parser.UrlQuery;
-
-import jd.http.Request;
-import jd.http.URLConnectionAdapter;
-import jd.parser.html.Form;
 
 public class PostRequest extends Request {
     private static enum SEND {
@@ -214,6 +214,11 @@ public class PostRequest extends Request {
 
     protected RequestMethod getRequestMethod() {
         return RequestMethod.POST;
+    }
+
+    @Override
+    protected boolean requireOutputStream() {
+        return true;
     }
 
     public void setContentType(final String contentType) {

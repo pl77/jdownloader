@@ -65,6 +65,11 @@ public class URLConnectionAdapterHTTPProxyImpl extends HTTPProxyHTTPConnectionIm
         this.request = request;
     }
 
+    @Override
+    protected boolean isRequiresOutputStream() {
+        return super.isRequiresOutputStream() || this.request != null && this.request.requireOutputStream();
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {

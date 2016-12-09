@@ -58,6 +58,11 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
     }
 
     @Override
+    protected boolean isRequiresOutputStream() {
+        return super.isRequiresOutputStream() || this.request != null && this.request.requireOutputStream();
+    }
+
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(300);
         final Request req = this.getRequest();

@@ -68,6 +68,11 @@ public class URLConnectionAdapterSocks5Impl extends Socks5HTTPConnectionImpl imp
         this.request = request;
     }
 
+    @Override
+    protected boolean isRequiresOutputStream() {
+        return super.isRequiresOutputStream() || this.request != null && this.request.requireOutputStream();
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {
