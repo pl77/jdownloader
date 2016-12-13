@@ -120,6 +120,8 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
         final StringBuilder sb = new StringBuilder(300);
         final Request req = this.getRequest();
         if (req != null) {
+            sb.append("Caller:" + req.getCaller());
+            sb.append(URLConnectionAdapter.CRLF);
             sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
             sb.append(URLConnectionAdapter.CRLF);
         }

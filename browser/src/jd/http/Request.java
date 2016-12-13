@@ -272,10 +272,27 @@ public abstract class Request {
         throw new WTFException("Not Implemented");
     }
 
+    protected String caller = null;
+
+    protected String getCaller() {
+        return this.caller;
+    }
+
     protected Request connect(final Browser br) throws IOException {
         if (this.requestID == -1 && br != null) {
             this.browserID = br.getBrowserID();
             this.requestID = br.getNextRequestID();
+        }
+        try {
+            final StackTraceElement[] stackTrace = new Exception().getStackTrace();
+            for (final StackTraceElement stack : stackTrace) {
+                if ("jd.http.Request".equals(stack.getClassName()) || "jd.http.Browser".equals(stack.getClassName())) {
+                    continue;
+                }
+                this.caller = stack.toString();
+                break;
+            }
+        } catch (final Throwable e) {
         }
         return this.connect();
     }
