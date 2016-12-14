@@ -40,7 +40,6 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
-import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
@@ -284,13 +283,19 @@ public abstract class Request {
             this.requestID = br.getNextRequestID();
         }
         try {
+            final StringBuilder sb = new StringBuilder();
             final StackTraceElement[] stackTrace = new Exception().getStackTrace();
             for (final StackTraceElement stack : stackTrace) {
                 if ("jd.http.Request".equals(stack.getClassName()) || "jd.http.Browser".equals(stack.getClassName())) {
                     continue;
                 }
-                this.caller = stack.toString();
-                break;
+                if (sb.length() > 0) {
+                    sb.append("\r\n");
+                }
+                sb.append(stack.toString());
+            }
+            if (sb.length() > 0) {
+                this.caller = sb.toString();
             }
         } catch (final Throwable e) {
         }
@@ -733,8 +738,8 @@ public abstract class Request {
         if (this.httpConnection instanceof URLConnectionAdapterDirectImpl) {
             final String connectionRequest = this.httpConnection.getRequestProperty(HTTPConstants.HEADER_REQUEST_CONNECTION);
             if (connectionRequest == null || StringUtils.containsIgnoreCase(connectionRequest, "Keep-Alive")) {
-                HTTPConnectionImpl httpConnectionImpl = (HTTPConnectionImpl) this.httpConnection;
-                httpConnectionImpl.setKeepAlive(KEEPALIVE.EXTERNAL_EXCEPTION);
+                final URLConnectionAdapterDirectImpl httpConnection = (URLConnectionAdapterDirectImpl) this.httpConnection;
+                httpConnection.setKeepAlive(KEEPALIVE.EXTERNAL_EXCEPTION);
             }
         }
         this.preRequest();
