@@ -38,6 +38,7 @@ public class DeviceData {
 
     private String type;
     private String name;
+    private DeviceStatus status;
 
     public DeviceData(/* storable */) {
 
@@ -108,6 +109,14 @@ public class DeviceData {
     @Override
     public String toString() {
         return name + " (" + id + ")";
+    }
+
+    public DeviceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DeviceStatus status) {
+        this.status = status;
     }
 
 }
