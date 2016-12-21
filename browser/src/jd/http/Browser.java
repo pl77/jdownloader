@@ -116,7 +116,7 @@ public class Browser {
         }
         final String trimURL = url.trim();
         try {
-            return Browser.getHost(URLHelper.createURL(trimURL), includeSubDomains);
+            return Browser.getHost(new URL(trimURL), includeSubDomains);
         } catch (Throwable e) {
         }
         /* direct ip with protocol */

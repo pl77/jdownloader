@@ -34,7 +34,7 @@ import jd.parser.Regex;
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Hex;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.URLHelper;
 
 public class HTMLParser {
@@ -493,6 +493,10 @@ public class HTMLParser {
             return false;
         }
 
+        public LogInterface getLogger() {
+            return null;
+        }
+
         public boolean remove(HtmlParserCharSequence e) {
             if (e != null) {
                 if (this.dupeCheck.remove(e)) {
@@ -702,7 +706,7 @@ public class HTMLParser {
                     } else {
                         link = link.replaceAll(HTMLParser.removeTagsPattern, "");
                         if (!link.matches(HTMLParser.space2Pattern)) {
-                            results.add(HTMLParser.correctURL(link));
+                            results.add(HTMLParser.correctURL(results, link));
                             return results;
                         }
                     }
@@ -749,7 +753,7 @@ public class HTMLParser {
         }
         if (protocol != null || (protocol = HTMLParser.getProtocol(hrefURL)) != null) {
             /* found a valid url with recognized protocol */
-            results.add(HTMLParser.correctURL(hrefURL));
+            results.add(HTMLParser.correctURL(results, hrefURL));
             if (data.equals(hrefURL)) {
                 return results;
             }
@@ -770,7 +774,7 @@ public class HTMLParser {
                     link = HTMLParser.mergeUrl(baseURL, link);
                 }
                 if (protocol != null || (protocol = HTMLParser.getProtocol(link)) != null) {
-                    results.add(HTMLParser.correctURL(link));
+                    results.add(HTMLParser.correctURL(results, link));
                     if (data.equals(link)) {
                         return results;
                     }
@@ -788,7 +792,7 @@ public class HTMLParser {
                 if (HTMLParser.getProtocol(link) == null && !link.contains("%2F")) {
                     link = link.replaceFirst(HTMLParser.missingHTTPPattern, "http://www\\.");
                 }
-                results.add(HTMLParser.correctURL(link));
+                results.add(HTMLParser.correctURL(results, link));
                 final Matcher mlinks = HTMLParser.protocols.matcher(link);
                 int start = -1;
                 /*
@@ -798,13 +802,13 @@ public class HTMLParser {
                     if (start == -1) {
                         start = mlinks.start();
                     } else {
-                        results.add(HTMLParser.correctURL(link.subSequence(start, mlinks.start())));
+                        results.add(HTMLParser.correctURL(results, link.subSequence(start, mlinks.start())));
                         start = mlinks.start();
                     }
                 }
                 if (start != -1) {
                     link = link.subSequence(start);
-                    results.add(HTMLParser.correctURL(link));
+                    results.add(HTMLParser.correctURL(results, link));
                     if (data.equals(link)) {
                         /* data equals check, so we can leave this loop */
                         return results;
@@ -914,12 +918,31 @@ public class HTMLParser {
         return results;
     }
 
-    private static HtmlParserCharSequence correctURL(HtmlParserCharSequence input) {
+    private static void logInfo(HtmlParserResultSet results, String log) {
+        if (results != null && log != null) {
+            final LogInterface logger = results.getLogger();
+            if (logger != null) {
+                logger.info(log);
+            }
+        }
+    }
+
+    private static void logThrowable(HtmlParserResultSet results, Throwable throwable) {
+        if (results != null && throwable != null) {
+            final LogInterface logger = results.getLogger();
+            if (logger != null) {
+                logger.log(throwable);
+            }
+        }
+    }
+
+    private static HtmlParserCharSequence correctURL(HtmlParserResultSet results, HtmlParserCharSequence input) {
         final int specialCutOff = input.indexOf("', ");
         if (specialCutOff >= 0) {
-            input = input.subSequence(0, specialCutOff);
+            final HtmlParserCharSequence cutoff = input.subSequence(0, specialCutOff);
+            HTMLParser.logInfo(results, "Apply auto special cut off|" + input + "|" + cutoff);
+            input = cutoff;
         }
-
         final int indexofa = input.indexOf("&");
         if (indexofa > 0 && input.indexOf("?") == -1) {
             final int indexofb = input.indexOf("#");
@@ -940,13 +963,11 @@ public class HTMLParser {
                  * also pay attention about anchor
                  */
                 final HtmlParserCharSequence check = input.subSequence(indexofa);
-                final int indexChecka = check.indexOf("=");
-                if (indexChecka > 0) {
-                    final HtmlParserCharSequence check2 = check.subSequence(1, indexChecka);
-                    if (check2.matches(Pattern.compile("[a-zA-Z0-9%]+"))) {
-                        /* we have found &x=y pattern, so it is okay to cut it off */
-                        input = input.subSequence(0, indexofa);
-                    }
+                if (check.matches(Pattern.compile("^&[a-zA-Z0-9%]+=.*?"))) {
+                    /* we have found &x=y pattern, so it is okay to cut it off */
+                    final HtmlParserCharSequence cutoff = input.subSequence(0, indexofa);
+                    HTMLParser.logInfo(results, "Apply auto cut off|" + input + "|" + cutoff);
+                    input = cutoff;
                 }
             }
         }
@@ -968,7 +989,7 @@ public class HTMLParser {
         } catch (Throwable e) {
             final HtmlParserCharSequence protocol = HTMLParser.getProtocol(input);
             if (protocol == null) {
-                LoggerFactory.getDefaultLogger().log(e);
+                HTMLParser.logThrowable(results, e);
             }
         }
         return input;
