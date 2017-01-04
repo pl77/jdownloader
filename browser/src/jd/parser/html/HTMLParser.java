@@ -613,7 +613,7 @@ public class HTMLParser {
         if (data != null) {
             data = data.trim();
         }
-        if (data == null || data.length() < 13) {
+        if (data == null || data.length() < HTMLParser.MIN_VALID) {
             return results;
         }
         if ((data.startsWith(HTMLParser.directHTTP) || data.startsWith(HTMLParser.httpviajd) || data.startsWith(HTMLParser.httpsviajd)) && results.contains(data)) {
@@ -819,8 +819,10 @@ public class HTMLParser {
         return results;
     }
 
-    private final static String TAGOPEN  = String.valueOf('<');
-    private final static String TAGCLOSE = String.valueOf('>');
+    private final static String TAGOPEN   = String.valueOf('<');
+    private final static String TAGCLOSE  = String.valueOf('>');
+
+    private final static int    MIN_VALID = "ftp://1.23".length();
 
     private static HtmlParserResultSet _getHttpLinksWalker(HtmlParserCharSequence data, HtmlParserResultSet results, Pattern tagRegex) {
         // System.out.println("Call: "+data.length());
@@ -830,7 +832,7 @@ public class HTMLParser {
         if (data != null) {
             data = data.trim();
         }
-        if (data == null || data.length() < 13) {
+        if (data == null || data.length() < HTMLParser.MIN_VALID) {
             return results;
         }
         /* filtering tags, recursion command me ;) */
@@ -889,7 +891,7 @@ public class HTMLParser {
             }
         }
         /* find normal */
-        if (data.length() < 13) {
+        if (data.length() < HTMLParser.MIN_VALID) {
             //
             return results;
         }
