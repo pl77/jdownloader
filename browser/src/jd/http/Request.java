@@ -320,7 +320,9 @@ public abstract class Request {
                     }
                     return this;
                 } catch (final HTTPKeepAliveSocketException ignore) {
-                    // ignore.printStackTrace();
+                    if (false) {
+                        ignore.printStackTrace();
+                    }
                 }
             }
         } finally {
