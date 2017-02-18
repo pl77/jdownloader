@@ -407,7 +407,7 @@ public abstract class Request {
     }
 
     protected String getSuggestedUserAgent() {
-        final String archString = CrossSystem.getARCHString();
+        String archString = CrossSystem.getARCHString();
         final String osString;
         switch (CrossSystem.getOS()) {
         case FREEBSD:
@@ -430,6 +430,11 @@ public abstract class Request {
             break;
         }
 
+        // do not return ARM based strings as it will revert to mobile websites. We do not want that behaviour by default -raztoki
+        if (archString != null && new Regex(archString, "(arm|aarch)").matches()) {
+            archString = null;
+        }
+            
         if (archString != null && osString != null) {
             return "Mozilla/5.0 (X11; U; " + osString.trim() + " " + archString.trim() + "; rv:44.0) Gecko/20100101 Firefox/44.0";
         } else {
