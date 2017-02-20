@@ -7,10 +7,19 @@ public class JobLinkCrawlerStorable extends AbstractJsonData {
     private boolean crawling;
     private boolean checking;
     private long    jobId;
+    private long crawlerId;
     private int     broken;
     private int     filtered;
     private int     unhandled;
     private int     crawled;
+    
+    public long getCrawlerId() {
+        return crawlerId;
+    }
+
+    public void setCrawlerId(long crawlerId) {
+        this.crawlerId = crawlerId;
+    }
     
     public boolean isCrawling() {
         return this.crawling;
