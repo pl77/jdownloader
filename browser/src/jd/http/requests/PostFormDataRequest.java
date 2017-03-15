@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import jd.http.Request;
 import jd.http.URLConnectionAdapter;
@@ -38,9 +39,9 @@ import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
  */
 public class PostFormDataRequest extends Request {
 
-    protected String                       boundary;
-    private final java.util.List<FormData> formDatas;
-    private String                         encodeType = "multipart/form-data";
+    protected String               boundary;
+    protected final List<FormData> formDatas;
+    protected String               encodeType = "multipart/form-data";
 
     public PostFormDataRequest(final String url) throws IOException {
         super(url);
@@ -56,6 +57,10 @@ public class PostFormDataRequest extends Request {
 
     public void addFormData(final FormData fd) {
         this.formDatas.add(fd);
+    }
+
+    public List<FormData> getFormData() {
+        return this.formDatas;
     }
 
     protected void generateBoundary() {
