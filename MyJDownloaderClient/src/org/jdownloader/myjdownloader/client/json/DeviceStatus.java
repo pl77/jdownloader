@@ -6,5 +6,6 @@ public enum DeviceStatus {
     RESTARTING,
     RECONNECTING,
     OFFLINE,
+    UNKNOWN,
     ONLINE;
 }
