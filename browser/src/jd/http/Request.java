@@ -44,6 +44,7 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.os.CrossSystem;
+import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.parser.UrlQuery;
 
 public abstract class Request {
@@ -429,20 +430,34 @@ public abstract class Request {
             osString = null;
             break;
         }
+        final String firefoxRevision = "52.0";
         if (archString != null && osString != null && !new Regex(archString, "(arm|aarch)").matches()) {
             // do not return ARM based strings as it will revert to mobile websites. We do not want that behaviour by default -raztoki
-            return "Mozilla/5.0 (X11; U; " + osString.trim() + " " + archString.trim() + "; rv:44.0) Gecko/20100101 Firefox/44.0";
+            return "Mozilla/5.0 (X11; Ubuntu; " + osString.trim() + " " + archString.trim() + "; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
         } else {
             switch (CrossSystem.getOSFamily()) {
             case WINDOWS:
-                return "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0";
+                if (CrossSystem.getOS().isMinimum(OperatingSystem.WINDOWS_10)) {
+                    return "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
+                } else if (CrossSystem.getOS().isMinimum(OperatingSystem.WINDOWS_8)) {
+                    return "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
+                } else if (CrossSystem.getOS().isMinimum(OperatingSystem.WINDOWS_7)) {
+                    return "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
+                } else {
+                    return "Mozilla/5.0 (Windows NT 6.0; WOW64; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
+                }
             case MAC:
-                return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
+                final String macVersion = new Regex(System.getProperty("os.version"), "(\\d+\\.\\d+)").getMatch(0);
+                if (macVersion != null) {
+                    return "Mozilla/5.0 (Macintosh; Intel Mac OS X " + macVersion + "; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
+                } else {
+                    return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
+                }
             default:
                 if (CrossSystem.is64BitArch()) {
-                    return "Mozilla/5.0 (X11; U; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0";
+                    return "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
                 } else {
-                    return "Mozilla/5.0 (X11; U; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0";
+                    return "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
                 }
             }
         }
