@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "My JDownloader Client" License
  *         The "My JDownloader Client" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -156,9 +156,7 @@ public abstract class AbstractMyJDClient<GenericType> {
 
     public Object callAccessTokenURL(final AccessToken accessToken, String url, final GenericType returnType) throws MyJDownloaderException, APIException {
         try {
-            if (accessToken == null) {
-                throw new IllegalArgumentException("accessToken is null!");
-            }
+            if (accessToken == null) { throw new IllegalArgumentException("accessToken is null!"); }
             url += url.contains("?") ? "&" : "?";
             final long RID = this.getUniqueRID();
             url += "rid=" + RID;
@@ -176,9 +174,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             Object ret = this.convertData(data, returnType);
             if (ret != null) {
                 if (ret instanceof RequestIDValidator) {
-                    if (((RequestIDValidator) ret).getRid() != RID) {
-                        throw new BadResponseException("RID Mismatch");
-                    }
+                    if (((RequestIDValidator) ret).getRid() != RID) { throw new BadResponseException("RID Mismatch"); }
                 }
                 return ret;
             }
@@ -192,22 +188,16 @@ public abstract class AbstractMyJDClient<GenericType> {
                     throw new MyJDownloaderException("Invalid Response: " + dec);
                 }
 
-                if (dataObject.getRid() != RID) {
-                    throw new BadResponseException("RID Mismatch");
-                }
+                if (dataObject.getRid() != RID) { throw new BadResponseException("RID Mismatch"); }
 
                 // ugly!!! but this will be changed when we have a proper remoteAPI response format
-                if (returnType == void.class || returnType == Void.class) {
-                    return null;
-                }
+                if (returnType == void.class || returnType == Void.class) { return null; }
                 ret = this.jsonToObject(this.objectToJSon(dataObject.getData()) + "", returnType);
                 return ret;
             } else {
                 ret = this.jsonToObject(dec, returnType);
                 if (ret instanceof RequestIDValidator) {
-                    if (((RequestIDValidator) ret).getRid() != RID) {
-                        throw new BadResponseException("RID Mismatch");
-                    }
+                    if (((RequestIDValidator) ret).getRid() != RID) { throw new BadResponseException("RID Mismatch"); }
                 }
                 return ret;
             }
@@ -276,9 +266,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             Object ret = this.convertData(data, returnType);
             if (ret != null) {
                 if (ret instanceof RequestIDValidator) {
-                    if (((RequestIDValidator) ret).getRid() != i) {
-                        throw new BadResponseException("RID Mismatch");
-                    }
+                    if (((RequestIDValidator) ret).getRid() != i) { throw new BadResponseException("RID Mismatch"); }
                 }
                 return ret;
             }
@@ -293,14 +281,10 @@ public abstract class AbstractMyJDClient<GenericType> {
                     throw new MyJDownloaderException("Invalid Response: " + dec);
                 }
 
-                if (dataObject.getRid() != i) {
-                    throw new BadResponseException("RID Mismatch");
-                }
+                if (dataObject.getRid() != i) { throw new BadResponseException("RID Mismatch"); }
 
                 // ugly!!! but this will be changed when we have a proper remoteAPI response format
-                if (returnType == void.class || returnType == Void.class) {
-                    return null;
-                }
+                if (returnType == void.class || returnType == Void.class) { return null; }
                 String actualResponseString = this.objectToJSon(dataObject.getData()) + "";
                 if (dh != null) {
                     actualResponseString = dh.handle(payload, dataObject, deviceID, action, (String) this.jsonToObject(actualResponseString, (GenericType) String.class));
@@ -311,9 +295,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             } else {
                 ret = this.jsonToObject(dec, returnType);
                 if (ret instanceof RequestIDValidator) {
-                    if (((RequestIDValidator) ret).getRid() != i) {
-                        throw new BadResponseException("RID Mismatch");
-                    }
+                    if (((RequestIDValidator) ret).getRid() != i) { throw new BadResponseException("RID Mismatch"); }
                 }
                 return ret;
             }
@@ -376,9 +358,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             Object ret = this.convertData(data, (GenericType) class1);
             if (ret != null) {
                 if (ret instanceof RequestIDValidator) {
-                    if (((RequestIDValidator) ret).getRid() != rid) {
-                        throw new BadResponseException("RID Mismatch");
-                    }
+                    if (((RequestIDValidator) ret).getRid() != rid) { throw new BadResponseException("RID Mismatch"); }
                 }
                 return (T) ret;
             }
@@ -387,9 +367,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             this.log("Response\r\n" + dec);
             // System.out.println(this.objectToJSon(ret));
             if (ret instanceof RequestIDValidator) {
-                if (((RequestIDValidator) ret).getRid() != rid) {
-                    throw new BadResponseException("RID Mismatch");
-                }
+                if (((RequestIDValidator) ret).getRid() != rid) { throw new BadResponseException("RID Mismatch"); }
             }
             return (T) ret;
         } catch (final ExceptionResponse e) {
@@ -418,8 +396,8 @@ public abstract class AbstractMyJDClient<GenericType> {
     }
 
     /**
-     * Get a new Session. Do never store email and password in youra application. throw away the password after connect and work with
-     * #getSessionInfo #setSessionInfo and #reconnect to restore a session
+     * Get a new Session. Do never store email and password in youra application. throw away the password after connect and work with #getSessionInfo
+     * #setSessionInfo and #reconnect to restore a session
      *
      * @param email
      * @param password
@@ -443,9 +421,7 @@ public abstract class AbstractMyJDClient<GenericType> {
 
             retString = this.toString(this.cryptedPost(query.toString(), "", loginSecret));
             final ConnectResponse ret = this.jsonToObject(retString, (GenericType) ConnectResponse.class);
-            if (ret.getRid() != rid) {
-                throw new BadResponseException("RID Mismatch");
-            }
+            if (ret.getRid() != rid) { throw new BadResponseException("RID Mismatch"); }
 
             final String sessionToken = ret.getSessiontoken();
             final String regainToken = ret.getRegaintoken();
@@ -471,9 +447,7 @@ public abstract class AbstractMyJDClient<GenericType> {
     }
 
     protected <T> T convertData(final byte[] data, final GenericType returnType) throws MyJDownloaderException {
-        if (returnType == byte[].class) {
-            return (T) data;
-        }
+        if (returnType == byte[].class) { return (T) data; }
         return null;
     }
 
@@ -538,9 +512,7 @@ public abstract class AbstractMyJDClient<GenericType> {
      */
     public void finishPasswordReset(final String email, final String key, final String newPassword) throws MyJDownloaderException {
         final byte[] k = AbstractMyJDClient.hexToByteArray(key);
-        if (k.length != 32) {
-            throw new IllegalArgumentException("Bad Key. Expected: 64 hexchars");
-        }
+        if (k.length != 32) { throw new IllegalArgumentException("Bad Key. Expected: 64 hexchars"); }
         final byte[] newLoginSecret = this.createSecret(email, newPassword, "server");
         final String encryptedNewSecret = AbstractMyJDClient.byteArrayToHex(this.encrypt(newLoginSecret, k));
         final SessionInfo session = new SessionInfo();
@@ -561,9 +533,7 @@ public abstract class AbstractMyJDClient<GenericType> {
     public void finishRegistration(final String key, final String email, final String password) throws MyJDownloaderException {
 
         final byte[] k = AbstractMyJDClient.hexToByteArray(key);
-        if (k.length != 32) {
-            throw new IllegalArgumentException("Bad Key. Expected: 64 hexchars");
-        }
+        if (k.length != 32) { throw new IllegalArgumentException("Bad Key. Expected: 64 hexchars"); }
         final byte[] loginSecret = this.createSecret(email, password, "server");
         final String pw = AbstractMyJDClient.byteArrayToHex(this.encrypt(loginSecret, k));
         final SessionInfo session = new SessionInfo();
@@ -574,9 +544,7 @@ public abstract class AbstractMyJDClient<GenericType> {
 
     public void finishTermination(final String key, final String email, final String password, final CaptchaChallenge challenge) throws MyJDownloaderException {
         final byte[] k = AbstractMyJDClient.hexToByteArray(key);
-        if (k.length != 32) {
-            throw new IllegalArgumentException("Bad Key. Expected: 64 hexchars");
-        }
+        if (k.length != 32) { throw new IllegalArgumentException("Bad Key. Expected: 64 hexchars"); }
         final byte[] loginSecret = this.createSecret(email, password, "server");
         final String pw = AbstractMyJDClient.byteArrayToHex(this.encrypt(loginSecret, k));
         final SessionInfo session = new SessionInfo();
@@ -627,9 +595,7 @@ public abstract class AbstractMyJDClient<GenericType> {
      */
     public SessionInfo getSessionInfo() throws UnconnectedException {
         final SessionInfo ret = this.currentSessionInfo;
-        if (ret == null) {
-            throw new UnconnectedException();
-        }
+        if (ret == null) { throw new UnconnectedException(); }
         return ret;
     }
 
@@ -641,58 +607,58 @@ public abstract class AbstractMyJDClient<GenericType> {
             try {
                 error = this.jsonToObject(e.getContent(), (GenericType) ErrorResponse.class);
                 switch (error.getSrc()) {
-                case DEVICE:
-                    if (error.getType() != null) {
-                        final DeviceErrorType type = DeviceErrorType.valueOf(error.getType());
-                        // SES
-                        switch (type) {
-                        case INTERNAL_SERVER_ERROR:
-                            throw new InternalServerErrorException(null);
-                        case API_COMMAND_NOT_FOUND:
-                            throw new UnknownCommandException(null);
-                        case API_INTERFACE_NOT_FOUND:
-                            throw new UnknownInterfaceException(null);
-                        case AUTH_FAILED:
-                            throw new AuthException();
-                        case BAD_PARAMETERS:
-                            throw new WrongParametersException(null);
-                        case FILE_NOT_FOUND:
-                            throw new ApiFileNotFoundException(null);
-                        case SESSION:
-                            throw new SessionException(null);
-                        default:
-                            throw new APIException(error.getType(), null);
+                    case DEVICE:
+                        if (error.getType() != null) {
+                            final DeviceErrorType type = DeviceErrorType.valueOf(error.getType());
+                            // SES
+                            switch (type) {
+                                case INTERNAL_SERVER_ERROR:
+                                    throw new InternalServerErrorException(null);
+                                case API_COMMAND_NOT_FOUND:
+                                    throw new UnknownCommandException(null);
+                                case API_INTERFACE_NOT_FOUND:
+                                    throw new UnknownInterfaceException(null);
+                                case AUTH_FAILED:
+                                    throw new AuthException();
+                                case BAD_PARAMETERS:
+                                    throw new WrongParametersException(null);
+                                case FILE_NOT_FOUND:
+                                    throw new ApiFileNotFoundException(null);
+                                case SESSION:
+                                    throw new SessionException(null);
+                                default:
+                                    throw new APIException(error.getType(), null);
+                            }
                         }
-                    }
 
-                case MYJD:
-                    final ServerErrorType type = ServerErrorType.valueOf(error.getType());
-                    switch (type) {
-                    case AUTH_FAILED:
-                        throw new AuthException();
-                    case ERROR_EMAIL_NOT_CONFIRMED:
-                        throw new EmailNotValidatedException();
-                    case OUTDATED:
-                        throw new OutdatedException();
-                    case OFFLINE:
-                        throw new DeviceIsOfflineException();
-                    case TOKEN_INVALID:
-                        throw new TokenException(session);
-                    case UNKNOWN:
-                        throw new RuntimeException("Not Implemented: unkown");
-                    case CHALLENGE_FAILED:
-                        throw new ChallengeFailedException();
-                    case EMAIL_FORBIDDEN:
-                        throw new EmailNotAllowedException();
-                    case EMAIL_INVALID:
-                        throw new EmailInvalidException();
-                    case OVERLOAD:
-                        throw new OverloadException();
-                    case TOO_MANY_REQUESTS:
-                        throw new TooManyRequestsException();
-                    case MAINTENANCE:
-                        throw new MaintenanceException();
-                    }
+                    case MYJD:
+                        final ServerErrorType type = ServerErrorType.valueOf(error.getType());
+                        switch (type) {
+                            case AUTH_FAILED:
+                                throw new AuthException();
+                            case ERROR_EMAIL_NOT_CONFIRMED:
+                                throw new EmailNotValidatedException();
+                            case OUTDATED:
+                                throw new OutdatedException();
+                            case OFFLINE:
+                                throw new DeviceIsOfflineException();
+                            case TOKEN_INVALID:
+                                throw new TokenException(session);
+                            case UNKNOWN:
+                                throw new RuntimeException("Not Implemented: unkown");
+                            case CHALLENGE_FAILED:
+                                throw new ChallengeFailedException();
+                            case EMAIL_FORBIDDEN:
+                                throw new EmailNotAllowedException();
+                            case EMAIL_INVALID:
+                                throw new EmailInvalidException();
+                            case OVERLOAD:
+                                throw new OverloadException();
+                            case TOO_MANY_REQUESTS:
+                                throw new TooManyRequestsException();
+                            case MAINTENANCE:
+                                throw new MaintenanceException();
+                        }
                 }
             } catch (final MyJDownloaderException e1) {
                 e1.setSource(error.getSrc());
@@ -702,16 +668,18 @@ public abstract class AbstractMyJDClient<GenericType> {
             }
         }
         switch (e.getResponseCode()) {
-        case 403:
-            throw new AuthException();
-        case 503:
-            throw new OverloadException();
-        case 401:
-            throw new EmailNotValidatedException();
-        case 407:
-            throw new TokenException(session);
-        default:
-            throw new UnexpectedIOException(e);
+            case 403:
+                throw new AuthException();
+            case 502:
+                throw new MaintenanceException();
+            case 503:
+                throw new OverloadException();
+            case 401:
+                throw new EmailNotValidatedException();
+            case 407:
+                throw new TokenException(session);
+            default:
+                throw new UnexpectedIOException(e);
         }
     }
 
@@ -763,8 +731,8 @@ public abstract class AbstractMyJDClient<GenericType> {
     }
 
     /**
-     * If the Session becomes invalid(for example due to an ip change), you need to reconnect. The user does NOT have to reenter his logins.
-     * We use a regain token to get a new session. Short: If you get a #TokenException, call reconnect to refresh your session.
+     * If the Session becomes invalid(for example due to an ip change), you need to reconnect. The user does NOT have to reenter his logins. We use a regain
+     * token to get a new session. Short: If you get a #TokenException, call reconnect to refresh your session.
      *
      * @throws MyJDownloaderException
      */
@@ -894,9 +862,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             query.append("&signature=").append(this.urlencode(signature));
             retString = this.toString(this.cryptedPost(query.toString(), "", loginSecret));
             final RequestIDOnly ret = this.jsonToObject(retString, (GenericType) RequestIDOnly.class);
-            if (ret.getRid() != rid) {
-                throw new BadResponseException("RID Mismatch");
-            }
+            if (ret.getRid() != rid) { throw new BadResponseException("RID Mismatch"); }
         } catch (final ExceptionResponse e) {
             try {
                 this.handleInvalidResponseCodes(e, null);
@@ -947,15 +913,11 @@ public abstract class AbstractMyJDClient<GenericType> {
     abstract public String urlencode(String text) throws MyJDownloaderException;
 
     public boolean verifyDirectConnectionInfo(final String deviceID, final DirectConnectionInfo directConnectionInfo) throws MyJDownloaderException, APIException {
-        if (directConnectionInfo == null) {
-            throw new IllegalStateException("directConnectionInfo is null");
-        }
+        if (directConnectionInfo == null) { throw new IllegalStateException("directConnectionInfo is null"); }
         final String host = "http://" + directConnectionInfo.getIp() + ":" + directConnectionInfo.getPort();
         try {
             final Boolean ret = (Boolean) this.callAction(host, deviceID, "/device/ping", (GenericType) Boolean.class, (Object[]) null);
-            if (Boolean.TRUE.equals(ret)) {
-                return true;
-            }
+            if (Boolean.TRUE.equals(ret)) { return true; }
         } catch (final UnexpectedIOException e) {
         }
         return false;
