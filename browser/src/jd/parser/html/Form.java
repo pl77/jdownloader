@@ -368,25 +368,63 @@ public class Form {
         String escapedHtmlCode = htmlCode;
         final List<String> values = new ArrayList<String>();
         final long timeStamp = System.nanoTime();
-        final Pattern value1 = Pattern.compile("(?s)(?<!\\\\)\"(.*?)(?<!\\\\)\"");
-        final Pattern value2 = Pattern.compile("(?s)(?<!\\\\)'(.*?)(?<!\\\\)'");
-        boolean matches = false;
+        final Pattern valuePatternA;
+        final Pattern valuePatternB;
+        if (true) {
+            // optimized valuePatterns
+            valuePatternA = Pattern.compile("(?s)(?<!\\\\)\"(((?!VALUE-" + timeStamp + "-).)*?)(?<!\\\\)\"");
+            valuePatternB = Pattern.compile("(?s)(?<!\\\\)'(((?!VALUE-" + timeStamp + "-).)*?)(?<!\\\\)'");
+        } else {
+            // old valuePatterns with help that make use of ignoreValues
+            valuePatternA = Pattern.compile("(?s)(?<!\\\\)\"(.*?)(?<!\\\\)\"");
+            valuePatternB = Pattern.compile("(?s)(?<!\\\\)'(.*?)(?<!\\\\)'");
+        }
+        final List<String> ignoreValues = new ArrayList<String>();
         while (true) {
-            Matcher matcher = value1.matcher(escapedHtmlCode);
-            matches = matcher.find();
-            if (!matches) {
-                matcher = value2.matcher(escapedHtmlCode);
-                matches = matcher.find();
+            Matcher matches = null;
+            String matcherString = escapedHtmlCode;
+            while (matches == null) {
+                final Matcher matcher = valuePatternA.matcher(escapedHtmlCode);
+                if (matcher.find()) {
+                    final String value = matcher.group(1);
+                    if (value != null && !ignoreValues.contains(value)) {
+                        matches = matcher;
+                    } else {
+                        matcherString = matcherString.replaceFirst("\"", "");
+                    }
+                } else {
+                    break;
+                }
             }
-            if (matches) {
-                final String replace = matcher.group(0);
-                final String value = matcher.group(1);
+            if (matches == null) {
+                matcherString = escapedHtmlCode;
+                while (matches == null) {
+                    final Matcher matcher = valuePatternB.matcher(matcherString);
+                    if (matcher.find()) {
+                        final String value = matcher.group(1);
+                        if (value != null && !ignoreValues.contains(value)) {
+                            matches = matcher;
+                        } else {
+                            matcherString = matcherString.replaceFirst("\\'", "");
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            if (matches != null) {
+                final String replace = matches.group(0);
+                final String value = matches.group(1);
                 if (replace == null) {
                     break;
                 } else {
-                    final int index = values.size();
-                    values.add(value);
-                    escapedHtmlCode = escapedHtmlCode.replace(replace, "VALUE-" + timeStamp + "-" + index + " ");
+                    if (!value.contains("VALUE-" + timeStamp + "-")) {
+                        final int index = values.size();
+                        values.add(value);
+                        escapedHtmlCode = escapedHtmlCode.replace(replace, "VALUE-" + timeStamp + "-" + index + " ");
+                    } else {
+                        ignoreValues.add(value);
+                    }
                 }
             } else {
                 break;
