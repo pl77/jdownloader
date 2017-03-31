@@ -758,11 +758,12 @@ public class HTMLParser {
                     }
                     if (indexOf != -1) {
                         final HtmlParserCharSequence subSequence = data.subSequence(lastIndexOf, indexOf);
+                        lastIndexOf = indexOf + 1;
                         if (subSequence.find(HTMLParser.urlEncodedProtocol)) {
                             final HtmlParserCharSequence urlDecoded = HTMLParser.decodeURLParamEncodedURL(subSequence, true);
                             HTMLParser._getHttpLinksWalker(urlDecoded, results, null, null);
                         }
-                        lastIndexOf = indexOf + 1;
+                        // TODO: check for other embedded urls, base64, reverse...
                     } else {
                         break;
                     }
