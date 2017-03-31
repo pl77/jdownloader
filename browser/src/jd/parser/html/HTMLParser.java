@@ -18,6 +18,7 @@ package jd.parser.html;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -29,7 +30,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jd.nutils.encoding.Encoding;
-import jd.parser.Regex;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
@@ -515,8 +515,8 @@ public class HTMLParser {
             return this.results;
         }
 
-        protected LinkedHashSet<String> exportResults() {
-            final LinkedHashSet<String> ret = new LinkedHashSet<String>();
+        protected Collection<String> exportResults() {
+            final ArrayList<String> ret = new ArrayList<String>();
             for (final HtmlParserCharSequence result : this.getResults()) {
                 final String url = result.toURL();
                 if (StringUtils.isNotEmpty(url)) {
@@ -545,21 +545,21 @@ public class HTMLParser {
         }
     }
 
-    final private static Httppattern[]          linkAndFormPattern          = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\\\\\"|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\\\\\"|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
-    public final static String                  protocolFile                = "file:/";
-    final private static String                 protocolPrefixes            = "((?:mega|chrome|directhttp://https?|usenet|flashget|https?viajd|https?|ccf|dlc|ftp|ftpviajd|jd|rsdf|jdlist|youtubev2" + (!Application.isJared(null) ? "|jdlog" : "") + ")://|" + HTMLParser.protocolFile + "|magnet:)";
+    final private static Httppattern[] linkAndFormPattern      = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\\\\\"|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\\\\\"|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
+    public final static String         protocolFile            = "file:/";
+    final private static String        protocolPrefixes        = "((?:mega|chrome|directhttp://https?|usenet|flashget|https?viajd|https?|ccf|dlc|ftp|ftpviajd|jd|rsdf|jdlist|youtubev2" + (!Application.isJared(null) ? "|jdlog" : "") + ")://|" + HTMLParser.protocolFile + "|magnet:)";
 
-    final private static Pattern[]              basePattern                 = new Pattern[] { Pattern.compile("base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
-    final private static Pattern[]              hrefPattern                 = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
-    final private static Pattern                pat1                        = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern                protocols                   = Pattern.compile("(" + HTMLParser.protocolPrefixes + ")");
-    final private static Pattern                LINKPROTOCOL                = Pattern.compile("^" + HTMLParser.protocolPrefixes, Pattern.CASE_INSENSITIVE);
+    final private static Pattern[]     basePattern             = new Pattern[] { Pattern.compile("base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
+    final private static Pattern[]     hrefPattern             = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
+    final private static Pattern       pat1                    = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       protocols               = Pattern.compile("(" + HTMLParser.protocolPrefixes + ")");
+    final private static Pattern       LINKPROTOCOL            = Pattern.compile("^" + HTMLParser.protocolPrefixes, Pattern.CASE_INSENSITIVE);
 
-    final private static Pattern                mergePattern_Root           = Pattern.compile("(.*?\\..*?)(/|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern                mergePattern_Path           = Pattern.compile("(.*?\\.[^?#]+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern                mergePattern_FileORPath     = Pattern.compile("(.*?\\..*?/.*?)($|#|\\?)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       mergePattern_Root       = Pattern.compile("(.*?\\..*?)(/|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       mergePattern_Path       = Pattern.compile("(.*?\\.[^?#]+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       mergePattern_FileORPath = Pattern.compile("(.*?\\..*?/.*?)($|#|\\?)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static Pattern                      mp                          = null;
+    private static Pattern             mp                      = null;
 
     static {
         try {
@@ -567,6 +567,68 @@ public class HTMLParser {
         } catch (final Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
+    }
+
+    private static final class HtmlParserOptions {
+        private boolean reverse;
+
+        private boolean isReverse() {
+            return this.reverse;
+        }
+
+        private boolean isHex() {
+            return this.hex;
+        }
+
+        private boolean isBase64() {
+            return this.base64;
+        }
+
+        private boolean isUrlEncoded() {
+            return this.urlEncoded;
+        }
+
+        private boolean hex;
+        private boolean base64;
+        private boolean urlEncoded;
+        private boolean unescape;
+
+        private boolean isUnescape() {
+            return this.unescape;
+        }
+
+        private HtmlParserOptions() {
+            this(true, true, true, true, true);
+        }
+
+        private HtmlParserOptions(final boolean reverse, final boolean hex, final boolean base64, final boolean urlEncoded, final boolean unescape) {
+            this.reverse = reverse;
+            this.hex = hex;
+            this.base64 = base64;
+            this.urlEncoded = urlEncoded;
+            this.unescape = unescape;
+        }
+
+        private HtmlParserOptions reverse(final boolean reverse) {
+            return new HtmlParserOptions(reverse, this.hex, this.base64, this.urlEncoded, this.unescape);
+        }
+
+        private HtmlParserOptions hex(final boolean hex) {
+            return new HtmlParserOptions(this.reverse, hex, this.base64, this.urlEncoded, this.unescape);
+        }
+
+        private HtmlParserOptions base64(final boolean base64) {
+            return new HtmlParserOptions(this.reverse, this.hex, base64, this.urlEncoded, this.unescape);
+        }
+
+        private HtmlParserOptions unescape(final boolean unescape) {
+            return new HtmlParserOptions(this.reverse, this.hex, this.base64, this.urlEncoded, unescape);
+        }
+
+        private HtmlParserOptions urlEncoded(final boolean urlEncoded) {
+            return new HtmlParserOptions(this.reverse, this.hex, this.base64, urlEncoded, this.unescape);
+        }
+
     }
 
     final private static Pattern                unescapePattern             = Pattern.compile("unescape\\(('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -606,7 +668,10 @@ public class HTMLParser {
     // full | double full | partial | partial | partial | partial | partial | partial
     final private static Pattern                urlEncodedProtocol          = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static HtmlParserResultSet _getHttpLinksDeepWalker(HtmlParserCharSequence data, HtmlParserResultSet results) {
+    private static HtmlParserResultSet _getHttpLinksDeepWalker(HtmlParserCharSequence data, HtmlParserResultSet results, HtmlParserOptions options) {
+        if (options == null) {
+            options = new HtmlParserOptions();
+        }
         if (results == null) {
             results = new HtmlParserResultSet();
         }
@@ -622,55 +687,91 @@ public class HTMLParser {
         }
         final int indexBefore = results.getLastResultIndex();
         /* find reversed */
-        CharSequence reversedata = new StringBuilder(data).reverse();
-        if (!data.equals(reversedata)) {
-            HTMLParser._getHttpLinksFinder(new HtmlParserCharSequence(reversedata), results);
+        if (options.isReverse()) {
+            CharSequence reversedata = new StringBuilder(data).reverse();
+            if (!data.equals(reversedata)) {
+                HTMLParser._getHttpLinksFinder(new HtmlParserCharSequence(reversedata), results, options.reverse(false));
+            }
         }
-        reversedata = null;
         /* find base64'ed */
-        final HtmlParserCharSequence urlDecoded = HTMLParser.decodeURLParamEncodedURL(data);
+        final HtmlParserCharSequence urlDecoded = HTMLParser.decodeURLParamEncodedURL(data, false);
         // check for non base64 chars here -> speed up
-        CharSequence base64Data = Encoding.Base64Decode(urlDecoded);
-        if (urlDecoded.equals(base64Data)) {
-            /* no base64 content found */
-            base64Data = null;
+        if (options.isBase64()) {
+            CharSequence base64Data = Encoding.Base64Decode(urlDecoded);
+            if (urlDecoded.equals(base64Data)) {
+                /* no base64 content found */
+                base64Data = null;
+            }
+            if (base64Data != null && !data.equals(base64Data)) {
+                HTMLParser._getHttpLinksFinder(new HtmlParserCharSequence(base64Data), results, options.base64(false));
+            }
         }
-        if (base64Data != null && !data.equals(base64Data)) {
-            HTMLParser._getHttpLinksFinder(new HtmlParserCharSequence(base64Data), results);
-        }
-        base64Data = null;
-        /* parse escaped js stuff */
-        if (data.length() > 23 && data.contains("unescape")) {
-            final List<HtmlParserCharSequence> unescaped = data.getColumn(2, HTMLParser.unescapePattern);
-            if (unescaped != null && unescaped.size() > 0) {
-                for (HtmlParserCharSequence unescape : unescaped) {
-                    HTMLParser._getHttpLinksFinder(new HtmlParserCharSequence(Encoding.htmlDecode(unescape.toString())), results);
+        if (options.isUnescape()) {
+            /* parse escaped js stuff */
+            if (data.length() > 23 && data.contains("unescape")) {
+                final List<HtmlParserCharSequence> unescaped = data.getColumn(2, HTMLParser.unescapePattern);
+                if (unescaped != null && unescaped.size() > 0) {
+                    for (HtmlParserCharSequence unescape : unescaped) {
+                        HTMLParser._getHttpLinksFinder(new HtmlParserCharSequence(Encoding.htmlDecode(unescape.toString())), results, options.unescape(false));
+                    }
                 }
             }
         }
-        /* find hex'ed */
-        if (HTMLParser.deepWalkCheck(results, indexBefore) && data.length() >= 24) {
-            HtmlParserCharSequence hex = data.group(1, HTMLParser.unhexPattern);
-            if (hex != null && hex.length() >= 24) {
-                try {
-                    /* remove spaces from hex-coded string */
-                    hex = hex.replaceAll(Pattern.compile(" "), "");
-                    final String hexString = Hex.hex2String(hex);
-                    hex = new HtmlParserCharSequence(hexString);
-                    HTMLParser._getHttpLinksFinder(hex, results);
-                } catch (final Throwable e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+        if (options.isHex()) {
+            /* find hex'ed */
+            if (HTMLParser.deepWalkCheck(results, indexBefore) && data.length() >= 24) {
+                HtmlParserCharSequence hex = data.group(1, HTMLParser.unhexPattern);
+                if (hex != null && hex.length() >= 24) {
+                    try {
+                        /* remove spaces from hex-coded string */
+                        hex = hex.replaceAll(Pattern.compile(" "), "");
+                        final String hexString = Hex.hex2String(hex);
+                        hex = new HtmlParserCharSequence(hexString);
+                        HTMLParser._getHttpLinksFinder(hex, results, options.hex(false));
+                    } catch (final Throwable e) {
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    }
                 }
             }
         }
-        if (HTMLParser.deepWalkCheck(results, indexBefore) && !urlDecoded.equals(data)) {
-            /* no changes in results size, and data contains urlcoded http://, so lets urldecode it */
-            HTMLParser._getHttpLinksFinder(urlDecoded, results);
+        if (options.isUrlEncoded()) {
+            if (HTMLParser.deepWalkCheck(results, indexBefore) && !urlDecoded.equals(data)) {
+                /* no changes in results size, and data contains urlcoded http://, so lets urldecode it */
+                if (urlDecoded.find(HTMLParser.urlEncodedProtocol)) {
+                    HTMLParser._getHttpLinksFinder(urlDecoded, results, options);
+                } else {
+                    HTMLParser._getHttpLinksFinder(urlDecoded, results, options.urlEncoded(false));
+                }
+            }
         }
         return results;
     }
 
-    private static HtmlParserResultSet _getHttpLinksFinder(HtmlParserCharSequence data, HtmlParserResultSet results) {
+    private static void addToResultSet(HtmlParserResultSet results, HtmlParserCharSequence data, HtmlParserOptions options) {
+        if (results.add(HTMLParser.correctURL(results, data))) {
+            if (data.find(HTMLParser.urlEncodedProtocol)) {
+                int lastIndexOf = 0;
+                while (true) {
+                    int indexOf = data.indexOf("?", lastIndexOf);
+                    if (indexOf == -1) {
+                        indexOf = data.indexOf("&", lastIndexOf);
+                    }
+                    if (indexOf != -1) {
+                        final HtmlParserCharSequence subSequence = data.subSequence(lastIndexOf, indexOf);
+                        if (subSequence.find(HTMLParser.urlEncodedProtocol)) {
+                            final HtmlParserCharSequence urlDecoded = HTMLParser.decodeURLParamEncodedURL(subSequence, true);
+                            HTMLParser._getHttpLinksWalker(urlDecoded, results, null, null);
+                        }
+                        lastIndexOf = indexOf + 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private static HtmlParserResultSet _getHttpLinksFinder(HtmlParserCharSequence data, HtmlParserResultSet results, HtmlParserOptions options) {
         if (results == null) {
             results = new HtmlParserResultSet();
         }
@@ -701,12 +802,12 @@ public class HTMLParser {
                 }
                 if ((protocol = HTMLParser.getProtocol(link)) != null) {
                     if (protocol.startsWith(HTMLParser.protocolFile)) {
-                        results.add(link);
+                        HTMLParser.addToResultSet(results, link, options);
                         return results;
                     } else {
                         link = link.replaceAll(HTMLParser.removeTagsPattern, "");
                         if (!link.matches(HTMLParser.space2Pattern)) {
-                            results.add(HTMLParser.correctURL(results, link));
+                            HTMLParser.addToResultSet(results, link, options);
                             return results;
                         }
                     }
@@ -753,7 +854,7 @@ public class HTMLParser {
         }
         if (protocol != null || (protocol = HTMLParser.getProtocol(hrefURL)) != null) {
             /* found a valid url with recognized protocol */
-            results.add(HTMLParser.correctURL(results, hrefURL));
+            HTMLParser.addToResultSet(results, hrefURL, options);
             if (data.equals(hrefURL)) {
                 return results;
             }
@@ -774,7 +875,7 @@ public class HTMLParser {
                     link = HTMLParser.mergeUrl(baseURL, link);
                 }
                 if (protocol != null || (protocol = HTMLParser.getProtocol(link)) != null) {
-                    results.add(HTMLParser.correctURL(results, link));
+                    HTMLParser.addToResultSet(results, link, options);
                     if (data.equals(link)) {
                         return results;
                     }
@@ -783,16 +884,13 @@ public class HTMLParser {
         }
         if (HTMLParser.mp != null) {
             final Matcher m = HTMLParser.mp.matcher(data);
-            while (true) {
-                HtmlParserCharSequence link = data.group(2, m);
-                if (link == null) {
-                    break;
-                }
+            HtmlParserCharSequence link = null;
+            while ((link = data.group(2, m)) != null) {
                 link = link.trim();
                 if (HTMLParser.getProtocol(link) == null && !link.contains("%2F")) {
                     link = link.replaceFirst(HTMLParser.missingHTTPPattern, "http://www\\.");
                 }
-                results.add(HTMLParser.correctURL(results, link));
+                HTMLParser.addToResultSet(results, link, options);
                 final Matcher mlinks = HTMLParser.protocols.matcher(link);
                 int start = -1;
                 /*
@@ -802,17 +900,17 @@ public class HTMLParser {
                     if (start == -1) {
                         start = mlinks.start();
                     } else {
-                        results.add(HTMLParser.correctURL(results, link.subSequence(start, mlinks.start())));
+                        HTMLParser.addToResultSet(results, link.subSequence(start, mlinks.start()), options);
                         start = mlinks.start();
                     }
                 }
-                if (start != -1) {
+                if (start > 0) {
                     link = link.subSequence(start);
-                    results.add(HTMLParser.correctURL(results, link));
-                    if (data.equals(link)) {
-                        /* data equals check, so we can leave this loop */
-                        return results;
-                    }
+                    HTMLParser.addToResultSet(results, link, options);
+                }
+                if (data.equals(link)) {
+                    /* data equals check, so we can leave this loop */
+                    return results;
                 }
             }
         }
@@ -824,8 +922,11 @@ public class HTMLParser {
 
     private final static int    MIN_VALID = "ftp://1.23".length();
 
-    private static HtmlParserResultSet _getHttpLinksWalker(HtmlParserCharSequence data, HtmlParserResultSet results, Pattern tagRegex) {
+    private static HtmlParserResultSet _getHttpLinksWalker(HtmlParserCharSequence data, HtmlParserResultSet results, Pattern tagRegex, HtmlParserOptions options) {
         // System.out.println("Call: "+data.length());
+        if (options == null) {
+            options = new HtmlParserOptions();
+        }
         if (results == null) {
             results = new HtmlParserResultSet();
         }
@@ -846,7 +947,7 @@ public class HTMLParser {
                 break;
             } else {
                 /* lets check if tag contains links */
-                HTMLParser._getHttpLinksWalker(nexttag, results, HTMLParser.inTagsPattern);
+                HTMLParser._getHttpLinksWalker(nexttag, results, HTMLParser.inTagsPattern, options);
                 final int tagOpen = data.indexOf(new ConcatCharSequence(HTMLParser.TAGOPEN, nexttag));
                 int tagClose = -1;
                 if (tagOpen >= 0) {
@@ -861,9 +962,9 @@ public class HTMLParser {
                         final HtmlParserCharSequence dataLeft2 = data.subSequence(tagClose + 1);
                         data = null;
                         if (dataLeft.contains(HTMLParser.TAGCLOSE)) {
-                            HTMLParser._getHttpLinksWalker(dataLeft, results, HTMLParser.endTagPattern);
+                            HTMLParser._getHttpLinksWalker(dataLeft, results, HTMLParser.endTagPattern, options);
                         } else {
-                            HTMLParser._getHttpLinksWalker(dataLeft, results, HTMLParser.taglessPattern);
+                            HTMLParser._getHttpLinksWalker(dataLeft, results, HTMLParser.taglessPattern, options);
                         }
                         data = dataLeft2;
                     } else {
@@ -903,18 +1004,18 @@ public class HTMLParser {
             }
         }
         final int indexBefore = results.getResults().size();
-        HTMLParser._getHttpLinksFinder(data, results);
+        HTMLParser._getHttpLinksFinder(data, results, options);
         if (HTMLParser.deepWalkCheck(results, indexBefore)) {
-            HTMLParser._getHttpLinksDeepWalker(data, results);
+            HTMLParser._getHttpLinksDeepWalker(data, results, options);
             /* cut of ?xy= parts if needed */
             HtmlParserCharSequence newdata = data.group(1, HTMLParser.paramsCut1);
             if (newdata != null && !data.equals(newdata)) {
-                HTMLParser._getHttpLinksDeepWalker(newdata, results);
+                HTMLParser._getHttpLinksDeepWalker(newdata, results, options);
             }
             /* use of ?xy parts if available */
             newdata = data.group(1, HTMLParser.paramsCut2);
             if (newdata != null && !data.equals(newdata)) {
-                HTMLParser._getHttpLinksDeepWalker(newdata, results);
+                HTMLParser._getHttpLinksDeepWalker(newdata, results, options);
             }
         }
         return results;
@@ -1010,21 +1111,10 @@ public class HTMLParser {
         HTMLParser.URLDECODE.put(Pattern.compile("%23"), "#");
     }
 
-    public static HtmlParserCharSequence decodeURLParamEncodedURL(HtmlParserCharSequence url) {
-        if (url != null && url.find(HTMLParser.urlEncodedProtocol)) {
-            for (Entry<Pattern, String> replace : HTMLParser.URLDECODE.entrySet()) {
+    private static HtmlParserCharSequence decodeURLParamEncodedURL(HtmlParserCharSequence url, final boolean forceDecode) {
+        if (url != null && (forceDecode || url.find(HTMLParser.urlEncodedProtocol))) {
+            for (final Entry<Pattern, String> replace : HTMLParser.URLDECODE.entrySet()) {
                 url = url.replaceAll(replace.getKey(), replace.getValue());
-            }
-        }
-        return url;
-    }
-
-    public static String decodeURLParamEncodedURL(String url) {
-        if (url != null) {
-            final HtmlParserCharSequence url2 = new HtmlParserCharSequence(url);
-            final HtmlParserCharSequence ret = HTMLParser.decodeURLParamEncodedURL(url2);
-            if (url2 != ret) {
-                url = url2.toURL();
             }
         }
         return url;
@@ -1066,7 +1156,7 @@ public class HTMLParser {
     }
 
     public static String[] getHttpLinks(final String data, final String url, HtmlParserResultSet results) {
-        HashSet<String> links = HTMLParser.getHttpLinksIntern(data, url, results);
+        Collection<String> links = HTMLParser.getHttpLinksIntern(data, url, results);
         if (links == null || links.size() == 0) {
             return new String[0];
         }
@@ -1088,17 +1178,12 @@ public class HTMLParser {
             } else {
                 tmplinks.add(link);
             }
-            // this finds a URLencoded URL within 'link'. We only want to find URLEncoded link, and not a value belonging to 'link'
-            final String urlEncodedLink = new Regex(link, "(?:https?|ftp)" + HTMLParser.urlEncodedProtocol + "[^&]+").getMatch(-1);
-            if (urlEncodedLink != null) {
-                tmplinks.add(HTMLParser.decodeURLParamEncodedURL(urlEncodedLink));
-            }
         }
         links = null;
         return tmplinks.toArray(new String[tmplinks.size()]);
     }
 
-    public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString) {
+    public static Collection<String> getHttpLinksIntern(String content, final String baseURLString) {
         return HTMLParser.getHttpLinksIntern(content, baseURLString, null);
     }
 
@@ -1107,7 +1192,7 @@ public class HTMLParser {
      *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
-    public static HashSet<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
+    public static Collection<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
         if (content == null || content.length() == 0) {
             return null;
         }
@@ -1149,13 +1234,13 @@ public class HTMLParser {
         if (baseURLString != null && HTMLParser.getProtocol(baseURLString) != null) {
             resultSet.setBaseURL(new HtmlParserCharSequence(baseURLString));
         }
-        HTMLParser._getHttpLinksWalker(data, resultSet, null);
+        HTMLParser._getHttpLinksWalker(data, resultSet, null, null);
         data = null;
         /* we don't want baseurl to be included in result set */
         resultSet.remove(resultSet.getBaseURL());
         // System.out.println("Walker:" + results.getWalkerCounter() + "|DeepWalker:" + results.getDeepWalkerCounter() + "|Finder:" +
         // results.getFinderCounter() + "|Found:" + results.size());
-        final LinkedHashSet<String> ret = resultSet.exportResults();
+        final Collection<String> ret = resultSet.exportResults();
         if (ret.size() == 0) {
             return null;
         } else {
@@ -1212,8 +1297,9 @@ public class HTMLParser {
     private static HtmlParserCharSequence getProtocol(final HtmlParserCharSequence url) {
         if (url != null) {
             return url.group(1, HTMLParser.LINKPROTOCOL);
+        } else {
+            return null;
         }
-        return null;
     }
 
     public static String getProtocol(final String url) {
