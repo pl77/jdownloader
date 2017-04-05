@@ -9,7 +9,6 @@ import java.util.List;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 
 public class StaticProxySelector implements ProxySelectorInterface {
-
     private HTTPProxy       proxy;
     private List<HTTPProxy> lst;
 
@@ -22,6 +21,11 @@ public class StaticProxySelector implements ProxySelectorInterface {
 
     public HTTPProxy getProxy() {
         return this.proxy;
+    }
+
+    @Override
+    public String toString() {
+        return this.proxy.toString();
     }
 
     @Override
@@ -38,5 +42,4 @@ public class StaticProxySelector implements ProxySelectorInterface {
     public boolean reportConnectException(Request request, int retryCounter, IOException e) {
         return false;
     }
-
 }
