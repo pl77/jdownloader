@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 
 import jd.http.Request;
 import jd.http.URLConnectionAdapter;
-import jd.parser.html.Form;
 
 import org.appwork.utils.KeyValueEntry;
 import org.appwork.utils.KeyValueStringEntry;
@@ -58,10 +57,6 @@ public class PostRequest extends Request {
     private String                                    contentType   = null;
     private byte[]                                    postBytes     = null;
     private SEND                                      sendWHAT      = null;
-
-    public PostRequest(final Form form) throws IOException {
-        super(form.getAction(null));
-    }
 
     public PostRequest(final Request cloneRequest) {
         super(cloneRequest);

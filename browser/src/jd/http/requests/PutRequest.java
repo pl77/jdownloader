@@ -3,15 +3,11 @@ package jd.http.requests;
 import java.io.IOException;
 import java.net.URL;
 
+import jd.http.Request;
+
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 
-import jd.http.Request;
-import jd.parser.html.Form;
-
 public class PutRequest extends PostRequest {
-    public PutRequest(final Form form) throws IOException {
-        super(form);
-    }
 
     public PutRequest(final Request cloneRequest) {
         super(cloneRequest);
@@ -25,8 +21,6 @@ public class PutRequest extends PostRequest {
         super(url);
     }
 
-   
-
     @Override
     protected RequestMethod getRequestMethod() {
         return RequestMethod.PUT;
@@ -37,5 +31,4 @@ public class PutRequest extends PostRequest {
         return new PutRequest(this);
     }
 
-  
 }
