@@ -9,6 +9,7 @@ import jd.http.requests.PostRequest;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.NativeHTTPConnectionImpl;
+import org.brotli.dec.BrotliInputStream;
 
 public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl implements URLConnectionAdapter {
 
@@ -60,6 +61,21 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
     @Override
     protected boolean isRequiresOutputStream() {
         return super.isRequiresOutputStream() || this.request != null && this.request.requireOutputStream();
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        if (this.convertedInputStream == null && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+            super.getInputStream();
+            if (!this.isContentDecoded()) {
+                final String encoding = this.getHeaderField("Content-Encoding");
+                if ("br".equalsIgnoreCase(encoding)) {
+                    this.contentDecoded = true;
+                    this.convertedInputStream = new BrotliInputStream(this.convertedInputStream);
+                }
+            }
+        }
+        return super.getInputStream();
     }
 
     @Override

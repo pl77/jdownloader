@@ -398,7 +398,7 @@ public abstract class Request {
         headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
             /* deflate only java >=1.6 */
-            headers.put("Accept-Encoding", "gzip, deflate");
+            headers.put("Accept-Encoding", "gzip, deflate, br");
         } else {
             headers.put("Accept-Encoding", "gzip");
         }

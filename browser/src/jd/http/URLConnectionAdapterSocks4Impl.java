@@ -9,6 +9,7 @@ import jd.http.requests.PostRequest;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.Socks4HTTPConnectionImpl;
+import org.brotli.dec.BrotliInputStream;
 
 /**
  * The Class URLConnectionAdapterSocks4Impl.
@@ -73,6 +74,21 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
         return super.isRequiresOutputStream() || this.request != null && this.request.requireOutputStream();
     }
 
+    @Override
+    public InputStream getInputStream() throws IOException {
+        if (this.convertedInputStream == null && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+            super.getInputStream();
+            if (!this.isContentDecoded()) {
+                final String encoding = this.getHeaderField("Content-Encoding");
+                if ("br".equalsIgnoreCase(encoding)) {
+                    this.contentDecoded = true;
+                    this.convertedInputStream = new BrotliInputStream(this.convertedInputStream);
+                }
+            }
+        }
+        return super.getInputStream();
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {
@@ -81,8 +97,8 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
         if (req != null) {
             sb.append("Caller:" + req.getCaller());
             sb.append(URLConnectionAdapter.CRLF);
-        sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
-        sb.append(URLConnectionAdapter.CRLF);
+            sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
+            sb.append(URLConnectionAdapter.CRLF);
         }
         sb.append(this.getRequestInfo());
         if (req != null) {
