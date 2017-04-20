@@ -390,6 +390,10 @@ public abstract class Request {
 
     protected static final String DEFAULTACCEPTHEADER = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
+    protected boolean isBrotliEncodingSupportEnabled() {
+        return true;
+    }
+
     protected RequestHeader getDefaultRequestHeader(final URL url) {
         final RequestHeader headers = new RequestHeader();
 
@@ -398,7 +402,11 @@ public abstract class Request {
         headers.put("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
         if (Application.getJavaVersion() >= Application.JAVA16) {
             /* deflate only java >=1.6 */
-            headers.put("Accept-Encoding", "gzip, deflate, br");
+            if (this.isBrotliEncodingSupportEnabled()) {
+                headers.put("Accept-Encoding", "gzip, deflate, br");
+            } else {
+                headers.put("Accept-Encoding", "gzip, deflate");
+            }
         } else {
             headers.put("Accept-Encoding", "gzip");
         }
