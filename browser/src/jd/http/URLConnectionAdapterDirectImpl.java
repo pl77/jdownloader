@@ -122,8 +122,8 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
             if (!this.isContentDecoded()) {
                 final String encoding = this.getHeaderField("Content-Encoding");
                 if ("br".equalsIgnoreCase(encoding)) {
-                    this.contentDecoded = true;
                     this.convertedInputStream = new BrotliInputStream(this.convertedInputStream);
+                    this.contentDecoded = true;
                 }
             }
         }

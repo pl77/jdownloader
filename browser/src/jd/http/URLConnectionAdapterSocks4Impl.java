@@ -81,8 +81,8 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
             if (!this.isContentDecoded()) {
                 final String encoding = this.getHeaderField("Content-Encoding");
                 if ("br".equalsIgnoreCase(encoding)) {
-                    this.contentDecoded = true;
                     this.convertedInputStream = new BrotliInputStream(this.convertedInputStream);
+                    this.contentDecoded = true;
                 }
             }
         }
