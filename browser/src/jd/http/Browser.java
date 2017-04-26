@@ -450,7 +450,7 @@ public class Browser {
     private String                   acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
     /*
      * -1 means use default Timeouts
-     *
+     * 
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -461,7 +461,7 @@ public class Browser {
     private boolean                  debug            = false;
     private boolean                  doRedirects      = false;
     private RequestHeader            headers;
-    private int                      limit            = 2 * 1024 * 1024;
+    private int                      limit            = 8 * 1024 * 1024;
     private LogInterface             logger           = null;
     private ProxySelectorInterface   proxy;
     private int                      readTimeout      = -1;
