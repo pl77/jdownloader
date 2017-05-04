@@ -1,4 +1,5 @@
 package jd.websocket;
+
 import java.io.IOException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -16,34 +17,34 @@ import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 
 public class WebSocketRequest extends GetRequest {
-    
+
     private final static HTTPHeader SEC_WEBSOCKET_VERSION_HEADER = new HTTPHeader("Sec-WebSocket-Version", "13");
     private final static String     UPGRADE_VALUE                = "upgrade";
     private final static HTTPHeader CONNECTION_UPGRADE_HEADER    = new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONNECTION, WebSocketRequest.UPGRADE_VALUE);
     private final static HTTPHeader UPGRADE_HEADER               = new HTTPHeader("Upgrade", "websocket");
     private final static String     WEBSOCKET_ACCEPT_HASH_PREFIX = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    
+
     private HTTPHeader              secWebSocketKeyHeader        = null;
-    
+
     public WebSocketRequest(Request cloneRequest) {
         super(cloneRequest);
     }
-    
+
     public WebSocketRequest(final String url) throws IOException {
-        super(url);
+        super(url.replaceFirst("(^ws)", "http"));
     }
-    
+
     public WebSocketRequest(final URL url) throws IOException {
         super(url);
     }
-    
+
     protected HTTPHeader getSecWebSocketKeyHeader() {
         if (this.secWebSocketKeyHeader == null) {
             this.secWebSocketKeyHeader = new HTTPHeader("Sec-WebSocket-Key", Base64.encodeToString(String.valueOf(System.nanoTime()).getBytes(), false));
         }
         return this.secWebSocketKeyHeader;
     }
-    
+
     private HTTPHeader getConnectionUpgradeHeader(RequestHeader requestHeaders) {
         final String key = WebSocketRequest.CONNECTION_UPGRADE_HEADER.getKey();
         if (requestHeaders.contains(key)) {
@@ -57,7 +58,7 @@ public class WebSocketRequest extends GetRequest {
             return WebSocketRequest.CONNECTION_UPGRADE_HEADER;
         }
     }
-    
+
     @Override
     protected RequestHeader getDefaultRequestHeader(URL url) {
         final RequestHeader ret = super.getDefaultRequestHeader(url);
@@ -67,7 +68,7 @@ public class WebSocketRequest extends GetRequest {
         ret.put(WebSocketRequest.UPGRADE_HEADER);
         return ret;
     }
-    
+
     @Override
     public RequestHeader getHeaders() {
         final RequestHeader ret = super.getHeaders();
@@ -77,7 +78,7 @@ public class WebSocketRequest extends GetRequest {
         ret.put(this.getConnectionUpgradeHeader(ret));
         return ret;
     }
-    
+
     protected boolean verifySecWebSocketAccept(final String accept) throws IOException {
         final MessageDigest md;
         try {
@@ -88,7 +89,7 @@ public class WebSocketRequest extends GetRequest {
         final byte[] digest = md.digest((this.getSecWebSocketKeyHeader().getValue() + WebSocketRequest.WEBSOCKET_ACCEPT_HASH_PREFIX).getBytes("UTF-8"));
         return StringUtils.equalsIgnoreCase(Base64.encodeToString(digest, false), accept);
     }
-    
+
     @Override
     public void preRequest() throws IOException {
         if (this.httpConnection instanceof URLConnectionAdapterDirectImpl) {
@@ -96,12 +97,12 @@ public class WebSocketRequest extends GetRequest {
             httpConnection.setKeepAlive(KEEPALIVE.DISABLED);
         }
     }
-    
+
     @Override
     protected boolean requireOutputStream() {
         return true;
     }
-    
+
     @Override
     protected Request connect() throws IOException {
         final Request ret = super.connect();
@@ -124,5 +125,5 @@ public class WebSocketRequest extends GetRequest {
         }
         return ret;
     }
-    
+
 }

@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import jd.http.Browser;
 
+import org.appwork.utils.logging2.LogInterface;
+
 public class WebSocketClient {
     // https://tools.ietf.org/html/rfc6455
     // http://www.websocket.org/echo.html
@@ -96,28 +98,28 @@ public class WebSocketClient {
      *
      * @return
      */
-    public WebSocketFrame buildCloseFrame() {
-        return new WebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.CLOSE, 0, this.nextMask()));
+    public WriteWebSocketFrame buildCloseFrame() {
+        return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.CLOSE, 0, this.nextMask()));
     }
 
     /**
      * https://tools.ietf.org/html/rfc6455#section-5.5.2
      */
-    public WebSocketFrame buildPingFrame() {
+    public WriteWebSocketFrame buildPingFrame() {
         return this.buildPingFrame(null);
     }
 
     /**
      * https://tools.ietf.org/html/rfc6455#section-5.5.2
      */
-    public WebSocketFrame buildPingFrame(byte[] payLoad) {
+    public WriteWebSocketFrame buildPingFrame(byte[] payLoad) {
         if (payLoad != null && payLoad.length > 0) {
             if (payLoad.length > 125) {
                 throw new IllegalArgumentException("Payload length must be <=125!");
             }
-            return new WebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PING, payLoad.length, this.nextMask()), payLoad);
+            return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PING, payLoad.length, this.nextMask()), payLoad);
         } else {
-            return new WebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PING, 0, null));
+            return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PING, 0, null));
         }
     }
 
@@ -127,12 +129,13 @@ public class WebSocketClient {
      * @param text
      * @return
      */
-    public WebSocketFrame buildUTF8TextFrame(final String text) {
+    public WriteWebSocketFrame buildUTF8TextFrame(final String text) {
         final byte[] bytes = text.getBytes(Charset.forName("UTF-8"));
-        return new WebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.UTF8_TEXT, bytes.length, this.nextMask()), bytes);
+        return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.UTF8_TEXT, bytes.length, this.nextMask()), bytes);
     }
 
-    public synchronized void writeFrame(WebSocketFrame webSocketFrame) throws IOException {
+    public synchronized void writeFrame(WriteWebSocketFrame webSocketFrame) throws IOException {
+        this.log(webSocketFrame);
         final OutputStream os = this.getOutputStream();
         os.write(webSocketFrame.getHeader());
         if (webSocketFrame.hasPayLoad()) {
@@ -146,11 +149,11 @@ public class WebSocketClient {
      * @param ping
      * @return
      */
-    protected void onOpCode_Close(WebSocketFrame close) throws IOException {
+    protected void onOpCode_Close(ReadWebSocketFrame close) throws IOException {
         this.disconnect();
     }
 
-    protected void onOpCode_Pong(WebSocketFrame pong) throws IOException {
+    protected void onOpCode_Pong(ReadWebSocketFrame pong) throws IOException {
     }
 
     /**
@@ -159,12 +162,12 @@ public class WebSocketClient {
      * @param ping
      * @return
      */
-    public WebSocketFrame buildPongFrame(WebSocketFrame ping) {
+    public WriteWebSocketFrame buildPongFrame(ReadWebSocketFrame ping) {
         if (OP_CODE.PING.equals(ping.getOpcode())) {
             if (ping.hasPayLoad()) {
-                return new WebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PONG, ping.getPayloadLength(), ping.getMask()), ping.getPayload());
+                return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PONG, ping.getPayloadLength(), ping.getMask()), ping.getPayload());
             } else {
-                return new WebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PONG, 0), null);
+                return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PONG, 0), null);
             }
         } else {
             throw new IllegalArgumentException("Parameter must be valid PING!");
@@ -177,12 +180,49 @@ public class WebSocketClient {
      * @param ping
      * @return
      */
-    protected void onOpCode_Ping(WebSocketFrame ping) throws IOException {
+    protected void onOpCode_Ping(ReadWebSocketFrame ping) throws IOException {
         this.writeFrame(this.buildPongFrame(ping));
     }
 
-    public synchronized WebSocketFrame readNextFrame() throws IOException {
-        final WebSocketFrame webSocketFrame = WebSocketFrame.read(this.getInputStream());
+    protected void log(WebSocketFrame webSocketFrame) {
+        final LogInterface logger = this.br.getLogger();
+        if (logger != null && this.br.isDebug()) {
+            final StringBuilder sb = new StringBuilder();
+            try {
+                final StackTraceElement[] stackTrace = new Exception().getStackTrace();
+                for (final StackTraceElement stack : stackTrace) {
+                    if ("jd.websocket.WebSocketClient".equals(stack.getClassName())) {
+                        continue;
+                    }
+                    if (sb.length() > 0) {
+                        sb.append("\r\n");
+                    }
+                    sb.append(stack.toString());
+                }
+            } catch (final Throwable e) {
+            }
+            if (sb.length() > 0) {
+                sb.insert(0, "\r\nCaller:");
+                sb.append("\r\n");
+            }
+            sb.append("BrowserID:" + this.br.getBrowserID() + "|RequestID:" + this.webSocketRequest.getRequestID() + "|URL:" + this.webSocketRequest.getURL());
+            if (webSocketFrame instanceof ReadWebSocketFrame) {
+                sb.append("\r\n----------------READ WebSocketFrame Content-------------\r\n");
+            } else {
+                sb.append("\r\n----------------WRITE WebSocketFrame Content-------------\r\n");
+            }
+            if (this.br.isVerbose()) {
+                sb.append(String.valueOf(webSocketFrame));
+            } else if (this.br.isDebug()) {
+                sb.append(String.valueOf(webSocketFrame.getFrameHeader()));
+            }
+            logger.finest(sb.toString());
+        }
+    }
+
+    public synchronized ReadWebSocketFrame readNextFrame() throws IOException {
+        final ReadWebSocketFrame webSocketFrame = ReadWebSocketFrame.read(this.getInputStream());
+        this.log(webSocketFrame);
         switch (webSocketFrame.getOpcode()) {
         case PING:
             this.onOpCode_Ping(webSocketFrame);
