@@ -661,7 +661,9 @@ public abstract class AbstractMyJDClient<GenericType> {
                         }
                 }
             } catch (final MyJDownloaderException e1) {
-                e1.setSource(error.getSrc());
+                if (error != null) {
+                    e1.setSource(error.getSrc());
+                }
                 throw e1;
             } catch (final Exception e2) {
                 throw new UnexpectedIOException(e2);
