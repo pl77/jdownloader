@@ -12,7 +12,7 @@ import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.websocket.ReadWebSocketFrame;
 import org.appwork.utils.net.websocket.WebSocketFrame;
 
-public class WebSocketClient extends org.appwork.utils.net.websocket.WebSocketClient {
+public class WebSocketClient extends org.appwork.utils.net.websocket.WebSocketEndPoint {
 
     protected final URL           url;
     protected final Browser       br;
