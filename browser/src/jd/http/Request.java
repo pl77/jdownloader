@@ -283,22 +283,24 @@ public abstract class Request {
             this.browserID = br.getBrowserID();
             this.requestID = br.getNextRequestID();
         }
-        try {
-            final StringBuilder sb = new StringBuilder();
-            final StackTraceElement[] stackTrace = new Exception().getStackTrace();
-            for (final StackTraceElement stack : stackTrace) {
-                if ("jd.http.Request".equals(stack.getClassName()) || "jd.http.Browser".equals(stack.getClassName())) {
-                    continue;
+        if (this.caller == null) {
+            try {
+                final StringBuilder sb = new StringBuilder();
+                final StackTraceElement[] stackTrace = new Exception().getStackTrace();
+                for (final StackTraceElement stack : stackTrace) {
+                    if ("jd.http.Request".equals(stack.getClassName()) || "jd.http.Browser".equals(stack.getClassName())) {
+                        continue;
+                    }
+                    if (sb.length() > 0) {
+                        sb.append("\r\n");
+                    }
+                    sb.append(stack.toString());
                 }
                 if (sb.length() > 0) {
-                    sb.append("\r\n");
+                    this.caller = sb.toString();
                 }
-                sb.append(stack.toString());
+            } catch (final Throwable e) {
             }
-            if (sb.length() > 0) {
-                this.caller = sb.toString();
-            }
-        } catch (final Throwable e) {
         }
         return this.connect();
     }
