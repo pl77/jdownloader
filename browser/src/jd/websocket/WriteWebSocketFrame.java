@@ -26,7 +26,7 @@ public class WriteWebSocketFrame extends WebSocketFrame {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("Write|Fin:").append(this.isFin());
+        sb.append("WriteFrame|Fin:").append(this.isFin());
         sb.append("|OpCode:").append(this.getOpcode());
         if (this.getMask() != null) {
             sb.append("|Mask:").append(HexFormatter.byteArrayToHex(this.getMask()));
