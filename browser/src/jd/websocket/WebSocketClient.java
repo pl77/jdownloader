@@ -222,19 +222,24 @@ public class WebSocketClient {
 
     public synchronized ReadWebSocketFrame readNextFrame() throws IOException {
         final ReadWebSocketFrame webSocketFrame = ReadWebSocketFrame.read(this.getInputStream());
-        this.log(webSocketFrame);
-        switch (webSocketFrame.getOpcode()) {
-        case PING:
-            this.onOpCode_Ping(webSocketFrame);
+        if (webSocketFrame != null) {
+            this.log(webSocketFrame);
+            switch (webSocketFrame.getOpcode()) {
+            case PING:
+                this.onOpCode_Ping(webSocketFrame);
+                break;
+            case PONG:
+                this.onOpCode_Pong(webSocketFrame);
+                break;
+            case CLOSE:
+                this.onOpCode_Close(webSocketFrame);
+                break;
+            default:
+                break;
+            }
             return webSocketFrame;
-        case PONG:
-            this.onOpCode_Pong(webSocketFrame);
-            return webSocketFrame;
-        case CLOSE:
-            this.onOpCode_Close(webSocketFrame);
-            return webSocketFrame;
-        default:
-            return webSocketFrame;
+        } else {
+            return null;
         }
     }
 

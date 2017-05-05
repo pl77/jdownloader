@@ -29,15 +29,19 @@ public class ReadWebSocketFrame extends WebSocketFrame {
 
     public static ReadWebSocketFrame read(InputStream is) throws IOException {
         final WebSocketFrameHeader frameHeader = WebSocketFrameHeader.read(is);
-        if (frameHeader.getPayloadLength() > 0) {
-            final byte[] payLoad = IO.readStream(-1, new LimitedInputStream(is, frameHeader.getPayloadLength()) {
-                @Override
-                public void close() throws IOException {
-                }
-            });
-            return new ReadWebSocketFrame(frameHeader, payLoad);
+        if (frameHeader != null) {
+            if (frameHeader.getPayloadLength() > 0) {
+                final byte[] payLoad = IO.readStream(-1, new LimitedInputStream(is, frameHeader.getPayloadLength()) {
+                    @Override
+                    public void close() throws IOException {
+                    }
+                });
+                return new ReadWebSocketFrame(frameHeader, payLoad);
+            } else {
+                return new ReadWebSocketFrame(frameHeader);
+            }
         } else {
-            return new ReadWebSocketFrame(frameHeader);
+            return null;
         }
     }
 

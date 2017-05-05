@@ -25,7 +25,19 @@ public class WebSocketTest {
         wsc.writeFrame(wsc.buildPingFrame("test".getBytes()));
         WebSocketFrame frame = wsc.readNextFrame();
         System.out.println(frame);
-        wsc.writeFrame(wsc.buildUTF8TextFrame("Test"));
+        try {
+            while (true) {
+                frame = wsc.readNextFrame();
+                if (frame != null) {
+                    System.out.println(frame);
+                } else {
+                    break;
+                }
+            }
+        } catch (final Throwable e) {
+            e.printStackTrace();
+        }
+        wsc.writeFrame(wsc.buildUTF8TextFrame("Test2"));
         frame = wsc.readNextFrame();
         System.out.println(frame);
         wsc.close();
