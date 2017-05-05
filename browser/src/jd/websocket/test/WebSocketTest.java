@@ -5,10 +5,10 @@ import java.net.URL;
 
 import jd.http.Browser;
 import jd.websocket.WebSocketClient;
-import jd.websocket.WebSocketFrame;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.utils.net.websocket.WebSocketFrame;
 
 public class WebSocketTest {
 
