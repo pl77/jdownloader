@@ -165,11 +165,12 @@ public class Encoding {
         /* Form Variablen dürfen keine Leerzeichen haben */
         if (str == null) {
             return null;
-        }
-        if (Encoding.isUrlCoded(str) && !Encoding.isHtmlEntityCoded(str)) {
-            return str.replaceAll(" ", "+");
         } else {
-            return Encoding.urlEncode(str);
+            if (Encoding.isUrlCoded(str) && !Encoding.isHtmlEntityCoded(str)) {
+                return str.replaceAll(" ", "+");
+            } else {
+                return Encoding.urlEncode(str);
+            }
         }
     }
 
@@ -182,26 +183,28 @@ public class Encoding {
     public static String htmlDecode(String str) {
         if (str == null) {
             return null;
+        } else {
+            try {
+                str = URLDecoder.decode(str, "UTF-8");
+            } catch (final Throwable e) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            }
+            return Encoding.htmlOnlyDecode(str);
         }
-        try {
-            str = URLDecoder.decode(str, "UTF-8");
-        } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-        }
-        return Encoding.htmlOnlyDecode(str);
     }
 
     public static String htmlOnlyDecode(String str) {
         if (str == null) {
             return null;
+        } else {
+            str = HTMLEntities.unhtmlentities(str);
+            str = HTMLEntities.unhtmlAmpersand(str);
+            str = HTMLEntities.unhtmlAngleBrackets(str);
+            str = HTMLEntities.unhtmlDoubleQuotes(str);
+            str = HTMLEntities.unhtmlQuotes(str);
+            str = HTMLEntities.unhtmlSingleQuotes(str);
+            return str;
         }
-        str = HTMLEntities.unhtmlentities(str);
-        str = HTMLEntities.unhtmlAmpersand(str);
-        str = HTMLEntities.unhtmlAngleBrackets(str);
-        str = HTMLEntities.unhtmlDoubleQuotes(str);
-        str = HTMLEntities.unhtmlQuotes(str);
-        str = HTMLEntities.unhtmlSingleQuotes(str);
-        return str;
     }
 
     public static boolean isUrlCoded(final String str) {
