@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.nutils.encoding;
 
 import java.io.UnsupportedEncodingException;
@@ -27,7 +26,6 @@ import jd.parser.html.HTMLParser;
 import org.appwork.utils.StringUtils;
 
 public class Encoding {
-
     private final static char[] HEX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     public static String base16Encode(final String input) {
@@ -50,7 +48,6 @@ public class Encoding {
         while (i < code.length()) {
             res[i / 2] = (byte) Integer.parseInt(code.substring(i, i + 2), 16);
             i += 2;
-
         }
         return res;
     }
@@ -82,11 +79,9 @@ public class Encoding {
     }
 
     public static String Base64Encode(final String plain) {
-
         if (plain == null) {
             return null;
         }
-
         // String base64 = new BASE64Encoder().encode(plain.getBytes());
         String base64;
         try {
@@ -145,7 +140,6 @@ public class Encoding {
         if (str == null || filter == null) {
             return "";
         }
-
         final byte[] org = str.getBytes();
         final byte[] mask = filter.getBytes();
         final byte[] ret = new byte[org.length];
@@ -172,7 +166,7 @@ public class Encoding {
         if (str == null) {
             return null;
         }
-        if (Encoding.isUrlCoded(str)) {
+        if (Encoding.isUrlCoded(str) && !Encoding.isHtmlEntityCoded(str)) {
             return str.replaceAll(" ", "+");
         } else {
             return Encoding.urlEncode(str);
@@ -216,6 +210,21 @@ public class Encoding {
         }
         try {
             if (URLDecoder.decode(str, "UTF-8").length() != str.length()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isHtmlEntityCoded(final String str) {
+        if (str == null) {
+            return false;
+        }
+        try {
+            if (Encoding.htmlOnlyDecode(str).length() != str.length()) {
                 return true;
             } else {
                 return false;
@@ -430,7 +439,6 @@ public class Encoding {
      * @param str
      * @return str als UTF8Decodiert
      */
-
     public static String UTF8Decode(final String str) {
         return Encoding.UTF8Decode(str, null);
     }
@@ -543,5 +551,4 @@ public class Encoding {
         }
         return sb.toString();
     }
-
 }
