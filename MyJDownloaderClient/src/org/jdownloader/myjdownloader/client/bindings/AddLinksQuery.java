@@ -37,9 +37,9 @@ import org.jdownloader.myjdownloader.client.json.AbstractJsonData;
 
 public class AddLinksQuery extends AbstractJsonData {
     public AddLinksQuery(/* storable */) {
-        
+
     }
-    
+
     /**
      * @param autostart
      * @param links
@@ -57,7 +57,7 @@ public class AddLinksQuery extends AbstractJsonData {
         this.downloadPassword = downloadPassword;
         this.destinationFolder = destinationFolder;
     }
-    
+
     private Boolean  autostart                = null;
     private Boolean  deepDecrypt              = null;
     private Boolean  autoExtract              = null;
@@ -70,111 +70,116 @@ public class AddLinksQuery extends AbstractJsonData {
     private String   downloadPassword         = null;
     private String   destinationFolder        = null;
     private Boolean  assignJobID              = null;
-    
+
     public Boolean isAssignJobID() {
         return this.assignJobID;
     }
-
+    
     public void setAssignJobID(Boolean assignJobID) {
         this.assignJobID = assignJobID;
     }
-
+    
     public Boolean isAutostart() {
         return this.autostart;
     }
-    
+
     public void setAutostart(final Boolean autostart) {
         this.autostart = autostart;
     }
-    
+
     public String getLinks() {
         return this.links;
     }
-    
+
     public void setLinks(final String links) {
         this.links = links;
     }
-    
+
     public String getPackageName() {
         return this.packageName;
     }
-    
+
     public void setPackageName(final String packageName) {
         this.packageName = packageName;
     }
-    
+
     public String getExtractPassword() {
         return this.extractPassword;
     }
-    
+
     public void setExtractPassword(final String extractPassword) {
         this.extractPassword = extractPassword;
     }
-    
+
     public String getDownloadPassword() {
         return this.downloadPassword;
     }
-    
+
     public void setDownloadPassword(final String downloadPassword) {
         this.downloadPassword = downloadPassword;
     }
-    
+
     public String getDestinationFolder() {
         return this.destinationFolder;
     }
-    
+
     public void setDestinationFolder(final String destinationFolder) {
         this.destinationFolder = destinationFolder;
     }
-    
+
     private PriorityStorable priority = PriorityStorable.DEFAULT;
-    
+
     public PriorityStorable getPriority() {
         return this.priority;
     }
-    
+
     public void setPriority(PriorityStorable priority) {
         this.priority = priority;
     }
-    
+
     public String getSourceUrl() {
         return this.sourceUrl;
     }
-    
+
     public void setSourceUrl(String sourceUrl) {
         this.sourceUrl = sourceUrl;
     }
-    
+
+    @Deprecated
+    public void setSourceurl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
+    }
+
     public Boolean isAutoExtract() {
         return this.autoExtract;
     }
-    
+
     public void setAutoExtract(Boolean autoExtract) {
         this.autoExtract = autoExtract;
     }
-    
+
     public Boolean isDeepDecrypt() {
         return this.deepDecrypt;
     }
-    
+
     public void setDeepDecrypt(Boolean deepDecrypt) {
         this.deepDecrypt = deepDecrypt;
     }
-    
+
     public String[] getDataURLs() {
         return this.dataURLs;
     }
-    
+
     public void setDataURLs(String[] dataURLs) {
         this.dataURLs = dataURLs;
     }
-    
+
     public Boolean isOverwritePackagizerRules() {
         return this.overwritePackagizerRules;
     }
-    
+
     public void setOverwritePackagizerRules(Boolean overwritePackagizerRules) {
         this.overwritePackagizerRules = overwritePackagizerRules;
     }
-    
+
 }
