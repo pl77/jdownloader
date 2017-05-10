@@ -671,15 +671,15 @@ public abstract class AbstractMyJDClient<GenericType> {
         }
         switch (e.getResponseCode()) {
             case 403:
-                throw new AuthException();
+                throw new AuthException(e);
             case 502:
-                throw new MaintenanceException();
+                throw new MaintenanceException(e);
             case 503:
-                throw new OverloadException();
+                throw new OverloadException(e);
             case 401:
-                throw new EmailNotValidatedException();
+                throw new EmailNotValidatedException(e);
             case 407:
-                throw new TokenException(session);
+                throw new TokenException(e, session);
             default:
                 throw new UnexpectedIOException(e);
         }
