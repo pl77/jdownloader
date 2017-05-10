@@ -17,13 +17,11 @@ import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 
 public class WebSocketRequest extends GetRequest {
-
     private final static HTTPHeader SEC_WEBSOCKET_VERSION_HEADER = new HTTPHeader("Sec-WebSocket-Version", "13");
     private final static String     UPGRADE_VALUE                = "upgrade";
     private final static HTTPHeader CONNECTION_UPGRADE_HEADER    = new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONNECTION, WebSocketRequest.UPGRADE_VALUE);
     private final static HTTPHeader UPGRADE_HEADER               = new HTTPHeader("Upgrade", "websocket");
-    private final static String     WEBSOCKET_ACCEPT_HASH_PREFIX = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
+    public final static String      WEBSOCKET_ACCEPT_HASH_PREFIX = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     private HTTPHeader              secWebSocketKeyHeader        = null;
 
     public WebSocketRequest(Request cloneRequest) {
@@ -125,5 +123,4 @@ public class WebSocketRequest extends GetRequest {
         }
         return ret;
     }
-
 }
