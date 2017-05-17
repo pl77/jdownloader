@@ -37,9 +37,11 @@ import org.jdownloader.myjdownloader.client.exceptions.APIException;
 import org.jdownloader.myjdownloader.client.exceptions.AuthException;
 import org.jdownloader.myjdownloader.client.exceptions.ChallengeFailedException;
 import org.jdownloader.myjdownloader.client.exceptions.DeviceIsOfflineException;
+import org.jdownloader.myjdownloader.client.exceptions.EmailBlockedException;
 import org.jdownloader.myjdownloader.client.exceptions.EmailInvalidException;
 import org.jdownloader.myjdownloader.client.exceptions.EmailNotAllowedException;
 import org.jdownloader.myjdownloader.client.exceptions.EmailNotValidatedException;
+import org.jdownloader.myjdownloader.client.exceptions.EmailQuotaException;
 import org.jdownloader.myjdownloader.client.exceptions.ExceptionResponse;
 import org.jdownloader.myjdownloader.client.exceptions.MaintenanceException;
 import org.jdownloader.myjdownloader.client.exceptions.MyJDownloaderException;
@@ -51,7 +53,6 @@ import org.jdownloader.myjdownloader.client.exceptions.UnconnectedException;
 import org.jdownloader.myjdownloader.client.exceptions.UnexpectedIOException;
 import org.jdownloader.myjdownloader.client.exceptions.device.ApiFileNotFoundException;
 import org.jdownloader.myjdownloader.client.exceptions.device.InternalServerErrorException;
-import org.jdownloader.myjdownloader.client.exceptions.device.SessionException;
 import org.jdownloader.myjdownloader.client.exceptions.device.UnknownCommandException;
 import org.jdownloader.myjdownloader.client.exceptions.device.UnknownInterfaceException;
 import org.jdownloader.myjdownloader.client.exceptions.device.WrongParametersException;
@@ -619,23 +620,24 @@ public abstract class AbstractMyJDClient<GenericType> {
                                 case API_INTERFACE_NOT_FOUND:
                                     throw new UnknownInterfaceException(null);
                                 case AUTH_FAILED:
-                                    throw new AuthException();
+                                    throw new AuthException(e);
                                 case BAD_PARAMETERS:
                                     throw new WrongParametersException(null);
                                 case FILE_NOT_FOUND:
                                     throw new ApiFileNotFoundException(null);
-                                case SESSION:
-                                    throw new SessionException(null);
+                                case TOKEN_INVALID:
+                                    throw new TokenException(e, session);
                                 default:
-                                    throw new APIException(error.getType(), null);
+                                    throw new APIException(e, error.getType(), null);
                             }
                         }
-
+                        // TODO: fixme
+                        break;
                     case MYJD:
                         final ServerErrorType type = ServerErrorType.valueOf(error.getType());
                         switch (type) {
                             case AUTH_FAILED:
-                                throw new AuthException();
+                                throw new AuthException(e);
                             case ERROR_EMAIL_NOT_CONFIRMED:
                                 throw new EmailNotValidatedException();
                             case OUTDATED:
@@ -643,7 +645,7 @@ public abstract class AbstractMyJDClient<GenericType> {
                             case OFFLINE:
                                 throw new DeviceIsOfflineException();
                             case TOKEN_INVALID:
-                                throw new TokenException(session);
+                                throw new TokenException(e, session);
                             case UNKNOWN:
                                 throw new RuntimeException("Not Implemented: unkown");
                             case CHALLENGE_FAILED:
@@ -652,13 +654,27 @@ public abstract class AbstractMyJDClient<GenericType> {
                                 throw new EmailNotAllowedException();
                             case EMAIL_INVALID:
                                 throw new EmailInvalidException();
+                            case EMAIL_BLOCKED:
+                                throw new EmailBlockedException();
+                            case EMAIL_QUOTA:
+                                throw new EmailQuotaException();
                             case OVERLOAD:
-                                throw new OverloadException();
+                                throw new OverloadException(e);
                             case TOO_MANY_REQUESTS:
                                 throw new TooManyRequestsException();
                             case MAINTENANCE:
-                                throw new MaintenanceException();
+                                throw new MaintenanceException(e);
+                            case BAD_REQUEST:
+                                // TODO: fixme
+                                break;
+                            case FAILED:
+                                // TODO: fixme
+                                break;
                         }
+                        break;
+                    case UNKNOWN:
+                        // TODO: fixme
+                        break;
                 }
             } catch (final MyJDownloaderException e1) {
                 if (error != null) {
@@ -849,7 +865,13 @@ public abstract class AbstractMyJDClient<GenericType> {
         this.callServer(query, null, session, RequestIDOnly.class);
     }
 
-    public synchronized void kill(final String email, final String password, String sessionToken) throws MyJDownloaderException {
+    public synchronized boolean isSessionValid(final String validateToken) throws MyJDownloaderException {
+        final SessionInfo session = this.getSessionInfo();
+        final String query = "/my/issessionvalid?sessiontoken=" + this.urlencode(session.getSessionToken() + "&validatetoken=" + this.urlencode(validateToken));
+        return this.callServer(query, null, session, SuccessfulResponse.class).isSuccessful();
+    }
+
+    public synchronized void kill(final String email, final String password, String killToken) throws MyJDownloaderException {
         String retString = null;
         try {
             if (email == null || !email.matches("^.+?@.+$") || password == null || password.trim().length() == 0) {
@@ -859,7 +881,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             // localSecret = createSecret(username, password, "jd");
             final byte[] loginSecret = this.createSecret(email, password, "server");
             final long rid = this.getUniqueRID();
-            final StringBuilder query = new StringBuilder().append("/my/kill?email=").append(this.urlencode(email)).append("&killtoken=").append(this.urlencode(sessionToken)).append("&rid=").append(rid);
+            final StringBuilder query = new StringBuilder().append("/my/kill?email=").append(this.urlencode(email)).append("&killtoken=").append(this.urlencode(killToken)).append("&rid=").append(rid);
             final String signature = this.sign(loginSecret, query.toString());
             query.append("&signature=").append(this.urlencode(signature));
             retString = this.toString(this.cryptedPost(query.toString(), "", loginSecret));
