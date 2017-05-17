@@ -879,7 +879,7 @@ public abstract class AbstractMyJDClient<GenericType> {
 
     public synchronized SessionInfoResponse getSessionInfo(final String queryToken) throws MyJDownloaderException {
         final SessionInfo session = this.getSessionInfo();
-        final String query = "/my/getsessioninfo?sessiontoken=" + this.urlencode(session.getSessionToken() + "&queryToken=" + this.urlencode(queryToken));
+        final String query = "/my/getsessioninfo?sessiontoken=" + this.urlencode(session.getSessionToken()) + "&queryToken=" + this.urlencode(queryToken);
         final SessionInfoResponse ret = this.callServer(query, null, session, SessionInfoResponse.class);
         if (ret != null && queryToken.equals(ret.getSessionToken())) {
             return ret;
