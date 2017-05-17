@@ -75,6 +75,7 @@ import org.jdownloader.myjdownloader.client.json.ObjectData;
 import org.jdownloader.myjdownloader.client.json.RequestIDOnly;
 import org.jdownloader.myjdownloader.client.json.RequestIDValidator;
 import org.jdownloader.myjdownloader.client.json.ServerErrorType;
+import org.jdownloader.myjdownloader.client.json.SessionInfoResponse;
 import org.jdownloader.myjdownloader.client.json.SuccessfulResponse;
 
 public abstract class AbstractMyJDClient<GenericType> {
@@ -876,10 +877,15 @@ public abstract class AbstractMyJDClient<GenericType> {
         this.callServer(query, null, session, RequestIDOnly.class);
     }
 
-    public synchronized boolean isSessionValid(final String validateToken) throws MyJDownloaderException {
+    public synchronized SessionInfoResponse getSessionInfo(final String queryToken) throws MyJDownloaderException {
         final SessionInfo session = this.getSessionInfo();
-        final String query = "/my/issessionvalid?sessiontoken=" + this.urlencode(session.getSessionToken() + "&validatetoken=" + this.urlencode(validateToken));
-        return this.callServer(query, null, session, SuccessfulResponse.class).isSuccessful();
+        final String query = "/my/getsessioninfo?sessiontoken=" + this.urlencode(session.getSessionToken() + "&queryToken=" + this.urlencode(queryToken));
+        final SessionInfoResponse ret = this.callServer(query, null, session, SessionInfoResponse.class);
+        if (ret != null && queryToken.equals(ret.getSessionToken())) {
+            return ret;
+        } else {
+            return null;
+        }
     }
 
     public synchronized void kill(final String email, final String password, String killToken) throws MyJDownloaderException {
