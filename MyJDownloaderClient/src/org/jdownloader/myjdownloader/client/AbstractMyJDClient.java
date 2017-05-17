@@ -634,44 +634,55 @@ public abstract class AbstractMyJDClient<GenericType> {
                         // TODO: fixme
                         break;
                     case MYJD:
-                        final ServerErrorType type = ServerErrorType.valueOf(error.getType());
-                        switch (type) {
-                            case AUTH_FAILED:
-                                throw new AuthException(e);
-                            case ERROR_EMAIL_NOT_CONFIRMED:
-                                throw new EmailNotValidatedException();
-                            case OUTDATED:
-                                throw new OutdatedException();
-                            case OFFLINE:
-                                throw new DeviceIsOfflineException();
-                            case TOKEN_INVALID:
-                                throw new TokenException(e, session);
-                            case UNKNOWN:
-                                throw new RuntimeException("Not Implemented: unkown");
-                            case CHALLENGE_FAILED:
-                                throw new ChallengeFailedException();
-                            case EMAIL_FORBIDDEN:
-                                throw new EmailNotAllowedException();
-                            case EMAIL_INVALID:
-                                throw new EmailInvalidException();
-                            case EMAIL_BLOCKED:
-                                throw new EmailBlockedException();
-                            case EMAIL_QUOTA:
-                                throw new EmailQuotaException();
-                            case OVERLOAD:
-                                throw new OverloadException(e);
-                            case TOO_MANY_REQUESTS:
-                                throw new TooManyRequestsException();
-                            case MAINTENANCE:
-                                throw new MaintenanceException(e);
-                            case BAD_REQUEST:
-                                // TODO: fixme
-                                break;
-                            case FAILED:
-                                // TODO: fixme
-                                break;
+                        // RemoteAPIError
+                        if ("API_COMMAND_NOT_FOUND".equals(error.getType())) {
+                            throw new UnknownCommandException(null);
+                        } else if ("BAD_PARAMETERS".equals(error.getType())) {
+                            throw new WrongParametersException(null);
+                        } else if ("API_INTERFACE_NOT_FOUND".equals(error.getType())) {
+                            throw new UnknownInterfaceException(null);
+                        } else if ("INTERNAL_SERVER_ERROR".equals(error.getType())) {
+                            throw new InternalServerErrorException(null);
+                        } else {
+                            final ServerErrorType type = ServerErrorType.valueOf(error.getType());
+                            switch (type) {
+                                case AUTH_FAILED:
+                                    throw new AuthException(e);
+                                case ERROR_EMAIL_NOT_CONFIRMED:
+                                    throw new EmailNotValidatedException();
+                                case OUTDATED:
+                                    throw new OutdatedException();
+                                case OFFLINE:
+                                    throw new DeviceIsOfflineException();
+                                case TOKEN_INVALID:
+                                    throw new TokenException(e, session);
+                                case UNKNOWN:
+                                    throw new RuntimeException("Not Implemented: unkown");
+                                case CHALLENGE_FAILED:
+                                    throw new ChallengeFailedException();
+                                case EMAIL_FORBIDDEN:
+                                    throw new EmailNotAllowedException();
+                                case EMAIL_INVALID:
+                                    throw new EmailInvalidException();
+                                case EMAIL_BLOCKED:
+                                    throw new EmailBlockedException();
+                                case EMAIL_QUOTA:
+                                    throw new EmailQuotaException();
+                                case OVERLOAD:
+                                    throw new OverloadException(e);
+                                case TOO_MANY_REQUESTS:
+                                    throw new TooManyRequestsException();
+                                case MAINTENANCE:
+                                    throw new MaintenanceException(e);
+                                case BAD_REQUEST:
+                                    // TODO: fixme
+                                    break;
+                                case FAILED:
+                                    // TODO: fixme
+                                    break;
+                            }
+                            break;
                         }
-                        break;
                     case UNKNOWN:
                         // TODO: fixme
                         break;
