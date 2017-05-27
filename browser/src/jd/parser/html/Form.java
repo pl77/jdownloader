@@ -163,7 +163,7 @@ public class Form {
     }
 
     /**
-     * Gets the first inputfiled with this key. REMEMBER. There can be more than one file with this key
+     * Gets the first InputField with this key. REMEMBER. There can be more than one file with this key
      *
      * @param key
      * @return
@@ -270,13 +270,13 @@ public class Form {
     public java.util.List<KeyValueStringEntry> getRequestVariables() {
         final List<KeyValueStringEntry> ret = new ArrayList<KeyValueStringEntry>();
         for (final InputField ipf : this.inputfields) {
-            // Do not send not prefered Submit types
+            // Do not send not preferred Submit types
             if (this.getPreferredSubmit() != null && ipf.getType() != null && ipf.getType().equalsIgnoreCase("submit") && this.getPreferredSubmit() != ipf) {
                 continue;
             }
             if (ipf.getKey() == null || ipf.getValue() == null) {
                 /*
-                 * nameless key-value are not being sent, see firefox
+                 * nameless key-value are not being sent, see FireFox
                  */
                 continue;
             }
@@ -304,7 +304,7 @@ public class Form {
     public HashMap<String, String> getVarsMap() {
         final HashMap<String, String> ret = new HashMap<String, String>();
         for (final InputField ipf : this.inputfields) {
-            /* nameless key-value are not being sent, see firefox */
+            /* nameless key-value are not being sent, see FireFox */
             if (ipf.getKey() == null) {
                 continue;
             }
@@ -320,11 +320,10 @@ public class Form {
     private void parse(final String total) {
         this.htmlcode = total;
         // form.baseRequest = requestInfo;
-        final String header = new Regex(total, "<[\\s]*form(.*?)>").getMatch(0);
-        //
-        // <[\\s]*form(.*?)>(.*?)<[\\s]*/[\\s]*form[\\s]*>|<[\\s]*form(.*?)>(.+)
-        final String[][] headerEntries = new Regex(header, "(\\w+?)\\s*=\\s*('|\")(.*?)(\\2)").getMatches();
-        final String[][] headerEntries2 = new Regex(header, "(\\w+?)\\s*=\\s*([^> \"']+)").getMatches();
+        final String header = new Regex(total, "<\\s*form(.*?)>").getMatch(0);
+        final String[][] headerEntries = new Regex(header, "(\\w+)\\s*=\\s*('|\")(.*?)\\2").getMatches();
+        // make sure this regex doesn't pick up false positives! ie, parameters within urls
+        final String[][] headerEntries2 = new Regex(header, "[\\s\"'<]{1}(\\w+)\\s*=\\s*([^>\\s\"']+)[\\s\"'>]{1}").getMatches();
         this.parseHeader(headerEntries);
         this.parseHeader(headerEntries2);
         this.parseInputFields(total);
@@ -335,7 +334,7 @@ public class Form {
             for (final String[] entry : headerEntries) {
                 final String key;
                 final String value;
-                if (entry.length == 4) {
+                if (entry.length == 3) {
                     key = entry[0];
                     value = entry[2];
                 } else {
@@ -371,7 +370,7 @@ public class Form {
         final Pattern valuePatternA;
         final Pattern valuePatternB;
         if (true) {
-            // optimized valuePatterns
+            // Optimised valuePatterns
             valuePatternA = Pattern.compile("(?s)(?<!\\\\)\"(((?!VALUE-" + timeStamp + "-).)*?)(?<!\\\\)\"");
             valuePatternB = Pattern.compile("(?s)(?<!\\\\)'(((?!VALUE-" + timeStamp + "-).)*?)(?<!\\\\)'");
         } else {
@@ -455,14 +454,14 @@ public class Form {
     }
 
     /**
-     * Removes the first inputfiled with this key. REMEMBER. There can be more than one file with this key
+     * Removes the first InputField with this key. REMEMBER. There can be more than one file with this key
      *
      * @param key
      * @return
      */
     public void remove(final String key) {
         /*
-         * inputfields extends hashmap which overrides hashCode, thats why we use iterator here
+         * InputField extends HashMap which overrides hashCode, thats why we use iterator here
          */
         final Iterator<InputField> it = this.inputfields.iterator();
         while (it.hasNext()) {
