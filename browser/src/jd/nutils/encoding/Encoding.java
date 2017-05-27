@@ -237,13 +237,19 @@ public class Encoding {
         }
     }
 
-    public static String unescape(String s) {
-        if (s == null) {
+    /**
+     * decodes unicode
+     * 
+     * @param s
+     * @return
+     */
+    public static String unicodeDecode(final String input) {
+        if (input == null) {
             return null;
         }
+        String s = input;
         if (true) {
             // convert any html based unicode as a pre correction
-            String test = s;
             final String regex = "(&#x([0-9a-f]{4});)";
             final String[] rmHtml = new Regex(s, regex).getColumn(0);
             if (rmHtml != null && rmHtml.length != 0) {
@@ -253,11 +259,10 @@ public class Encoding {
                     if (dupe.add(htmlrm) == true) {
                         final String[] rm = new Regex(htmlrm, regex).getRow(0);
                         if (rm[1] != null) {
-                            test = test.replaceAll(rm[0], "\\\\u" + rm[1]);
+                            s = s.replaceAll(rm[0], "\\\\u" + rm[1]);
                         }
                     }
                 }
-                s = test;
             }
         }
         char ch;
@@ -476,82 +481,4 @@ public class Encoding {
         }
     }
 
-    public static String unescapeYoutube(String s) {
-        if (s == null) {
-            return null;
-        }
-        if (true) {
-            // convert any html based unicode as a pre correction
-            String test = s;
-            String regex = "(&#x([0-9a-f]{4});)";
-            String[] rmHtml = new Regex(s, regex).getColumn(0);
-            if (rmHtml != null && rmHtml.length != 0) {
-                // lets prevent wasteful cycles
-                HashSet<String> dupe = new HashSet<String>();
-                for (String htmlrm : rmHtml) {
-                    if (dupe.add(htmlrm) == true) {
-                        String[] rm = new Regex(htmlrm, regex).getRow(0);
-                        if (rm[1] != null) {
-                            test = test.replaceAll(rm[0], "\\\\u" + rm[1]);
-                        }
-                    }
-                }
-                s = test;
-            }
-        }
-        char ch;
-        char ch2;
-        final StringBuilder sb = new StringBuilder();
-        int ii;
-        int i;
-        for (i = 0; i < s.length(); i++) {
-            ch = s.charAt(i);
-            // prevents StringIndexOutOfBoundsException with ending char equals case trigger
-            if (s.length() != i + 1) {
-                switch (ch) {
-                case '%':
-                case '\\':
-                    ch2 = ch;
-                    ch = s.charAt(++i);
-                    StringBuilder sb2 = null;
-                    switch (ch) {
-                    case 'u':
-                        /* unicode */
-                        sb2 = new StringBuilder();
-                        i++;
-                        ii = i + 4;
-                        for (; i < ii; i++) {
-                            ch = s.charAt(i);
-                            if (sb2.length() > 0 || ch != '0') {
-                                sb2.append(ch);
-                            }
-                        }
-                        i--;
-                        sb.append((char) Long.parseLong(sb2.toString(), 16));
-                        continue;
-                    case 'x':
-                        /* normal hex coding */
-                        sb2 = new StringBuilder();
-                        i++;
-                        ii = i + 2;
-                        for (; i < ii; i++) {
-                            ch = s.charAt(i);
-                            sb2.append(ch);
-                        }
-                        i--;
-                        sb.append((char) Long.parseLong(sb2.toString(), 16));
-                        continue;
-                    default:
-                        if (ch2 == '%') {
-                            sb.append(ch2);
-                        }
-                        sb.append(ch);
-                        continue;
-                    }
-                }
-            }
-            sb.append(ch);
-        }
-        return sb.toString();
-    }
 }
