@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http.requests;
 
 import java.io.FileInputStream;
@@ -38,21 +37,23 @@ import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
  * @author coalado
  */
 public class PostFormDataRequest extends Request {
-
     protected String               boundary;
-    protected final List<FormData> formDatas;
+    protected final List<FormData> formDatas  = new ArrayList<FormData>();
     protected String               encodeType = "multipart/form-data";
 
     public PostFormDataRequest(final String url) throws IOException {
         super(url);
         this.generateBoundary();
-        this.formDatas = new ArrayList<FormData>();
     }
 
     public PostFormDataRequest(final URL url) throws IOException {
         super(url);
         this.generateBoundary();
-        this.formDatas = new ArrayList<FormData>();
+    }
+
+    protected PostFormDataRequest(PostFormDataRequest request) {
+        super(request);
+        this.generateBoundary();
     }
 
     public void addFormData(final FormData fd) {
@@ -102,6 +103,13 @@ public class PostFormDataRequest extends Request {
         } finally {
         }
         return output.transferedBytes();
+    }
+
+    @Override
+    public Request cloneRequest() {
+        final PostFormDataRequest ret = new PostFormDataRequest(this);
+        ret.getFormData().addAll(this.getFormData());
+        return ret;
     }
 
     /**
@@ -190,5 +198,4 @@ public class PostFormDataRequest extends Request {
             break;
         }
     }
-
 }
