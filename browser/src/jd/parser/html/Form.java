@@ -320,12 +320,28 @@ public class Form {
     private void parse(final String total) {
         this.htmlcode = total;
         // form.baseRequest = requestInfo;
-        final String header = new Regex(total, "<\\s*form(.*?)>").getMatch(0);
-        final String[][] headerEntries = new Regex(header, "(\\w+)\\s*=\\s*('|\")(.*?)\\2").getMatches();
-        // make sure this regex doesn't pick up false positives! ie, parameters within urls
-        final String[][] headerEntries2 = new Regex(header, "[\\s\"'<]{1}(\\w+)\\s*=\\s*([^>\\s\"']+)[\\s\"'>]{1}").getMatches();
-        this.parseHeader(headerEntries);
-        this.parseHeader(headerEntries2);
+        String header = new Regex(total, "<\\s*form(.*?)>").getMatch(0);
+        final List<String[]> headerEntries = new ArrayList<String[]>();
+        while (true) {
+            // first parse/remove all x='y' and x="y"
+            final String[][] entries = new Regex(header, "((\\w+)\\s*=\\s*('|\")(.*?)\\3)").getMatches();
+            // then parse/remove remaining x=y
+            final String[][] entries2 = new Regex(header, "((\\w+)\\s*=\\s*(.*?)( |$))").getMatches();
+            if (entries != null && entries.length > 0) {
+                for (final String[] entry : entries) {
+                    headerEntries.add(new String[] { entry[1], entry[3] });
+                    header = header.replaceFirst(Pattern.quote(entry[0]), " ");
+                }
+            } else if (entries2 != null && entries2.length > 0) {
+                for (final String[] entry : entries2) {
+                    headerEntries.add(new String[] { entry[1], entry[2] });
+                    header = header.replaceFirst(Pattern.quote(entry[0]), " ");
+                }
+            } else {
+                break;
+            }
+        }
+        this.parseHeader(headerEntries.toArray(new String[0][]));
         this.parseInputFields(total);
     }
 
