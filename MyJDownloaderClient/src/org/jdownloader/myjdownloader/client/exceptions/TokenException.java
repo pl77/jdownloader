@@ -53,4 +53,9 @@ public class TokenException extends MyJDownloaderException {
         this.sessionInfo = sessionInfo;
     }
     
+    public TokenException(final String message, final Exception cause, SessionInfo sessionInfo) {
+        super(message, cause);
+        this.sessionInfo = sessionInfo;
+    }
+    
 }

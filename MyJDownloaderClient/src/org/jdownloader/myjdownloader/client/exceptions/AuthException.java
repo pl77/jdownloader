@@ -34,12 +34,16 @@
 package org.jdownloader.myjdownloader.client.exceptions;
 
 public class AuthException extends MyJDownloaderException {
-    
+
     public AuthException() {
         super();
     }
-    
+
     public AuthException(final Exception e) {
         super(e);
+    }
+    
+    public AuthException(final String message, final Exception cause) {
+        super(message, cause);
     }
 }

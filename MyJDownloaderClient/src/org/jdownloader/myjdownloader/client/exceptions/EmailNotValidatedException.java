@@ -34,13 +34,17 @@
 package org.jdownloader.myjdownloader.client.exceptions;
 
 public class EmailNotValidatedException extends MyJDownloaderException {
-    
+
     public EmailNotValidatedException() {
         super();
     }
-    
+
     public EmailNotValidatedException(final Exception e) {
         super(e);
     }
-    
+
+    public EmailNotValidatedException(final String message, final Exception cause) {
+        super(message, cause);
+    }
+
 }

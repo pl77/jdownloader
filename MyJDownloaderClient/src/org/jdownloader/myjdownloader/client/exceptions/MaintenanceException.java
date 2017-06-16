@@ -34,12 +34,16 @@
 package org.jdownloader.myjdownloader.client.exceptions;
 
 public class MaintenanceException extends MyJDownloaderException {
-    
+
     public MaintenanceException() {
         super();
     }
-
+    
     public MaintenanceException(final Exception e) {
         super(e);
+    }
+
+    public MaintenanceException(final String message, final Exception cause) {
+        super(message, cause);
     }
 }

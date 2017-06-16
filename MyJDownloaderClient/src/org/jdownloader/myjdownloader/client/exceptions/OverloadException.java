@@ -34,12 +34,16 @@
 package org.jdownloader.myjdownloader.client.exceptions;
 
 public class OverloadException extends MyJDownloaderException {
-    
+
     public OverloadException() {
         super();
     }
-    
+
     public OverloadException(final Exception e) {
         super(e);
+    }
+
+    public OverloadException(final String message, final Exception cause) {
+        super(message, cause);
     }
 }
