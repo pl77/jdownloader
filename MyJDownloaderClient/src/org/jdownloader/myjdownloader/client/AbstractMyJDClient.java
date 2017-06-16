@@ -608,93 +608,95 @@ public abstract class AbstractMyJDClient<GenericType> {
             ErrorResponse error = null;
             try {
                 error = this.jsonToObject(e.getContent(), (GenericType) ErrorResponse.class);
-                switch (error.getSrc()) {
-                    case DEVICE:
-                        if (error.getType() != null) {
-                            final DeviceErrorType type = DeviceErrorType.valueOf(error.getType());
-                            // SES
-                            switch (type) {
-                                case INTERNAL_SERVER_ERROR:
-                                    throw new InternalServerErrorException(null);
-                                case API_COMMAND_NOT_FOUND:
-                                    throw new UnknownCommandException(null);
-                                case API_INTERFACE_NOT_FOUND:
-                                    throw new UnknownInterfaceException(null);
-                                case AUTH_FAILED:
-                                    throw new AuthException(e);
-                                case BAD_PARAMETERS:
-                                    throw new WrongParametersException(null);
-                                case FILE_NOT_FOUND:
-                                    throw new ApiFileNotFoundException(null);
-                                case TOKEN_INVALID:
-                                    throw new TokenException(e, session);
-                                default:
-                                    throw new APIException(e, error.getType(), null);
-                            }
-                        }
-                        // TODO: fixme
-                        break;
-                    case MYJD:
-                        // RemoteAPIError
-                        if ("API_COMMAND_NOT_FOUND".equals(error.getType())) {
-                            throw new UnknownCommandException(null);
-                        } else if ("BAD_PARAMETERS".equals(error.getType())) {
-                            throw new WrongParametersException(null);
-                        } else if ("API_INTERFACE_NOT_FOUND".equals(error.getType())) {
-                            throw new UnknownInterfaceException(null);
-                        } else if ("INTERNAL_SERVER_ERROR".equals(error.getType())) {
-                            throw new InternalServerErrorException(null);
-                        } else {
-                            final ServerErrorType type = ServerErrorType.valueOf(error.getType());
-                            switch (type) {
-                                case AUTH_FAILED:
-                                    throw new AuthException(e);
-                                case ERROR_EMAIL_NOT_CONFIRMED:
-                                    throw new EmailNotValidatedException();
-                                case OUTDATED:
-                                    throw new OutdatedException();
-                                case OFFLINE:
-                                    throw new DeviceIsOfflineException();
-                                case TOKEN_INVALID:
-                                    throw new TokenException(e, session);
-                                case UNKNOWN:
-                                    throw new RuntimeException("Not Implemented: unkown");
-                                case CHALLENGE_FAILED:
-                                    throw new ChallengeFailedException();
-                                case EMAIL_FORBIDDEN:
-                                    throw new EmailNotAllowedException();
-                                case EMAIL_INVALID:
-                                    throw new EmailInvalidException();
-                                case EMAIL_BLOCKED:
-                                    throw new EmailBlockedException();
-                                case EMAIL_QUOTA:
-                                    throw new EmailQuotaException();
-                                case OVERLOAD:
-                                    throw new OverloadException(e);
-                                case TOO_MANY_REQUESTS:
-                                    throw new TooManyRequestsException();
-                                case MAINTENANCE:
-                                    throw new MaintenanceException(e);
-                                case BAD_REQUEST:
-                                    // TODO: fixme
-                                    break;
-                                case FAILED:
-                                    // TODO: fixme
-                                    break;
-                            }
-                            break;
-                        }
-                    case UNKNOWN:
-                        // TODO: fixme
-                        break;
-                }
-            } catch (final MyJDownloaderException e1) {
                 if (error != null) {
-                    e1.setSource(error.getSrc());
+                    switch (error.getSrc()) {
+                        case DEVICE:
+                            if (error.getType() != null) {
+                                final DeviceErrorType type = DeviceErrorType.valueOf(error.getType());
+                                // SES
+                                switch (type) {
+                                    case INTERNAL_SERVER_ERROR:
+                                        throw new InternalServerErrorException(null);
+                                    case API_COMMAND_NOT_FOUND:
+                                        throw new UnknownCommandException(null);
+                                    case API_INTERFACE_NOT_FOUND:
+                                        throw new UnknownInterfaceException(null);
+                                    case AUTH_FAILED:
+                                        throw new AuthException(e);
+                                    case BAD_PARAMETERS:
+                                        throw new WrongParametersException(null);
+                                    case FILE_NOT_FOUND:
+                                        throw new ApiFileNotFoundException(null);
+                                    case TOKEN_INVALID:
+                                        throw new TokenException(e, session);
+                                    default:
+                                        throw new APIException(e, error.getType(), null);
+                                }
+                            }
+                            // TODO: fixme
+                            break;
+                        case MYJD:
+                            // RemoteAPIError
+                            if ("API_COMMAND_NOT_FOUND".equals(error.getType())) {
+                                throw new UnknownCommandException(null);
+                            } else if ("BAD_PARAMETERS".equals(error.getType())) {
+                                throw new WrongParametersException(null);
+                            } else if ("API_INTERFACE_NOT_FOUND".equals(error.getType())) {
+                                throw new UnknownInterfaceException(null);
+                            } else if ("INTERNAL_SERVER_ERROR".equals(error.getType())) {
+                                throw new InternalServerErrorException(null);
+                            } else {
+                                final ServerErrorType type = ServerErrorType.valueOf(error.getType());
+                                switch (type) {
+                                    case AUTH_FAILED:
+                                        throw new AuthException(e);
+                                    case ERROR_EMAIL_NOT_CONFIRMED:
+                                        throw new EmailNotValidatedException();
+                                    case OUTDATED:
+                                        throw new OutdatedException();
+                                    case OFFLINE:
+                                        throw new DeviceIsOfflineException();
+                                    case TOKEN_INVALID:
+                                        throw new TokenException(e, session);
+                                    case UNKNOWN:
+                                        throw new RuntimeException("Not Implemented: unkown");
+                                    case CHALLENGE_FAILED:
+                                        throw new ChallengeFailedException();
+                                    case EMAIL_FORBIDDEN:
+                                        throw new EmailNotAllowedException();
+                                    case EMAIL_INVALID:
+                                        throw new EmailInvalidException();
+                                    case EMAIL_BLOCKED:
+                                        throw new EmailBlockedException();
+                                    case EMAIL_QUOTA:
+                                        throw new EmailQuotaException();
+                                    case OVERLOAD:
+                                        throw new OverloadException(e);
+                                    case TOO_MANY_REQUESTS:
+                                        throw new TooManyRequestsException();
+                                    case MAINTENANCE:
+                                        throw new MaintenanceException(e);
+                                    case BAD_REQUEST:
+                                        // TODO: fixme
+                                        break;
+                                    case FAILED:
+                                        // TODO: fixme
+                                        break;
+                                }
+                                break;
+                            }
+                        case UNKNOWN:
+                            // TODO: fixme
+                            break;
+                    }
                 }
-                throw e1;
-            } catch (final Exception e2) {
-                throw new UnexpectedIOException(e2);
+            } catch (final MyJDownloaderException my) {
+                if (error != null) {
+                    my.setSource(error.getSrc());
+                }
+                throw my;
+            } catch (final Exception ex) {
+                throw new UnexpectedIOException(e.getContent(), ex);
             }
         }
         switch (e.getResponseCode()) {
@@ -709,7 +711,7 @@ public abstract class AbstractMyJDClient<GenericType> {
             case 407:
                 throw new TokenException(e, session);
             default:
-                throw new UnexpectedIOException(e);
+                throw new UnexpectedIOException(e.getContent(), e);
         }
     }
 
