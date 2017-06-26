@@ -15,10 +15,10 @@ define("device",[], function() {
 		call: function(action, params, localModeCallback) {
 			if (this.localURL) {
 				if(localModeCallback)	localModeCallback(true);
-				return this.jdAPICore.localDeviceCall(this.localURL, this.deviceId, action, this.rsaPublicKey, params);
+				return this.jdAPICore.localDeviceCall(this.localURL, this.deviceId, action, params, this.rsaPublicKey);
 			} else {
 				if(localModeCallback)	localModeCallback(false);
-				return this.jdAPICore.deviceCall(this.deviceId, action, this.rsaPublicKey, params);
+				return this.jdAPICore.deviceCall(this.deviceId, action, params , this.rsaPublicKey);
 			}
 		},
 		setLocalURL: function(localURL) {

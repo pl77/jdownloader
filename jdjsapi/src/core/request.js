@@ -12,7 +12,7 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
         if (options.jdParams) {
             options = addConverters(options, options.serverEncryptionToken.firstHalf(), options.serverEncryptionToken.secondHalf());
             if (options.type === "GET") {
-                var queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid + $
+                var queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + $
                         .param(options.jdParams);
             } else {
                 if (options.serverEncryptionToken) {
@@ -24,7 +24,12 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
                         queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&" + $
                             .param(options.jdParams) + "&rid=" + options.rid;
                     } else {
-                        queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid;
+                        if (options.jdAction === "notify/register") {
+                            queryString = "/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&" + $
+                                .param(options.urlParams);
+                        } else {
+                            queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid;
+                        }
                         unencrypted = {
                             "apiVer": 1,
                             "params": [],
@@ -36,8 +41,9 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
                             // Do net send empty param
                             unencrypted.params = [options.jdParams];
                         }
-
-                        var encryptedJSON = CryptoUtils.encryptJSON(options.serverEncryptionToken, unencrypted, options.rsaPublicKey);
+                        var encryptedJSON = CryptoUtils.encryptJSON(options.serverEncryptionToken, unencrypted);
+                        // server expects application/json 26.06.2017 TODO add support for application/aesjson server side
+                        encryptedJSON.contentType = "application/json; charset=UTF-8";
                         options.data = encryptedJSON.data;
                         options.contentType = encryptedJSON.contentType;
                         options = addConverters(options, encryptedJSON.iv, encryptedJSON.key);
@@ -45,6 +51,10 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
                 } else {
                     logger.error("[MYJD] [JSAPI] [REQUEST] [FAILED] Server encryption token missing. Action: " + JSON.stringify(options ? options.jdAction : "NO_ACTION"));
                 }
+            }
+            if (options.jdAction === "notify/register") {
+                options.contentType = "application/json; charset=utf-8";
+                queryString += "&rid=" + options.rid;
             }
             queryString += "&signature=" + CoreCrypto
                 .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.serverEncryptionToken)
@@ -65,7 +75,8 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
 
     var addConverters = function (options, aesIv, aesKey) {
         options.converters = {
-            "* aesjson": CryptoUtils.decryptJSON.bind(this, aesIv, aesKey),
+            "* aesjson-server": CryptoUtils.decryptJSON.bind(this, aesIv, aesKey),
+            "* aesjson": CryptoUtils.decryptJSON.bind(this, aesIv, aesKey)
         };
         return options;
     };

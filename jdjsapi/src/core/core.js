@@ -41,13 +41,13 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 if (callback && typeof callback === "function") {
                     onChangeCallbacks.push(callback);
                 } else {
-                    throw new TypeError("APIStateChangeListener must be function");
+                    throw new TypeError("APIStateChangeListener must be of type function");
                 }
             }
         };
     })();
     //Default App Key
-    var APP_KEY = "MYJD_JS_DEFAULT_APP_KEY";
+    var APP_KEY = "com.appwork.jdownloader" //"org.jdownloader.my_web_0.1.657"
 
     // Global Request Queue
     var jdapiRequestQueue = new Array();
@@ -131,6 +131,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             }.bind(this));
             return filter;
         },
+        getRID: getRID,
         reconnect: function () {
             var reconnectDef = $.Deferred();
             // IF RECONNECT NOT ALREADY IN PROGRESS
@@ -172,14 +173,13 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
             return disconnectCall;
         },
         /* send request to list all available devices */
-        serverCall: function (action, params, type) {
+        serverCall: function (action, params, urlParams, type) {
             // Create request object
             params = params || {};
             var reqOptions = {
-
                 jdAction: action,
                 jdParams: params,
-                // url : this.options.apiRoot + queryString,
+                urlParams: urlParams,
                 type: type || "POST",
                 dataType: "aesjson-server",
                 serverEncryptionToken: this.options.serverEncryptionToken,
@@ -207,7 +207,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 type: "POST",
                 dataType: "aesjson-server",
                 deviceEncryptionToken: this.options.deviceEncryptionToken,
-                rsaPublicKey: rsaPublicKey,
+                //rsaPublicKey: rsaPublicKey,
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: API_ROOT,
                 sessiontoken: this.options.sessiontoken,
@@ -234,7 +234,7 @@ define("coreCore", ["coreCrypto", "coreCryptoUtils", "coreRequest", "coreRequest
                 type: "POST",
                 dataType: "aesjson-server",
                 deviceEncryptionToken: this.options.deviceEncryptionToken,
-                rsaPublicKey: rsaPublicKey,
+                //rsaPublicKey: rsaPublicKey,
                 TRANSFER_ENCODING: TRANSFER_ENCODING,
                 API_ROOT: localURL,
                 sessiontoken: this.options.sessiontoken,

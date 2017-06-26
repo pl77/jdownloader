@@ -22,9 +22,8 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         },
         /* Register a new user account on the api */
         registerUser: function (data) {
-            if (!(/.@./.test(data.email)) || !data.captchaChallenge || !data.captchaResponse) throw "Invalid parameters";
             data.referrer = "webui";
-            var requestURL = this.jdapiCore.API_ROOT + "/my/requestregistrationemail?email=" + data.email + "&captchaResponse=" + data.captchaResponse + "&captchaChallenge=" + data.captchaChallenge + "&referer=" + data.referer;
+            var requestURL = this.jdapiCore.API_ROOT + "/my/requestregistrationemail?email=" + encodeURIComponent(data.email) + "&captchaResponse=" + encodeURIComponent(data.captchaResponse) + "&captchaChallenge=" + encodeURIComponent(data.captchaChallenge) + "&referer=" + encodeURIComponent(data.referrer);
             return $.ajax({
                 url: requestURL,
                 type: "POST",
@@ -44,9 +43,9 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
                 iv: iv
             });
             var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
-            var queryString = "/my/" + action + "?email=" + email + "&loginSecret=" + stringEnc;
-            queryString += "&signature=" + CoreCrypto
-                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING);
+            var queryString = "/my/" + encodeURIComponent(action) + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc);
+            queryString += "&signature=" + encodeURIComponent(CoreCrypto
+                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING));
             var confirm = $.ajax({
                 url: this.jdapiCore.API_ROOT + queryString,
                 type: "POST",
@@ -93,9 +92,9 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
                 iv: iv
             });
             var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
-            var queryString = "/my/" + action + "?email=" + email + "&loginSecret=" + stringEnc + "&captchaResponse=" + captchaResponse + "&captchaChallenge=" + captchaChallenge;
-            queryString += "&signature=" + CoreCrypto
-                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), keyHex).toString(this.jdapiCore.transferEncoding);
+            var queryString = "/my/" + action + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc) + "&captchaResponse=" + encodeURIComponent(captchaResponse) + "&captchaChallenge=" + encodeURIComponent(captchaChallenge);
+            queryString += "&signature=" + encodeURIComponent(CoreCrypto
+                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), keyHex).toString(this.jdapiCore.transferEncoding));
             var finish = $.ajax({
                 url: this.jdapiCore.API_ROOT + queryString,
                 type: "POST",
@@ -121,10 +120,10 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
             });
 
             var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
-            var queryString = "/my/" + action + "?email=" + email + "&loginSecret=" + stringEnc;
+            var queryString = "/my/" + action + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc);
 
-            queryString += "&signature=" + CoreCrypto
-                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING);
+            queryString += "&signature=" + encodeURIComponent(CoreCrypto
+                .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING));
 
             // issue authentication request
             var confirm = $.ajax({
@@ -137,6 +136,15 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         /* send feedback message to the server */
         feedback: function (data) {
             return this.jdapiCore.serverCall("feedback", data);
+        },
+        subscribePushNotifications: function (subscriptionId, deviceId, types) {
+            return this.jdapiCore.serverCall("notify/register", types, {
+                receiverid: subscriptionId,
+                deviceid: deviceId
+            }, "POST");
+        },
+        unsubscribePushNotifications: function (subscriptionId, deviceId, types) {
+
         }
     });
     return JDAPIServer;

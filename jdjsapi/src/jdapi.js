@@ -21,7 +21,7 @@ define("config/config", function () {
         TRANSFER_ENCODING: CryptoJS.enc.Hex,
         API_ROOT: "//api.jdownloader.org",
         LOCAL_STORAGE_KEY: "api.transport.options",
-        APP_KEY: "MYJD_JS_DEFAULT_APP_KEY"
+        APP_KEY: "com.appwork.jdownloader" //"org.jdownloader.my_web_0.1.657"
     };
 });
 
@@ -134,6 +134,12 @@ define("jdapi", ["coreCore", "device", "serverServer", "serviceService", "device
          */
         feedback: function (data) {
             return this.apiServer.feedback(data);
+        },
+        subscribePushNotifications: function (subscriptionId, deviceId, types) {
+            return this.apiServer.subscribePushNotifications(subscriptionId, deviceId, types);
+        },
+        unsubscribePushNotifications: function (subscriptionId, deviceId, types) {
+
         },
         /**
          *   Start polling events from the server.

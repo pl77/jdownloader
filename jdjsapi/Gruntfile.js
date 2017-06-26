@@ -53,6 +53,13 @@ module.exports = function (grunt) {
                 }
             }
         },
+        uglify: {
+            minified: {
+                files: {
+                    'build/jdapi.min.js': ['build/jdapi.min.js']
+                }
+            }
+        },
         requirejs: {
             compile: {
                 options: {
@@ -126,5 +133,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-string-replace');
 
     // Task definition
-    grunt.registerTask('default', ['npm-install', 'bower', 'concat:cryptojs', 'string-replace:dist', 'requirejs:compile', 'requirejs:compileMin', 'concat:header', 'string-replace:version']);
+    grunt.registerTask('default', ['npm-install', 'bower', 'concat:cryptojs', 'string-replace:dist', 'requirejs:compile', 'requirejs:compileMin', 'concat:header', 'string-replace:version', 'uglify:minified']);
 };
