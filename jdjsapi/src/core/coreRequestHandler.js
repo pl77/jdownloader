@@ -19,11 +19,11 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 var action;
 
                 params.email = options.email;
-                action = "connect";
+                action = "/my/connect";
                 params.appkey = this.appKey;
                 params.rid = 0;
 
-                var queryString = "/my/" + action + "?" + $.param(params);
+                var queryString = action + "?" + $.param(params);
                 queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.loginSecret).toString(this.transferEncoding);
 
                 // issue authentication request
@@ -115,12 +115,12 @@ define("coreRequestHandler", ["coreCrypto", "coreCryptoUtils"], function (CoreCr
                 var params = {};
                 var action;
 
-                action = "reconnect";
+                action = "/my/reconnect";
                 params.sessiontoken = options.sessiontoken;
                 params.regainToken = options.regaintoken;
                 params.rid = rid;
 
-                var queryString = "/my/" + action + "?" + $.param(params);
+                var queryString = action + "?" + $.param(params);
                 queryString += "&signature=" + CoreCrypto.HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.serverEncryptionToken).toString(this.transferEncoding);
 
                 var self = this;

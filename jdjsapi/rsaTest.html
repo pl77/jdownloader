@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JDAPI JavaScript API</title>
+</head>
+<body>
+<h1>rsa test</h1>
+<!-- JavaScript at the bottom for fast page loading -->
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/requirejs/require.js"></script>
+<script type="text/javascript" src="http://my.jdownloader.org/src/crypto-js/components/core.js"></script>
+<script type="text/javascript" src="http://my.jdownloader.org/src/crypto-js/rollups/aes.js"></script>
+<script type="text/javascript" src="http://my.jdownloader.org/src/crypto-js/rollups/hmac-sha256.js"></script>
+<!-- Include JDAPI Stuff -->
+<script src="bower_components/jsencrypt/bin/jsencrypt.js"></script>
+<script src="build/jdapi.js"></script>
+
+<script>
+    console.log(CryptoJS.SHA256("Message"));
+    require(['jdapi', 'coreCryptoUtils'], function (API, CrypotUtils) {
+        // login with a MyJD Account
+        var api = new API({email: "marco.kotz@gmail.com", pass: ""}, function () {
+            window.api = api;
+
+            var devicesDef = api.listDevices();
+
+            devicesDef.done(function (devices) {
+                console.log(JSON.stringify(devices));
+                if (devices && devices.length > 0) {
+                    api.setActiveDevice(devices[0].id);
+                    /*var def = api.send("/update/isUpdateAvailable");
+                     def.always(function (response) {
+                     console.log(JSON.stringify(response));
+                     });*/
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

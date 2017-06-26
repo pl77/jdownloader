@@ -7,7 +7,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
     };
     $.extend(JDAPIServer.prototype, {
         listDevices: function () {
-            return this.jdapiCore.serverCall("listdevices");
+            return this.jdapiCore.serverCall("/my/listdevices");
         },
         /**
          * Calls that don't require authentication, and thus are made directly and not via the JDAPICore
@@ -33,7 +33,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         /* send email validationkey to the server */
         confirmEmail: function (email, validationkey, pass) {
             if (!pass) throw "No credentials given";
-            var action = "finishregistration";
+            var action = "/my/finishregistration";
             var loginSecret = CryptoUtils.hashPassword(email, pass, "server");
             var registerKey = CoreCrypto.enc.Hex.parse(validationkey);
             var iv = registerKey.firstHalf();
@@ -43,7 +43,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
                 iv: iv
             });
             var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
-            var queryString = "/my/" + encodeURIComponent(action) + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc);
+            var queryString = encodeURIComponent(action) + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc);
             queryString += "&signature=" + encodeURIComponent(CoreCrypto
                 .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING));
             var confirm = $.ajax({
@@ -57,13 +57,13 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         requestPasswordChangeEmail: function (email, captchaChallenge, captchaResponse) {
             // craft query string
             var params = {};
-            var action = "requestpasswordresetemail";
+            var action = "/my/requestpasswordresetemail";
 
             params.email = email;
             params.captchaResponse = captchaResponse;
             params.captchaChallenge = captchaChallenge;
 
-            var queryString = "/my/" + action + "?" + $.param(params);
+            var queryString = action + "?" + $.param(params);
 
             // issue authentication request
             var confirm = $.ajax({
@@ -75,7 +75,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
             return confirm;
         },
         requestTerminationEmail: function (captchaChallenge, captchaResponse) {
-            return this.jdapiCore.serverCall("requestterminationemail", {
+            return this.jdapiCore.serverCall("/my/requestterminationemail", {
                 captchaResponse: captchaResponse,
                 captchaChallenge: captchaChallenge
             });
@@ -83,7 +83,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         finishTermination: function (email, pw, keyParam, captchaChallenge, captchaResponse) {
             var options = {email: email, pass: pw};
             CryptoUtils.processPassword(options);
-            var action = "finishtermination";
+            var action = "/my/finishtermination";
             var keyHex = CoreCrypto.enc.Hex.parse(keyParam);
             var iv = keyHex.firstHalf();
             var key = keyHex.secondHalf();
@@ -92,7 +92,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
                 iv: iv
             });
             var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
-            var queryString = "/my/" + action + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc) + "&captchaResponse=" + encodeURIComponent(captchaResponse) + "&captchaChallenge=" + encodeURIComponent(captchaChallenge);
+            var queryString = action + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc) + "&captchaResponse=" + encodeURIComponent(captchaResponse) + "&captchaChallenge=" + encodeURIComponent(captchaChallenge);
             queryString += "&signature=" + encodeURIComponent(CoreCrypto
                 .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), keyHex).toString(this.jdapiCore.transferEncoding));
             var finish = $.ajax({
@@ -106,7 +106,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         changePassword: function (email, newpass, key) {
 
             // craft query string
-            var action = "finishpasswordreset";
+            var action = "/my/finishpasswordreset";
 
             var loginSecret = CryptoUtils.hashPassword(email, newpass, "server");
             var registerKey = CoreCrypto.enc.Hex.parse(key);
@@ -120,7 +120,7 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
             });
 
             var stringEnc = CoreCrypto.enc.Hex.stringify(encrypted.ciphertext);
-            var queryString = "/my/" + action + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc);
+            var queryString = action + "?email=" + encodeURIComponent(email) + "&loginSecret=" + encodeURIComponent(stringEnc);
 
             queryString += "&signature=" + encodeURIComponent(CoreCrypto
                 .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), registerKey).toString(this.jdapiCore.TRANSFER_ENCODING));
@@ -135,10 +135,10 @@ define("serverServer", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, 
         },
         /* send feedback message to the server */
         feedback: function (data) {
-            return this.jdapiCore.serverCall("feedback", data);
+            return this.jdapiCore.serverCall("/my/feedback", data);
         },
         subscribePushNotifications: function (subscriptionId, deviceId, types) {
-            return this.jdapiCore.serverCall("notify/register", types, {
+            return this.jdapiCore.serverCall("/notify/register", types, {
                 receiverid: subscriptionId,
                 deviceid: deviceId
             }, "POST");

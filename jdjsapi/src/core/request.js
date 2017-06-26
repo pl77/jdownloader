@@ -7,29 +7,20 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
 
     var processOptions = function (options) {
         // SERVER_CALL
+        // TODO: options.jdAction should be absolute e.g. /my/feedback vs. /feedback
         // if URL params are included build querystring with
         // sessiontoken and signature
         if (options.jdParams) {
             options = addConverters(options, options.serverEncryptionToken.firstHalf(), options.serverEncryptionToken.secondHalf());
             if (options.type === "GET") {
-                var queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + $
-                        .param(options.jdParams);
+                var queryString = options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid + "&" + $.param(options.jdParams);
             } else {
                 if (options.serverEncryptionToken) {
                     options.contentType = "application/json; charset=utf-8";
                     var queryString;
                     var unencrypted;
-                    var payload;
-                    if (options.jdAction === "requestterminationemail") {
-                        queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&" + $
-                            .param(options.jdParams) + "&rid=" + options.rid;
-                    } else {
-                        if (options.jdAction === "notify/register") {
-                            queryString = "/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&" + $
-                                .param(options.urlParams);
-                        } else {
-                            queryString = "/my/" + options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid;
-                        }
+
+                    queryString = options.jdAction + "?sessiontoken=" + options.sessiontoken + "&rid=" + options.rid;
                         unencrypted = {
                             "apiVer": 1,
                             "params": [],
@@ -47,15 +38,11 @@ define("coreRequest", ["coreCrypto", "coreCryptoUtils"], function (CoreCrypto, C
                         options.data = encryptedJSON.data;
                         options.contentType = encryptedJSON.contentType;
                         options = addConverters(options, encryptedJSON.iv, encryptedJSON.key);
-                    }
                 } else {
                     logger.error("[MYJD] [JSAPI] [REQUEST] [FAILED] Server encryption token missing. Action: " + JSON.stringify(options ? options.jdAction : "NO_ACTION"));
                 }
             }
-            if (options.jdAction === "notify/register") {
-                options.contentType = "application/json; charset=utf-8";
-                queryString += "&rid=" + options.rid;
-            }
+
             queryString += "&signature=" + CoreCrypto
                 .HmacSHA256(CoreCrypto.enc.Utf8.parse(queryString), options.serverEncryptionToken)
                 .toString(options.TRANSFER_ENCODING);

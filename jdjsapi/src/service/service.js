@@ -33,7 +33,7 @@ define("serviceService", ["coreCryptoUtils", "coreCrypto"], function (CryptoUtil
 			// if token request already sent, queue return value
 			var params = {};
 			var action = "";
-			action = "requestaccesstoken";
+			action = "/my/requestaccesstoken";
 			params.service = servicename;
 			var request = this.jdapiCore.serverCall(action, params);
 			request.done(function(tokens){
