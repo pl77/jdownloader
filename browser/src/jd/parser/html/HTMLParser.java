@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.parser.html;
 
 import java.net.URL;
@@ -38,9 +37,7 @@ import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.URLHelper;
 
 public class HTMLParser {
-
     private static class ConcatCharSequence implements CharSequence {
-
         private final CharSequence[] charSequences;
         private final int            offset;
         private final int            end;
@@ -109,9 +106,7 @@ public class HTMLParser {
      *
      */
     public static class HtmlParserCharSequence implements CharSequence {
-
         private final static HashMap<Thread, HtmlParserCharSequence> THREADRESULTS = new HashMap<Thread, HtmlParserCharSequence>();
-
         final char[]                                                 chars;
         final CharSequence                                           charSequence;
         final int                                                    start;
@@ -208,7 +203,6 @@ public class HTMLParser {
             if (targetCount == 0) {
                 return fromIndex;
             }
-
             final char first = target.charAt(targetOffset);
             final int max = sourceOffset + sourceCount - targetCount;
             if (this.chars != null) {
@@ -453,15 +447,12 @@ public class HTMLParser {
                 len--;
             }
             return st > 0 || len < this.length() ? this.subSequence(st, len) : this;
-
         }
     }
 
     public static class HtmlParserResultSet {
-
         protected final ArrayList<HtmlParserCharSequence> results     = new ArrayList<HtmlParserCharSequence>();
         protected final HashSet<HtmlParserCharSequence>   dupeCheck   = new HashSet<HTMLParser.HtmlParserCharSequence>();
-
         private HtmlParserCharSequence                    baseURL     = null;
         private boolean                                   skipBaseURL = false;
 
@@ -548,19 +539,15 @@ public class HTMLParser {
     final private static Httppattern[] linkAndFormPattern      = new Httppattern[] { new Httppattern(Pattern.compile("src.*?=.*?('|\\\\\"|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)('|\\\\\"|\")(.*?)(\\2)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 3), new Httppattern(Pattern.compile("(<[ ]?a[^>]*?href=|<[ ]?form[^>]*?action=)([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2), new Httppattern(Pattern.compile("\\[(link|url)\\](.*?)\\[/(link|url)\\]", Pattern.CASE_INSENSITIVE | Pattern.DOTALL), 2) };
     public final static String         protocolFile            = "file:/";
     final private static String        protocolPrefixes        = "((?:chrome|directhttp://https?|usenet|flashget|https?viajd|https?|ccf|dlc|ftp|ftpviajd|jd|rsdf|jdlist|youtubev2" + (!Application.isJared(null) ? "|jdlog" : "") + ")://|" + HTMLParser.protocolFile + "|magnet:|mega:)";
-
     final private static Pattern[]     basePattern             = new Pattern[] { Pattern.compile("base[^>]*?href=('|\")(.*?)\\1", Pattern.CASE_INSENSITIVE), Pattern.compile("base[^>]*?(href)=([^'\"][^\\s]*)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern[]     hrefPattern             = new Pattern[] { Pattern.compile("href=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE), Pattern.compile("src=('|\")(.*?)(?:\\s*?)(\\1)", Pattern.CASE_INSENSITIVE) };
     final private static Pattern       pat1                    = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern       protocols               = Pattern.compile("(" + HTMLParser.protocolPrefixes + ")");
     final private static Pattern       LINKPROTOCOL            = Pattern.compile("^" + HTMLParser.protocolPrefixes, Pattern.CASE_INSENSITIVE);
-
     final private static Pattern       mergePattern_Root       = Pattern.compile("(.*?\\..*?)(/|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern       mergePattern_Path       = Pattern.compile("(.*?\\.[^?#]+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern       mergePattern_FileORPath = Pattern.compile("(.*?\\..*?/.*?)($|#|\\?)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     private static Pattern             mp                      = null;
-
     static {
         try {
             HTMLParser.mp = Pattern.compile("(\\\\\"|\"|')?((" + HTMLParser.protocolPrefixes + "|www\\.).+?(?=((\\s+" + HTMLParser.protocolPrefixes + ")|\\1|<|>|\\[/|\r|\n|\f|\t|$|';|'\\)|\"\\s*|'\\+)))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -628,43 +615,31 @@ public class HTMLParser {
         private HtmlParserOptions urlEncoded(final boolean urlEncoded) {
             return new HtmlParserOptions(this.reverse, this.hex, this.base64, urlEncoded, this.unescape);
         }
-
     }
 
     final private static Pattern                unescapePattern             = Pattern.compile("unescape\\(('|\")(.*?)(\\1)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                checkPatternHREFUNESCAPESRC = Pattern.compile(".*?(href|unescape|src=).+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                checkPatternHREFSRC         = Pattern.compile(".*?(href|src=).+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                unhexPattern                = Pattern.compile("(([0-9a-fA-F]{2}| )+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                paramsCut1                  = Pattern.compile("://[^\r\n]*?/[^\r\n]+\\?.[^\r\n]*?=(.*?)($|\r|\n)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                paramsCut2                  = Pattern.compile("://[^\r\n]*?/[^\r\n]*?\\?(.*?)($|\r|\n)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     private static final Pattern                inTagsPattern               = Pattern.compile("<([^<]*?)>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                endTagPattern               = Pattern.compile("^(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                taglessPattern              = Pattern.compile("^(.*?)$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static HtmlParserCharSequence directHTTP                  = new HtmlParserCharSequence("directhttp://");
     final private static HtmlParserCharSequence httpviajd                   = new HtmlParserCharSequence("httpviajd://");
     final private static HtmlParserCharSequence httpsviajd                  = new HtmlParserCharSequence("httpsviajd://");
     final private static HtmlParserCharSequence http                        = new HtmlParserCharSequence("http://");
     final private static Pattern                httpRescue                  = Pattern.compile("h.{2,3}://");
-
     final private static Pattern                tagsPattern                 = Pattern.compile(".*<.*>.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                singleSpacePattern          = Pattern.compile(" ", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                space2Pattern               = Pattern.compile(".*\\s.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                hdotsPattern                = Pattern.compile("h.{2,3}://", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                specialReplacePattern       = Pattern.compile("'", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                urlReplaceBracketOpen       = Pattern.compile("\\(", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                urlReplaceBracketClose      = Pattern.compile("\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     final private static Pattern                missingHTTPPattern          = Pattern.compile("^www\\.", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     // full | double full | partial | partial | partial | partial | partial | partial
     final private static Pattern                urlEncodedProtocol          = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -833,7 +808,6 @@ public class HTMLParser {
             }
             results.setSkipBaseURL(true);
         }
-
         HtmlParserCharSequence hrefURL = null;
         for (final Pattern pattern : HTMLParser.hrefPattern) {
             final HtmlParserCharSequence found = data.group(2, pattern);
@@ -860,7 +834,6 @@ public class HTMLParser {
                 return results;
             }
         }
-
         for (final Httppattern element : HTMLParser.linkAndFormPattern) {
             final Matcher m = element.p.matcher(data);
             while (true) {
@@ -920,7 +893,6 @@ public class HTMLParser {
 
     private final static String TAGOPEN   = String.valueOf('<');
     private final static String TAGCLOSE  = String.valueOf('>');
-
     private final static int    MIN_VALID = "ftp://1.23".length();
 
     private static HtmlParserResultSet _getHttpLinksWalker(HtmlParserCharSequence data, HtmlParserResultSet results, Pattern tagRegex, HtmlParserOptions options) {
@@ -1075,9 +1047,8 @@ public class HTMLParser {
                 }
             }
         }
-
         try {
-            final URL url = new URL(input.toString());
+            final URL url = URLHelper.createURL(input.toString());
             final String originalPath = url.getPath();
             if (originalPath != null) {
                 String path = originalPath;
@@ -1089,6 +1060,11 @@ public class HTMLParser {
                     final String ret = URLHelper.createURL(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), path, url.getQuery(), url.getRef());
                     return new HtmlParserCharSequence(ret);
                 }
+            }
+            if (input.equals(url.toString())) {
+                return input;
+            } else {
+                return new HtmlParserCharSequence(url.toString());
             }
         } catch (Throwable e) {
             final HtmlParserCharSequence protocol = HTMLParser.getProtocol(input);
@@ -1225,7 +1201,6 @@ public class HTMLParser {
         // data = data.replaceAll("(?i)<span.*?>", "");
         // data = data.replaceAll("(?i)</span.*?>", "");
         data = data.replaceAll(Pattern.compile("(?s)\\[(url|link)\\](.*?)\\[/(\\2)\\]"), "<$2>");
-
         final HtmlParserResultSet resultSet;
         if (results != null) {
             resultSet = results;
