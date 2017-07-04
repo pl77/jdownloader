@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http;
 
 import java.io.ByteArrayOutputStream;
@@ -48,7 +47,6 @@ import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.parser.UrlQuery;
 
 public abstract class Request {
-
     public static String getCookieString(final Cookies cookies, URL url) {
         if (cookies != null && !cookies.isEmpty()) {
             final boolean secure = "https".equalsIgnoreCase(url.getProtocol());
@@ -85,7 +83,6 @@ public abstract class Request {
     @Deprecated
     public static UrlQuery parseQuery(String query) throws MalformedURLException {
         return UrlQuery.parse(query);
-
     }
 
     public static byte[] read(final URLConnectionAdapter con, int readLimit) throws IOException {
@@ -172,30 +169,18 @@ public abstract class Request {
     protected int                  readTimeout    = 60000;
     protected Cookies              cookies        = null;
     protected RequestHeader        headers;
-
     protected String               htmlCode;
-
     protected URLConnectionAdapter httpConnection;
-
     protected long                 readTime       = -1;
-
     protected boolean              requested      = false;
     protected int                  readLimit      = 1 * 1024 * 1024;
-
     protected HTTPProxy            proxy;
-
     protected URL                  url;
-
     protected String               customCharset  = null;
-
     protected byte[]               responseBytes  = null;
-
     protected boolean              contentDecoded = true;
-
     protected boolean              keepByteArray  = false;
-
     protected Boolean              sslTrustALL    = null;
-
     protected long                 requestID      = -1;
     protected long                 browserID      = -1;
 
@@ -592,10 +577,9 @@ public abstract class Request {
 
     protected String getLocationHeader(URLConnectionAdapter httpConnection) {
         if (httpConnection != null) {
-            final String location = httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_LOCATION);
             final int responseCode = httpConnection.getResponseCode();
-            if (location != null && (responseCode == 201 || responseCode == 301 || responseCode == 302 || responseCode == 303 || responseCode == 305 || responseCode == 307)) {
-                return location;
+            if (responseCode == 201 || responseCode == 301 || responseCode == 302 || responseCode == 303 || responseCode == 305 || responseCode == 307) {
+                return httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_LOCATION);
             }
         }
         return null;
@@ -606,7 +590,7 @@ public abstract class Request {
         if (location == null) {
             if (this.httpConnection != null) {
                 final String locationHeader = this.getLocationHeader(this.httpConnection);
-                if (StringUtils.isEmpty(locationHeader)) {
+                if (locationHeader == null) {
                     /* check if we have an old-school refresh header */
                     final String refresh = this.httpConnection.getHeaderField("refresh");
                     if (refresh != null) {
@@ -642,7 +626,7 @@ public abstract class Request {
      * @return
      */
     public static String getLocation(final String location, final Request request) {
-        if (StringUtils.isEmpty(location)) {
+        if (location == null) {
             return null;
         } else {
             try {
@@ -885,5 +869,4 @@ public abstract class Request {
         }
         return sb.toString();
     }
-
 }
