@@ -16,7 +16,6 @@ import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.brotli.dec.BrotliInputStream;
 
 public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implements URLConnectionAdapter {
-
     /** The request. */
     private Request request;
 
@@ -136,7 +135,7 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
         final StringBuilder sb = new StringBuilder(300);
         final Request req = this.getRequest();
         if (req != null) {
-            sb.append("Caller:" + req.getCaller());
+            sb.append("Caller: " + req.getCaller());
             sb.append(URLConnectionAdapter.CRLF);
             sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
             sb.append(URLConnectionAdapter.CRLF);

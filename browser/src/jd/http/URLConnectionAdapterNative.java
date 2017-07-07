@@ -12,7 +12,6 @@ import org.appwork.utils.net.httpconnection.NativeHTTPConnectionImpl;
 import org.brotli.dec.BrotliInputStream;
 
 public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl implements URLConnectionAdapter {
-
     private Request request;
 
     public URLConnectionAdapterNative(final URL url) {
@@ -83,7 +82,7 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
         final StringBuilder sb = new StringBuilder(300);
         final Request req = this.getRequest();
         if (req != null) {
-            sb.append("Caller:" + req.getCaller());
+            sb.append("Caller: " + req.getCaller());
             sb.append(URLConnectionAdapter.CRLF);
             sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
             sb.append(URLConnectionAdapter.CRLF);
@@ -108,5 +107,4 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
         sb.append(this.getResponseInfo());
         return sb.toString();
     }
-
 }

@@ -15,7 +15,6 @@ import org.brotli.dec.BrotliInputStream;
  * The Class URLConnectionAdapterSocks4Impl.
  */
 public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl implements URLConnectionAdapter {
-
     /** The request. */
     private Request request;
 
@@ -95,7 +94,7 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
         final StringBuilder sb = new StringBuilder(300);
         final Request req = this.getRequest();
         if (req != null) {
-            sb.append("Caller:" + req.getCaller());
+            sb.append("Caller: " + req.getCaller());
             sb.append(URLConnectionAdapter.CRLF);
             sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
             sb.append(URLConnectionAdapter.CRLF);
