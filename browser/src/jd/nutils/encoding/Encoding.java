@@ -307,6 +307,15 @@ public class Encoding {
                         i--;
                         sb.append((char) Long.parseLong(sb2.toString(), 16));
                         continue;
+                    // preserve text new line chars and tabs, otherwise they showup post decode as r n t, as default strips all \
+                    case 'n':
+                        sb.append("\n");
+                        continue;
+                    case 'r':
+                        sb.append("\r");
+                        continue;
+                    case 't':
+                        sb.append("\t");
                     default:
                         if (ch2 == '%') {
                             sb.append(ch2);
