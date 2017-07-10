@@ -239,7 +239,7 @@ public class Encoding {
 
     /**
      * decodes unicode
-     * 
+     *
      * @param s
      * @return
      */
@@ -265,19 +265,17 @@ public class Encoding {
                 }
             }
         }
-        char ch;
-        char ch2;
         final StringBuilder sb = new StringBuilder();
         int ii;
         int i;
         for (i = 0; i < s.length(); i++) {
-            ch = s.charAt(i);
+            char ch = s.charAt(i);
             // prevents StringIndexOutOfBoundsException with ending char equals case trigger
             if (s.length() != i + 1) {
                 switch (ch) {
                 case '%':
                 case '\\':
-                    ch2 = ch;
+                    final char escape = ch;
                     ch = s.charAt(++i);
                     StringBuilder sb2 = null;
                     switch (ch) {
@@ -307,19 +305,9 @@ public class Encoding {
                         i--;
                         sb.append((char) Long.parseLong(sb2.toString(), 16));
                         continue;
-                    // preserve text new line chars and tabs, otherwise they showup post decode as r n t, as default strips all \
-                    case 'n':
-                        sb.append("\n");
-                        continue;
-                    case 'r':
-                        sb.append("\r");
-                        continue;
-                    case 't':
-                        sb.append("\t");
                     default:
-                        if (ch2 == '%') {
-                            sb.append(ch2);
-                        }
+                        /* normal escaping */
+                        sb.append(escape);
                         sb.append(ch);
                         continue;
                     }
@@ -489,5 +477,4 @@ public class Encoding {
             return null;
         }
     }
-
 }
