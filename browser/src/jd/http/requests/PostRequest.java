@@ -207,6 +207,7 @@ public class PostRequest extends Request {
         }
     }
 
+    @Override
     protected RequestMethod getRequestMethod() {
         return RequestMethod.POST;
     }

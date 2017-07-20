@@ -2,13 +2,16 @@ package jd.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketAddress;
 import java.net.URL;
 
 import jd.http.requests.PostFormDataRequest;
 import jd.http.requests.PostRequest;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface;
 import org.appwork.utils.net.httpconnection.Socks4HTTPConnectionImpl;
+import org.appwork.utils.net.socketconnection.SocketConnection;
 import org.brotli.dec.BrotliInputStream;
 
 /**
@@ -118,5 +121,25 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
         }
         sb.append(this.getResponseInfo());
         return sb.toString();
+    }
+
+    protected SocketAddress endPointSocketAddress;
+
+    @Override
+    public void disconnect() {
+        try {
+            this.getEndPointSocketAddress();
+        } finally {
+            super.disconnect();
+        }
+    }
+
+    @Override
+    public SocketAddress getEndPointSocketAddress() {
+        final SocketStreamInterface socket = this.getConnectionSocket();
+        if (socket != null && socket.getSocket() instanceof SocketConnection) {
+            this.endPointSocketAddress = ((SocketConnection) socket.getSocket()).getEndPointSocketAddress();
+        }
+        return this.endPointSocketAddress;
     }
 }

@@ -27,8 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jd.nutils.encoding.Encoding;
-
 import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
@@ -39,6 +37,7 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
+import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
 import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
@@ -222,20 +221,11 @@ public abstract class Request {
         } else {
             this.setHeaders(this.getDefaultRequestHeader(this.getURL()));
         }
-        this.setAuth(cloneRequest.getURL());
-    }
-
-    protected void setAuth(final URL url) {
-        final String userInfo = url != null ? url.getUserInfo() : null;
-        if (StringUtils.isNotEmpty(userInfo)) {
-            this.getHeaders().put("Authorization", "Basic " + Encoding.Base64Encode(userInfo));
-        }
     }
 
     public Request(final URL url) throws IOException {
         this.setURL(url);
         this.setHeaders(this.getDefaultRequestHeader(this.getURL()));
-        this.setAuth(url);
     }
 
     public Request(final String url) throws IOException {
@@ -255,6 +245,10 @@ public abstract class Request {
 
     public Request cloneRequest() {
         throw new WTFException("Not Implemented");
+    }
+
+    protected RequestMethod getRequestMethod() {
+        return null;
     }
 
     protected String caller = null;
@@ -813,6 +807,12 @@ public abstract class Request {
         this.responseBytes = null;
         this.htmlCode = htmlCode;
         this.requested = true;
+    }
+
+    public void resetConnection() {
+        this.responseBytes = null;
+        this.htmlCode = null;
+        this.requested = false;
     }
 
     public void setResponseBytes(byte[] bytes) {

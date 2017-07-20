@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -450,7 +451,7 @@ public class Browser {
     private String                   acceptLanguage   = "de, en-gb;q=0.9, en;q=0.8";
     /*
      * -1 means use default Timeouts
-     * 
+     *
      * 0 means infinite (DO NOT USE if not needed)
      */
     private int                      connectTimeout   = -1;
@@ -543,7 +544,9 @@ public class Browser {
         br.readTimeout = this.readTimeout;
         br.request = this.getRequest();
         br.cookies = this.cookies;
+        br.authentications = this.authentications;
         br.cookiesExclusive = this.cookiesExclusive;
+        br.authenticationFactory = this.authenticationFactory;
         br.debug = this.debug;
         br.verbose = this.verbose;
         br.logger = this.getLogger();
@@ -1378,9 +1381,23 @@ public class Browser {
         return this.openRequestConnection(request, this.isFollowingRedirects());
     }
 
-    private final static AtomicLong BROWSERIDS = new AtomicLong(0);
-    private final AtomicLong        requestID  = new AtomicLong(0);
-    private long                    browserID  = -1;
+    private final static AtomicLong          BROWSERIDS            = new AtomicLong(0);
+    private final AtomicLong                 requestID             = new AtomicLong(0);
+    protected volatile AuthenticationFactory authenticationFactory = null;
+
+    public AuthenticationFactory getAuthenticationFactory() {
+        return this.authenticationFactory;
+    }
+
+    public void setAuthenticationFactory(AuthenticationFactory authenticationFactory) {
+        this.authenticationFactory = authenticationFactory;
+    }
+
+    public void clearAuthentications() {
+        this.authentications.clear();
+    }
+
+    private long browserID = -1;
 
     public synchronized long getBrowserID() {
         if (this.browserID == -1) {
@@ -1393,14 +1410,58 @@ public class Browser {
         return this.requestID.incrementAndGet();
     }
 
+    protected CopyOnWriteArrayList<Authentication> authentications = new CopyOnWriteArrayList<Authentication>();
+
+    public boolean addAuthentication(Authentication authentication) {
+        if (authentication != null) {
+            return this.authentications.addIfAbsent(authentication);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean removeAuthentication(Authentication authentication) {
+        return authentication != null && this.authentications.remove(authentication);
+    }
+
+    public List<Authentication> getAuthentications() {
+        return this.authentications;
+    }
+
+    protected Authentication applyAuthentication(Request request) throws IOException {
+        for (final Authentication authentication : this.getAuthentications()) {
+            if (authentication.authorize(this, request)) {
+                return authentication;
+            }
+        }
+        return null;
+    }
+
+    protected boolean retryAuthentication(Authentication requestAuthentication, Request request) throws IOException {
+        final AuthenticationFactory authenticationFactory = this.getAuthenticationFactory();
+        if (requestAuthentication != null) {
+            if (authenticationFactory != null) {
+                return authenticationFactory.retry(requestAuthentication, this, request);
+            } else {
+                return requestAuthentication.retry(this, request);
+            }
+        } else if (requestAuthentication == null && authenticationFactory != null) {
+            final Authentication authentication = authenticationFactory.buildAuthentication(this, request);
+            if (authentication != null) {
+                return this.addAuthentication(authentication);
+            }
+        }
+        return false;
+    }
+
     public URLConnectionAdapter openRequestConnection(Request request, final boolean followRedirects) throws IOException {
         int redirectLoopPrevention = 0;
         final Request originalRequest = request;
         final String refererURL = this.getRefererURL();
-        while (true) {
+        redirectLoop: while (true) {
             this.setRequestProperties(originalRequest, request, refererURL);
-            int proxyRetryCounter = 0;
-            while (true) {
+            int connectRetryCounter = 0;
+            connectLoop: while (true) {
                 try {
                     // connect may throw ProxyAuthException for https or direct connection method requests
                     try {
@@ -1409,12 +1470,14 @@ public class Browser {
                         throw new BrowserException("requestIntervalTime Exception", request, e);
                     }
                     final URLConnectionAdapter connection;
+                    final Authentication requestAuthentication;
                     try {
                         if (request.getProxy() == null) {
                             final List<HTTPProxy> proxies = this.selectProxies(request.getURL());
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
+                        requestAuthentication = this.applyAuthentication(request);
                         connection = request.connect(this).getHttpConnection();
                     } finally {
                         this.updateCookies(request);
@@ -1430,6 +1493,11 @@ public class Browser {
                         }
                     }
                     if (connection != null) {
+                        if (this.retryAuthentication(requestAuthentication, request)) {
+                            this.loadConnection(connection);
+                            request.resetConnection();
+                            continue connectLoop;
+                        }
                         connection.setAllowedResponseCodes(this.getAllowedResponseCodes());
                         if (connection.getResponseCode() == 407) {
                             throw new ProxyAuthException(request.getProxy());
@@ -1447,11 +1515,11 @@ public class Browser {
                     if (llogger != null) {
                         llogger.log(e);
                     }
-                    proxyRetryCounter++;
-                    if (this.reportConnectException(proxyRetryCounter, e, request) || e instanceof ProxyAuthException && this.updateProxy(proxyRetryCounter, request)) {
+                    connectRetryCounter++;
+                    if (this.reportConnectException(connectRetryCounter, e, request) || e instanceof ProxyAuthException && this.updateProxy(connectRetryCounter, request)) {
                         // reset proxy
                         request.setProxy(null);
-                        continue;
+                        continue connectLoop;
                     } else {
                         throw new BrowserException(e, request);
                     }

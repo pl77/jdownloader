@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http.requests;
 
 import java.io.IOException;
@@ -33,7 +32,6 @@ import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
  * representation of the specified resource. Requests using GET should only retrieve data and should have no other effect.
  */
 public class GetRequest extends Request {
-
     public GetRequest(final Request cloneRequest) {
         super(cloneRequest);
     }
@@ -75,10 +73,14 @@ public class GetRequest extends Request {
         return 0;
     }
 
+    @Override
+    protected RequestMethod getRequestMethod() {
+        return RequestMethod.GET;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void preRequest() throws IOException {
-        this.httpConnection.setRequestMethod(RequestMethod.GET);
+        this.httpConnection.setRequestMethod(this.getRequestMethod());
     }
-
 }
