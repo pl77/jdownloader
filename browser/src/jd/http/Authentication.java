@@ -1,6 +1,5 @@
 package jd.http;
 
-
 public abstract class Authentication {
     protected final String username;
 
@@ -27,14 +26,6 @@ public abstract class Authentication {
 
     public boolean isProxyAuthentication() {
         return this.isProxyAuthentication;
-    }
-
-    protected String getValueOrEmpty(final String value) {
-        if (value != null) {
-            return value;
-        } else {
-            return "";
-        }
     }
 
     protected Authentication(final boolean isProxyAuthentication, final String host, final String username, final String password, final String realm) {

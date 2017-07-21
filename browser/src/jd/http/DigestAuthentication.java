@@ -74,11 +74,11 @@ public class DigestAuthentication extends Authentication {
     @Override
     public boolean authorize(Browser browser, Request request) {
         if (StringUtils.endsWithCaseInsensitive(request.getURL().getHost(), this.getHost()) && !this.isProxyAuthentication()) {
-            final String HA1 = this.hashWithAlgorithm(this.getValueOrEmpty(this.getUsername()) + ":" + this.getValueOrEmpty(this.getRealm()) + ":" + this.getValueOrEmpty(this.getPassword()));
+            final String HA1 = this.hashWithAlgorithm(StringUtils.valueOrEmpty(this.getUsername()) + ":" + StringUtils.valueOrEmpty(this.getRealm()) + ":" + StringUtils.valueOrEmpty(this.getPassword()));
             final String HA2 = this.hashWithAlgorithm(request.getRequestMethod() + ":" + request.getURL().getPath());
             final String nextNc = this.getNextNc();
             final String response = this.hashWithAlgorithm(HA1 + ":" + this.getNonce() + ":" + nextNc + ":" + this.getCnonce() + ":" + this.getQop() + ":" + HA2);
-            String auth = "username=\"" + this.getValueOrEmpty(this.getUsername()) + "\", realm=\"" + this.getValueOrEmpty(this.getRealm()) + "\", nonce=\"" + this.getNonce() + "\", uri=\"" + request.getURL().getPath() + "\", algorithm=" + this.getAlgorithm() + ", response=\"" + response + "\", qop=\"" + this.getQop() + "\", nc=" + nextNc + ", cnonce=\"" + this.getCnonce() + "\"";
+            String auth = "username=\"" + StringUtils.valueOrEmpty(this.getUsername()) + "\", realm=\"" + StringUtils.valueOrEmpty(this.getRealm()) + "\", nonce=\"" + this.getNonce() + "\", uri=\"" + request.getURL().getPath() + "\", algorithm=" + this.getAlgorithm() + ", response=\"" + response + "\", qop=\"" + this.getQop() + "\", nc=" + nextNc + ", cnonce=\"" + this.getCnonce() + "\"";
             if (this.getOpaque() != null) {
                 auth += ",opaque=\"" + this.getOpaque() + "\"";
             }
@@ -91,6 +91,7 @@ public class DigestAuthentication extends Authentication {
 
     @Override
     public boolean retry(Browser browser, Request request) {
+        // TODO: add renegotiation support
         return false;
     }
 }

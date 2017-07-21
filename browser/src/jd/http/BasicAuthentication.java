@@ -14,7 +14,7 @@ public class BasicAuthentication extends Authentication {
     @Override
     public boolean authorize(final Browser browser, final Request request) {
         if (StringUtils.endsWithCaseInsensitive(request.getURL().getHost(), this.getHost()) && !this.isProxyAuthentication()) {
-            final String userInfo = this.getValueOrEmpty(this.getUsername()) + ":" + this.getValueOrEmpty(this.getPassword());
+            final String userInfo = StringUtils.valueOrEmpty(this.getUsername()) + ":" + StringUtils.valueOrEmpty(this.getPassword());
             final String auth = Encoding.Base64Encode(userInfo);
             request.getHeaders().put(HTTPConstants.HEADER_REQUEST_AUTHORIZATION, "Basic " + auth);
             return true;
