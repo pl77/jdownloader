@@ -182,6 +182,15 @@ public abstract class Request {
     protected Boolean              sslTrustALL    = null;
     protected long                 requestID      = -1;
     protected long                 browserID      = -1;
+    protected Authentication       authentication = null;
+
+    public Authentication getAuthentication() {
+        return this.authentication;
+    }
+
+    protected void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
+    }
 
     public long getBrowserID() {
         return this.browserID;
@@ -211,6 +220,7 @@ public abstract class Request {
         this.setReadLimit(cloneRequest.getReadLimit());
         this.setProxy(cloneRequest.getProxy());
         this.setContentDecoded(cloneRequest.isContentDecodedSet());
+        this.setAuthentication(cloneRequest.getAuthentication());
         if (cloneRequest.getHeaders() != null) {
             final RequestHeader headers = new RequestHeader(cloneRequest.getHeaders());
             /**

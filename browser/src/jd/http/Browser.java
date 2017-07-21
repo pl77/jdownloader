@@ -1429,7 +1429,23 @@ public class Browser {
     }
 
     protected Authentication applyAuthentication(Request request) throws IOException {
-        for (final Authentication authentication : this.getAuthentications()) {
+        final Authentication authentication = request.getAuthentication();
+        if (authentication == null) {
+            final AuthenticationFactory authenticationFactory = this.getAuthenticationFactory();
+            if (authenticationFactory != null) {
+                final Authentication authenticationByFactory = authenticationFactory.authorize(this, request);
+                if (authenticationByFactory != null) {
+                    request.setAuthentication(authenticationByFactory);
+                    return authenticationByFactory;
+                }
+            }
+            for (final Authentication browserAuthentication : this.getAuthentications()) {
+                if (browserAuthentication.authorize(this, request)) {
+                    request.setAuthentication(browserAuthentication);
+                    return browserAuthentication;
+                }
+            }
+        } else {
             if (authentication.authorize(this, request)) {
                 return authentication;
             }
@@ -1437,7 +1453,8 @@ public class Browser {
         return null;
     }
 
-    protected boolean retryAuthentication(Authentication requestAuthentication, Request request) throws IOException {
+    protected boolean retryAuthentication(Request request) throws IOException {
+        final Authentication requestAuthentication = request.getAuthentication();
         final AuthenticationFactory authenticationFactory = this.getAuthenticationFactory();
         if (requestAuthentication != null) {
             if (authenticationFactory != null) {
@@ -1448,8 +1465,9 @@ public class Browser {
         } else if (requestAuthentication == null && authenticationFactory != null) {
             final Authentication authentication = authenticationFactory.buildAuthentication(this, request);
             if (authentication != null) {
-                return this.addAuthentication(authentication);
+                request.setAuthentication(authentication);
             }
+            return authentication != null;
         }
         return false;
     }
@@ -1470,14 +1488,13 @@ public class Browser {
                         throw new BrowserException("requestIntervalTime Exception", request, e);
                     }
                     final URLConnectionAdapter connection;
-                    final Authentication requestAuthentication;
                     try {
                         if (request.getProxy() == null) {
                             final List<HTTPProxy> proxies = this.selectProxies(request.getURL());
                             // choose first one
                             request.setProxy(proxies.get(0));
                         }
-                        requestAuthentication = this.applyAuthentication(request);
+                        this.applyAuthentication(request);
                         connection = request.connect(this).getHttpConnection();
                     } finally {
                         this.updateCookies(request);
@@ -1493,7 +1510,7 @@ public class Browser {
                         }
                     }
                     if (connection != null) {
-                        if (this.retryAuthentication(requestAuthentication, request)) {
+                        if (this.retryAuthentication(request)) {
                             this.loadConnection(connection);
                             request.resetConnection();
                             continue connectLoop;

@@ -1,5 +1,8 @@
 package jd.http;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -36,6 +39,28 @@ public class DefaultAuthenticanFactory implements AuthenticationFactory {
         this.realm = realm;
         this.username = username;
         this.password = password;
+    }
+
+    protected boolean requiresAuthentication(Request request) {
+        return request.getHttpConnection().getResponseCode() == 401 && request.getResponseHeader(HTTPConstants.HEADER_RESPONSE_WWW_AUTHENTICATE) != null;
+    }
+
+    protected CopyOnWriteArrayList<Authentication> authentications = new CopyOnWriteArrayList<Authentication>();
+
+    public boolean containsAuthentication(Authentication authentication) {
+        return authentication != null && this.authentications.contains(authentication);
+    }
+
+    public boolean addAuthentication(Authentication authentication) {
+        return authentication != null && this.authentications.addIfAbsent(authentication);
+    }
+
+    public boolean removeAuthentication(Authentication authentication) {
+        return authentication != null && this.authentications.remove(authentication);
+    }
+
+    public List<Authentication> getAuthentications() {
+        return this.authentications;
     }
 
     /**
@@ -95,20 +120,39 @@ public class DefaultAuthenticanFactory implements AuthenticationFactory {
 
     @Override
     public boolean retry(Authentication authentication, Browser browser, Request request) {
-        return authentication != null && authentication.retry(browser, request);
+        return authentication != null && this.containsAuthentication(authentication) && authentication.retry(browser, request);
+    }
+
+    protected String getRealm(Request request) {
+        final String wwwAuthenticate = request.getResponseHeader(HTTPConstants.HEADER_RESPONSE_WWW_AUTHENTICATE);
+        return new Regex(wwwAuthenticate, "realm\\s*=\\s*\"(.*?)\"").getMatch(0);
     }
 
     @Override
     public Authentication buildAuthentication(Browser browser, Request request) {
-        if (request.getHttpConnection().getResponseCode() == 401) {
+        if (request.getAuthentication() == null && this.requiresAuthentication(request)) {
             final String wwwAuthenticate = request.getResponseHeader(HTTPConstants.HEADER_RESPONSE_WWW_AUTHENTICATE);
             if (wwwAuthenticate != null) {
                 final String realm = new Regex(wwwAuthenticate, "realm\\s*=\\s*\"(.*?)\"").getMatch(0);
                 if (wwwAuthenticate.matches("(?i)^\\s*Basic.*")) {
-                    return this.buildBasicAuthentication(browser, request, realm);
+                    final Authentication ret = this.buildBasicAuthentication(browser, request, realm);
+                    this.addAuthentication(ret);
+                    return ret;
                 } else if (wwwAuthenticate.matches("(?i)^\\s*Digest.*")) {
-                    return this.buildDigestAuthentication(browser, request, realm);
+                    final Authentication ret = this.buildDigestAuthentication(browser, request, realm);
+                    this.addAuthentication(ret);
+                    return ret;
                 }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Authentication authorize(Browser browser, Request request) {
+        for (final Authentication authentication : this.getAuthentications()) {
+            if (authentication.authorize(browser, request)) {
+                return authentication;
             }
         }
         return null;
