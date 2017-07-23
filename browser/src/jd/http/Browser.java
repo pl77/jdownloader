@@ -1382,12 +1382,26 @@ public class Browser {
         return this.openRequestConnection(request, this.isFollowingRedirects());
     }
 
-    private final static AtomicLong          BROWSERIDS            = new AtomicLong(0);
-    private final AtomicLong                 requestID             = new AtomicLong(0);
-    protected volatile AuthenticationFactory authenticationFactory = new DefaultAuthenticanFactory();
+    private final static AtomicLong          BROWSERIDS                   = new AtomicLong(0);
+    private final AtomicLong                 requestID                    = new AtomicLong(0);
+    protected static AuthenticationFactory   DEFAULTAUTHENTICATIONFACTORY = new DefaultAuthenticanFactory();
+    protected volatile AuthenticationFactory authenticationFactory        = null;
+
+    public static AuthenticationFactory getDefaultAuthenticationFactory() {
+        return DEFAULTAUTHENTICATIONFACTORY;
+    }
+
+    public static void setDefaultAuthenticationFactory(AuthenticationFactory authenticationFactory) {
+        DEFAULTAUTHENTICATIONFACTORY = authenticationFactory;
+    }
 
     public AuthenticationFactory getAuthenticationFactory() {
-        return this.authenticationFactory;
+        final AuthenticationFactory ret = this.authenticationFactory;
+        if (ret != null) {
+            return ret;
+        } else {
+            return getDefaultAuthenticationFactory();
+        }
     }
 
     public void setAuthenticationFactory(AuthenticationFactory authenticationFactory) {
