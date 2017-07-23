@@ -655,10 +655,11 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
+     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
      *
      *
      *
+     * 
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -1383,7 +1384,7 @@ public class Browser {
 
     private final static AtomicLong          BROWSERIDS            = new AtomicLong(0);
     private final AtomicLong                 requestID             = new AtomicLong(0);
-    protected volatile AuthenticationFactory authenticationFactory = null;
+    protected volatile AuthenticationFactory authenticationFactory = new DefaultAuthenticanFactory();
 
     public AuthenticationFactory getAuthenticationFactory() {
         return this.authenticationFactory;
