@@ -20,12 +20,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashSet;
 
+import org.appwork.utils.StringUtils;
+
 import jd.parser.Regex;
 import jd.parser.html.HTMLParser;
 
-import org.appwork.utils.StringUtils;
-
 public class Encoding {
+
     private final static char[] HEX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     public static String base16Encode(final String input) {
@@ -477,4 +478,57 @@ public class Encoding {
             return null;
         }
     }
+
+    public static String atbashDecode(String crypted) {
+        if (crypted == null) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (int index = 0; index < crypted.length(); index++) {
+            char ch = crypted.charAt(index);
+            if (ch >= 'a' && ch <= 'z') {
+                sb.append((char) ('z' - (ch - 'a')));
+            } else if (ch >= 'A' && ch <= 'Z') {
+                sb.append((char) ('Z' - (ch - 'A')));
+            } else if (ch >= '0' && ch <= '9') {
+                sb.append(ch);
+            } else if (ch == ':') {
+                sb.append(':');
+            } else if (ch == '$') {
+                sb.append('/');
+            } else if (ch == '+') {
+                sb.append('.');
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String atbashEncode(String crypted) {
+        if (crypted == null) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (int index = 0; index < crypted.length(); index++) {
+            char ch = crypted.charAt(index);
+            if (ch >= 'a' && ch <= 'z') {
+                sb.append((char) ('a' - (ch - 'z')));
+            } else if (ch >= 'A' && ch <= 'Z') {
+                sb.append((char) ('A' - (ch - 'Z')));
+            } else if (ch >= '0' && ch <= '9') {
+                sb.append(ch);
+            } else if (ch == ':') {
+                sb.append(':');
+            } else if (ch == '/') {
+                sb.append('$');
+            } else if (ch == '.') {
+                sb.append('+');
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
 }
