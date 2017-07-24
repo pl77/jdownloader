@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Hash;
+import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 
 public class DigestAuthentication extends Authentication {
@@ -71,6 +72,25 @@ public class DigestAuthentication extends Authentication {
         }
     }
 
+    public static DigestAuthentication build(Browser browser, Request request, final String realm, final String username, final String password) {
+        if (StringUtils.isNotEmpty(username) || StringUtils.isNotEmpty(password)) {
+            final String wwwAuthenticate = request.getResponseHeader(HTTPConstants.HEADER_RESPONSE_WWW_AUTHENTICATE);
+            final String qop = new Regex(wwwAuthenticate, "qop\\s*=\\s*\"(.*?)\"").getMatch(0);
+            if (StringUtils.equalsIgnoreCase(qop, "auth")) {
+                final String nonce = new Regex(wwwAuthenticate, "nonce\\s*=\\s*\"(.*?)\"").getMatch(0);
+                String algorithm = new Regex(wwwAuthenticate, "algorithm\\s*=\\s*(MD5|SHA-256)").getMatch(0);
+                if (algorithm == null) {
+                    algorithm = new Regex(wwwAuthenticate, "algorithm\\s*=\\s*\"(MD5|SHA-256)\"").getMatch(0);
+                }
+                if (nonce != null && algorithm != null) {
+                    final String opaque = new Regex(wwwAuthenticate, "opaque\\s*=\\s*\"(.*?)\"").getMatch(0);
+                    return new DigestAuthentication(request.getURL().getHost(), username, password, realm, nonce, algorithm, qop, opaque);
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean authorize(Browser browser, Request request) {
         if (StringUtils.endsWithCaseInsensitive(request.getURL().getHost(), this.getHost()) && !this.isProxyAuthentication()) {
@@ -80,7 +100,7 @@ public class DigestAuthentication extends Authentication {
             final String response = this.hashWithAlgorithm(HA1 + ":" + this.getNonce() + ":" + nextNc + ":" + this.getCnonce() + ":" + this.getQop() + ":" + HA2);
             String auth = "username=\"" + StringUtils.valueOrEmpty(this.getUsername()) + "\", realm=\"" + StringUtils.valueOrEmpty(this.getRealm()) + "\", nonce=\"" + this.getNonce() + "\", uri=\"" + request.getURL().getPath() + "\", algorithm=" + this.getAlgorithm() + ", response=\"" + response + "\", qop=\"" + this.getQop() + "\", nc=" + nextNc + ", cnonce=\"" + this.getCnonce() + "\"";
             if (this.getOpaque() != null) {
-                auth += ",opaque=\"" + this.getOpaque() + "\"";
+                auth += ", opaque=\"" + this.getOpaque() + "\"";
             }
             request.getHeaders().put(HTTPConstants.HEADER_REQUEST_AUTHORIZATION, "Digest " + auth);
             return true;

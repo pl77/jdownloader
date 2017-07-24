@@ -655,11 +655,11 @@ public class Browser {
     /**
      * Creates a new postrequest based an an requestVariable ArrayList
      *
-     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
+     * @deprecated use {@link #createPostRequest(String, UrlQuery, String)
      *
      *
      *
-     * 
+     *
      */
     @Deprecated
     public PostRequest createPostRequest(String url, final List<KeyValueStringEntry> post, final String encoding) throws IOException {
@@ -1384,27 +1384,31 @@ public class Browser {
 
     private final static AtomicLong          BROWSERIDS                   = new AtomicLong(0);
     private final AtomicLong                 requestID                    = new AtomicLong(0);
-    protected static AuthenticationFactory   DEFAULTAUTHENTICATIONFACTORY = new DefaultAuthenticanFactory();
+    protected static AuthenticationFactory   DEFAULTAUTHENTICATIONFACTORY = new URLUserInfoAuthentication();
     protected volatile AuthenticationFactory authenticationFactory        = null;
 
     public static AuthenticationFactory getDefaultAuthenticationFactory() {
-        return DEFAULTAUTHENTICATIONFACTORY;
+        return Browser.DEFAULTAUTHENTICATIONFACTORY;
     }
 
     public static void setDefaultAuthenticationFactory(AuthenticationFactory authenticationFactory) {
-        DEFAULTAUTHENTICATIONFACTORY = authenticationFactory;
+        Browser.DEFAULTAUTHENTICATIONFACTORY = authenticationFactory;
+    }
+
+    public AuthenticationFactory getCustomAuthenticationFactory() {
+        return this.authenticationFactory;
     }
 
     public AuthenticationFactory getAuthenticationFactory() {
-        final AuthenticationFactory ret = this.authenticationFactory;
+        final AuthenticationFactory ret = this.getCustomAuthenticationFactory();
         if (ret != null) {
             return ret;
         } else {
-            return getDefaultAuthenticationFactory();
+            return Browser.getDefaultAuthenticationFactory();
         }
     }
 
-    public void setAuthenticationFactory(AuthenticationFactory authenticationFactory) {
+    public void setCustomAuthenticationFactory(AuthenticationFactory authenticationFactory) {
         this.authenticationFactory = authenticationFactory;
     }
 
