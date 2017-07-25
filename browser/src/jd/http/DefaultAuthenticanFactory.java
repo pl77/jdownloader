@@ -45,7 +45,7 @@ public class DefaultAuthenticanFactory extends AbstractAuthenticationFactory {
     }
 
     protected boolean matchesRealm(final String realm) {
-        return StringUtils.equalsIgnoreCase(realm, this.getRealm());
+        return this.getRealm() == null || StringUtils.equalsIgnoreCase(realm, this.getRealm());
     }
 
     protected boolean matches(Browser browser, Request request, final String realm) {
