@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,11 +107,18 @@ public class HTMLParser {
      *
      */
     public static class HtmlParserCharSequence implements CharSequence {
-        private final static HashMap<Thread, HtmlParserCharSequence> THREADRESULTS = new HashMap<Thread, HtmlParserCharSequence>();
-        final char[]                                                 chars;
-        final CharSequence                                           charSequence;
-        final int                                                    start;
-        final int                                                    end;
+        private Map<Thread, HtmlParserCharSequence> threadResults = null;
+        final char[]                                chars;
+        final CharSequence                          charSequence;
+        final int                                   start;
+        final int                                   end;
+
+        private synchronized Map<Thread, HtmlParserCharSequence> getTHREADRESULTS() {
+            if (this.threadResults == null) {
+                this.threadResults = new WeakHashMap<Thread, HtmlParserCharSequence>();
+            }
+            return this.threadResults;
+        }
 
         private HtmlParserCharSequence(final HtmlParserCharSequence source, final int start, final int end) {
             this.chars = source.chars;
@@ -300,7 +308,11 @@ public class HTMLParser {
                 matcher.appendReplacement(sb, replacement);
             } while (matcher.find());
             matcher.appendTail(sb);
-            return new HtmlParserCharSequence(sb);
+            if (this.equals(sb)) {
+                return this;
+            } else {
+                return new HtmlParserCharSequence(sb);
+            }
         }
 
         public HtmlParserCharSequence replaceFirst(final Pattern regex, final String replacement) {
@@ -315,7 +327,11 @@ public class HTMLParser {
             final StringBuffer sb = new StringBuffer();
             matcher.appendReplacement(sb, replacement);
             matcher.appendTail(sb);
-            return new HtmlParserCharSequence(sb);
+            if (this.equals(sb)) {
+                return this;
+            } else {
+                return new HtmlParserCharSequence(sb);
+            }
         }
 
         public boolean startsWith(final CharSequence prefix) {
@@ -357,14 +373,15 @@ public class HTMLParser {
                 return null;
             }
             final Thread currentThread = Thread.currentThread();
-            synchronized (HtmlParserCharSequence.THREADRESULTS) {
-                HtmlParserCharSequence.THREADRESULTS.put(currentThread, null);
+            final Map<Thread, HtmlParserCharSequence> lthreadResults = this.getTHREADRESULTS();
+            synchronized (lthreadResults) {
+                lthreadResults.put(currentThread, null);
             }
             try {
                 final String stringResult = matcher.group(group);
                 final HtmlParserCharSequence htmlParserResult;
-                synchronized (HtmlParserCharSequence.THREADRESULTS) {
-                    htmlParserResult = HtmlParserCharSequence.THREADRESULTS.get(currentThread);
+                synchronized (lthreadResults) {
+                    htmlParserResult = lthreadResults.get(currentThread);
                 }
                 if (htmlParserResult != null) {
                     return htmlParserResult;
@@ -374,8 +391,8 @@ public class HTMLParser {
                 }
                 return new HtmlParserCharSequence(stringResult);
             } finally {
-                synchronized (HtmlParserCharSequence.THREADRESULTS) {
-                    HtmlParserCharSequence.THREADRESULTS.remove(currentThread);
+                synchronized (lthreadResults) {
+                    lthreadResults.remove(currentThread);
                 }
             }
         }
@@ -393,9 +410,10 @@ public class HTMLParser {
             } else {
                 ret = this;
             }
-            synchronized (HtmlParserCharSequence.THREADRESULTS) {
-                if (HtmlParserCharSequence.THREADRESULTS.containsKey(currentThread)) {
-                    HtmlParserCharSequence.THREADRESULTS.put(currentThread, ret);
+            final Map<Thread, HtmlParserCharSequence> lthreadResults = this.getTHREADRESULTS();
+            synchronized (lthreadResults) {
+                if (lthreadResults.containsKey(currentThread)) {
+                    lthreadResults.put(currentThread, ret);
                 }
             }
             return ret;
@@ -410,9 +428,10 @@ public class HTMLParser {
             } else {
                 ret = this;
             }
-            synchronized (HtmlParserCharSequence.THREADRESULTS) {
-                if (HtmlParserCharSequence.THREADRESULTS.containsKey(currentThread)) {
-                    HtmlParserCharSequence.THREADRESULTS.put(currentThread, ret);
+            final Map<Thread, HtmlParserCharSequence> lthreadResults = this.getTHREADRESULTS();
+            synchronized (lthreadResults) {
+                if (lthreadResults.containsKey(currentThread)) {
+                    lthreadResults.put(currentThread, ret);
                 }
             }
             return ret;
@@ -420,8 +439,9 @@ public class HTMLParser {
 
         @Override
         public String toString() {
-            synchronized (HtmlParserCharSequence.THREADRESULTS) {
-                if (HtmlParserCharSequence.THREADRESULTS.containsKey(Thread.currentThread())) {
+            final Map<Thread, HtmlParserCharSequence> lthreadResults = this.getTHREADRESULTS();
+            synchronized (lthreadResults) {
+                if (lthreadResults.containsKey(Thread.currentThread())) {
                     return null;
                 }
             }
@@ -435,6 +455,10 @@ public class HTMLParser {
         public String toURL() {
             final String ret = this.toString();
             return Encoding.urlEncode_light(ret);
+        }
+
+        public CharSequence toCharSequenceURL() {
+            return Encoding.urlEncodeCharSequence_light(this);
         }
 
         public HtmlParserCharSequence trim() {
@@ -639,7 +663,7 @@ public class HTMLParser {
     final private static Pattern                urlReplaceBracketOpen       = Pattern.compile("\\(", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                urlReplaceBracketClose      = Pattern.compile("\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern                missingHTTPPattern          = Pattern.compile("^www\\.", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern                removeTagsPattern           = Pattern.compile("[<>\"]+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     // full | double full | partial | partial | partial | partial | partial | partial
     final private static Pattern                urlEncodedProtocol          = Pattern.compile("(%3A%2F%2F|%253A%252F%252F|%3A//|%3A%2F/|%3A/%2F|:%2F%2F|:%2F/|:/%2F)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -790,24 +814,6 @@ public class HTMLParser {
                 }
             }
         }
-        HtmlParserCharSequence baseURL = results.getBaseURL();
-        if (baseURL == null && !results.isSkipBaseURL()) {
-            for (final Pattern pattern : HTMLParser.basePattern) {
-                final HtmlParserCharSequence found = data.group(2, pattern);
-                if (found != null) {
-                    if (!found.equals("about:blank")) {
-                        baseURL = found;
-                        break;
-                    }
-                }
-            }
-            if (HTMLParser.getProtocol(baseURL) != null) {
-                results.setBaseURL(baseURL);
-            } else {
-                baseURL = null;
-            }
-            results.setSkipBaseURL(true);
-        }
         HtmlParserCharSequence hrefURL = null;
         for (final Pattern pattern : HTMLParser.hrefPattern) {
             final HtmlParserCharSequence found = data.group(2, pattern);
@@ -818,8 +824,10 @@ public class HTMLParser {
                 }
             }
         }
+        HtmlParserCharSequence baseURL = null;
         HtmlParserCharSequence protocol = HTMLParser.getProtocol(hrefURL);
         if (protocol == null && hrefURL != null) {
+            baseURL = HTMLParser.getBaseURL(data, results);
             if (baseURL != null) {
                 hrefURL = HTMLParser.mergeUrl(baseURL, hrefURL);
             } else {
@@ -845,8 +853,13 @@ public class HTMLParser {
                 if (protocol == null) {
                     link = link.replaceAll(HTMLParser.httpRescue, "http://");
                 }
-                if (protocol == null && baseURL != null && (protocol = HTMLParser.getProtocol(link)) == null) {
-                    link = HTMLParser.mergeUrl(baseURL, link);
+                if (protocol == null && (protocol = HTMLParser.getProtocol(link)) == null) {
+                    if (baseURL == null) {
+                        baseURL = HTMLParser.getBaseURL(data, results);
+                    }
+                    if (baseURL != null) {
+                        link = HTMLParser.mergeUrl(baseURL, link);
+                    }
                 }
                 if (protocol != null || (protocol = HTMLParser.getProtocol(link)) != null) {
                     HTMLParser.addToResultSet(results, link, options);
@@ -889,6 +902,28 @@ public class HTMLParser {
             }
         }
         return results;
+    }
+
+    private static HtmlParserCharSequence getBaseURL(HtmlParserCharSequence data, HtmlParserResultSet results) {
+        HtmlParserCharSequence baseURL = results.getBaseURL();
+        if (baseURL == null && !results.isSkipBaseURL()) {
+            for (final Pattern pattern : HTMLParser.basePattern) {
+                final HtmlParserCharSequence found = data.group(2, pattern);
+                if (found != null) {
+                    if (!found.equals("about:blank")) {
+                        baseURL = found;
+                        break;
+                    }
+                }
+            }
+            if (HTMLParser.getProtocol(baseURL) != null) {
+                results.setBaseURL(baseURL);
+            } else {
+                baseURL = null;
+            }
+            results.setSkipBaseURL(true);
+        }
+        return baseURL;
     }
 
     private final static String TAGOPEN   = String.valueOf('<');
@@ -1166,7 +1201,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static Collection<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
@@ -1207,13 +1242,15 @@ public class HTMLParser {
         } else {
             resultSet = new HtmlParserResultSet();
         }
-        if (baseURLString != null && HTMLParser.getProtocol(baseURLString) != null) {
+        if (baseURLString != null && HTMLParser.isSupportedProtocol(baseURLString)) {
             resultSet.setBaseURL(new HtmlParserCharSequence(baseURLString));
         }
         HTMLParser._getHttpLinksWalker(data, resultSet, null, null);
         data = null;
         /* we don't want baseurl to be included in result set */
-        resultSet.remove(resultSet.getBaseURL());
+        if (resultSet.isSkipBaseURL()) {
+            resultSet.remove(resultSet.getBaseURL());
+        }
         // System.out.println("Walker:" + results.getWalkerCounter() + "|DeepWalker:" + results.getDeepWalkerCounter() + "|Finder:" +
         // results.getFinderCounter() + "|Found:" + results.size());
         final Collection<String> ret = resultSet.exportResults();
@@ -1286,6 +1323,14 @@ public class HTMLParser {
             }
         }
         return null;
+    }
+
+    public static boolean isSupportedProtocol(final String url) {
+        if (url != null) {
+            return HTMLParser.getProtocol(new HtmlParserCharSequence(url)) != null;
+        } else {
+            return false;
+        }
     }
 
     /**

@@ -20,13 +20,12 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashSet;
 
-import org.appwork.utils.StringUtils;
-
 import jd.parser.Regex;
 import jd.parser.html.HTMLParser;
 
-public class Encoding {
+import org.appwork.utils.StringUtils;
 
+public class Encoding {
     private final static char[] HEX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     public static String base16Encode(final String input) {
@@ -363,6 +362,10 @@ public class Encoding {
     }
 
     public static String urlEncode_light(final String url) {
+        return (String) Encoding.urlEncodeCharSequence_light(url);
+    }
+
+    public static CharSequence urlEncodeCharSequence_light(final CharSequence url) {
         if (url == null) {
             return null;
         }
@@ -530,5 +533,4 @@ public class Encoding {
         }
         return sb.toString();
     }
-
 }
