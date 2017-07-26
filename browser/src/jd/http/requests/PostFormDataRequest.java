@@ -155,7 +155,8 @@ public class PostFormDataRequest extends Request {
             break;
         case FILE:
             writer.write("Content-Disposition: form-data; name=\"" + formData.getName() + "\"; filename=\"" + formData.getValue() + "\"");
-            writer.write("\r\nContent-Type: " + formData.getDataType() + "\r\n\r\n");
+            writer.write("\r\nContent-Type: " + formData.getDataType());
+            writer.write("\r\nContent-Length: " + formData.getFile().length() + "\r\n\r\n");
             writer.flush();
             final byte[] b = new byte[1024];
             InputStream in = null;
@@ -192,12 +193,13 @@ public class PostFormDataRequest extends Request {
             sb.append("Content-Disposition: form-data; name=\"").append(formData.getName()).append("\"; filename=\"").append(formData.getValue()).append("\"");
             final byte[] data = formData.getData();
             sb.append("\r\nContent-Type: " + formData.getDataType());
-            sb.append("\r\nContent-Length: " + data.length + "\r\n\r\n");
-            sb.append("\r\n\r\n[.....").append(data.length).append(" Byte DATA....]\r\n");
+            sb.append("\r\nContent-Length: " + data.length);
+            sb.append("\r\n\r\n[.....").append(data.length).append(" ByteArray DATA....]\r\n");
             break;
         case FILE:
             sb.append("Content-Disposition: form-data; name=\"").append(formData.getName()).append("\"; filename=\"").append(formData.getValue()).append("\"");
             sb.append("\r\nContent-Type: ").append(formData.getDataType());
+            sb.append("\r\nContent-Length: " + formData.getFile().length());
             sb.append("\r\n\r\n[.....").append(formData.getFile().length()).append(" FileByte DATA....]\r\n");
             break;
         }
