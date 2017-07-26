@@ -134,6 +134,14 @@ public class HTMLParser {
             this.end = source.length();
         }
 
+        public int getRetainedLength() {
+            if (this.chars != null) {
+                return this.chars.length;
+            } else {
+                return this.charSequence.length();
+            }
+        }
+
         @Override
         public char charAt(int index) {
             index = index + this.getStartIndex();
