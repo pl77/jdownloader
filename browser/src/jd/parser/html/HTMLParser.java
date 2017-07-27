@@ -882,10 +882,17 @@ public class HTMLParser {
             HtmlParserCharSequence link = null;
             while ((link = data.group(2, m)) != null) {
                 link = link.trim();
-                if (HTMLParser.getProtocol(link) == null && !link.contains("%2F")) {
+                protocol = HTMLParser.getProtocol(link);
+                if (protocol == null && !link.contains("%2F")) {
                     link = link.replaceFirst(HTMLParser.missingHTTPPattern, "http://www\\.");
                 }
                 HTMLParser.addToResultSet(results, link, options);
+                if (protocol != null && protocol.startsWith("directhttp://")) {
+                    /*
+                     * special handling for directhttp, do not search for inner links!
+                     */
+                    continue;
+                }
                 final Matcher mlinks = HTMLParser.protocols.matcher(link);
                 int start = -1;
                 /*
@@ -1256,7 +1263,7 @@ public class HTMLParser {
         HTMLParser._getHttpLinksWalker(data, resultSet, null, null);
         data = null;
         /* we don't want baseurl to be included in result set */
-        if (resultSet.isSkipBaseURL()) {
+        if (resultSet.isSkipBaseURL() && resultSet.getBaseURL() != null) {
             resultSet.remove(resultSet.getBaseURL());
         }
         // System.out.println("Walker:" + results.getWalkerCounter() + "|DeepWalker:" + results.getDeepWalkerCounter() + "|Finder:" +
