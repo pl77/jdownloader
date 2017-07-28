@@ -39,8 +39,8 @@ import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
-import org.appwork.utils.net.httpconnection.HTTPKeepAliveSocketException;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.net.httpconnection.KeepAliveSocketStreamException;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.parser.UrlQuery;
@@ -311,7 +311,7 @@ public abstract class Request {
                         throw new IOException("Malformed url?", e);
                     }
                     return this;
-                } catch (final HTTPKeepAliveSocketException ignore) {
+                } catch (final KeepAliveSocketStreamException ignore) {
                     if (false) {
                         ignore.printStackTrace();
                     }
@@ -855,7 +855,7 @@ public abstract class Request {
         }
     }
 
-    public void setURL(final URL url) {
+    protected void setURL(final URL url) {
         this.url = url;
     }
 
