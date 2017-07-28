@@ -855,7 +855,7 @@ public abstract class Request {
         }
     }
 
-    protected void setURL(final URL url) {
+    public void setURL(final URL url) {
         this.url = url;
     }
 
