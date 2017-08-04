@@ -62,7 +62,7 @@ public abstract class AbstractAuthenticationFactory implements AuthenticationFac
         if (request.getAuthentication() == null && this.requiresAuthentication(request)) {
             final String wwwAuthenticate = this.getWWWAuthenticate(request);
             final String realm = this.getRealm(request);
-            if (wwwAuthenticate != null && realm != null) {
+            if (wwwAuthenticate != null) {
                 if (wwwAuthenticate.matches("(?i)^\\s*Basic.*")) {
                     final Authentication ret = this.buildBasicAuthentication(browser, request, realm);
                     this.addAuthentication(ret);
