@@ -84,6 +84,36 @@ public class PostRequest extends Request {
         this.postVariables.add(new KeyValueStringEntry(key, value));
     }
 
+    /**
+     * Changes the value of the first filed entry with the key, with new value. if no field exists, a new one is created.
+     *
+     * @param key
+     * @param value
+     */
+    public void put(final String key, final String value) {
+        final KeyValueStringEntry ipf = getKeyValue(key);
+        if (ipf != null) {
+            ipf.setValue(value);
+        } else {
+            this.postVariables.add(new KeyValueStringEntry(key, value));
+        }
+    }
+
+    /**
+     * Gets the first InputField with this key. REMEMBER. There can be more than one file with this key
+     *
+     * @param key
+     * @return
+     */
+    public KeyValueStringEntry getKeyValue(final String key) {
+        for (final KeyValueStringEntry input : this.postVariables) {
+            if (input.getKey() != null && input.getKey().equalsIgnoreCase(key)) {
+                return input;
+            }
+        }
+        return null;
+    }
+
     @Override
     public PostRequest cloneRequest() {
         final PostRequest ret = this.cloneRequestRaw();
