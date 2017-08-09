@@ -13,7 +13,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package jd.http;
 
 import java.util.Iterator;
@@ -30,7 +29,6 @@ public class RequestHeader implements Iterable<HTTPHeader> {
      * @link(http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14).
      */
     private boolean                dominant = false;
-
     private final HeaderCollection headers  = new HeaderCollection();
 
     public RequestHeader() {
@@ -67,8 +65,9 @@ public class RequestHeader implements Iterable<HTTPHeader> {
         final HTTPHeader header = this.headers.get(key);
         if (header != null) {
             return header.getValue();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Deprecated

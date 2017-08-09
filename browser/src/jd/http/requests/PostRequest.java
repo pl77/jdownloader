@@ -91,11 +91,13 @@ public class PostRequest extends Request {
      * @param value
      */
     public void put(final String key, final String value) {
-        final KeyValueStringEntry ipf = getKeyValue(key);
-        if (ipf != null) {
-            ipf.setValue(value);
+        final KeyValueStringEntry existing = this.getKeyValue(key);
+        final KeyValueStringEntry newEntry = new KeyValueStringEntry(key, value);
+        final int index = existing != null ? this.postVariables.indexOf(existing) : -1;
+        if (index != -1) {
+            this.postVariables.set(index, newEntry);
         } else {
-            this.postVariables.add(new KeyValueStringEntry(key, value));
+            this.postVariables.add(newEntry);
         }
     }
 
@@ -130,23 +132,34 @@ public class PostRequest extends Request {
     }
 
     public String getPostDataString() {
-        final StringBuilder buffer = new StringBuilder();
-        for (final KeyValueStringEntry rv : this.postVariables) {
-            if (rv.getKey() != null) {
-                buffer.append("&");
-                buffer.append(rv.getKey());
-                buffer.append("=");
-                if (rv.getValue() != null) {
-                    buffer.append(rv.getValue());
-                } else {
-                    buffer.append("");
+        final SEND mode = this.getMode();
+        if (mode != null) {
+            switch (mode) {
+            case STRING:
+                return this.postString;
+            case VARIABLES:
+                final StringBuilder buffer = new StringBuilder();
+                for (final KeyValueStringEntry rv : this.postVariables) {
+                    if (rv.getKey() != null) {
+                        buffer.append("&");
+                        buffer.append(rv.getKey());
+                        buffer.append("=");
+                        if (rv.getValue() != null) {
+                            buffer.append(rv.getValue());
+                        } else {
+                            buffer.append("");
+                        }
+                    }
                 }
+                if (buffer.length() == 0) {
+                    return "";
+                }
+                return buffer.substring(1);
+            default:
+                return null;
             }
         }
-        if (buffer.length() == 0) {
-            return "";
-        }
-        return buffer.substring(1);
+        return null;
     }
 
     public String log() {
@@ -159,7 +172,6 @@ public class PostRequest extends Request {
         case BYTES:
             return this.postBytes.length + " raw-bytes send";
         case STRING:
-            return this.postString;
         case VARIABLES:
             return this.getPostDataString();
         default:
@@ -185,8 +197,6 @@ public class PostRequest extends Request {
             output.write(this.postBytes);
             return output.transferedBytes();
         case STRING:
-            postString = this.postString;
-            break;
         case VARIABLES:
             postString = this.getPostDataString();
             break;
@@ -235,6 +245,10 @@ public class PostRequest extends Request {
             this.sendWHAT = SEND.NOTHING;
             this.httpConnection.setRequestProperty("Content-Length", "0");
         }
+    }
+
+    public SEND getMode() {
+        return this.sendWHAT;
     }
 
     @Override
