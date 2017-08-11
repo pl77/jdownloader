@@ -323,9 +323,6 @@ public abstract class Request {
                     }
                     return this;
                 } catch (final KeepAliveSocketStreamException ignore) {
-                    if (false) {
-                        ignore.printStackTrace();
-                    }
                 }
             }
         } finally {
