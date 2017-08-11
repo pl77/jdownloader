@@ -164,25 +164,35 @@ public abstract class Request {
     /*
      * default timeouts, because 0 is infinite and BAD, if we need 0 then we have to set it manually
      */
-    protected int                  connectTimeout = 30000;
-    protected int                  readTimeout    = 60000;
-    protected Cookies              cookies        = null;
+    protected int                  connectTimeout  = 30000;
+    protected int                  readTimeout     = 60000;
+    protected Cookies              cookies         = null;
     protected RequestHeader        headers;
     protected String               htmlCode;
     protected URLConnectionAdapter httpConnection;
-    protected long                 readTime       = -1;
-    protected boolean              requested      = false;
-    protected int                  readLimit      = 1 * 1024 * 1024;
+    protected long                 readTime        = -1;
+    protected boolean              requested       = false;
+    protected int                  readLimit       = 1 * 1024 * 1024;
     protected HTTPProxy            proxy;
     protected URL                  url;
-    protected String               customCharset  = null;
-    protected byte[]               responseBytes  = null;
-    protected boolean              contentDecoded = true;
-    protected boolean              keepByteArray  = false;
-    protected Boolean              sslTrustALL    = null;
-    protected long                 requestID      = -1;
-    protected long                 browserID      = -1;
-    protected Authentication       authentication = null;
+    protected String               customCharset   = null;
+    protected byte[]               responseBytes   = null;
+    protected boolean              contentDecoded  = true;
+    protected boolean              keepByteArray   = false;
+    protected Boolean              sslTrustALL     = null;
+    protected long                 requestID       = -1;
+    protected long                 browserID       = -1;
+    protected long                 browserParentID = -1;
+
+    protected long getBrowserParentID() {
+        return this.browserParentID;
+    }
+
+    protected void setBrowserParentID(long browserParentID) {
+        this.browserParentID = browserParentID;
+    }
+
+    protected Authentication authentication = null;
 
     public Authentication getAuthentication() {
         return this.authentication;
@@ -192,7 +202,7 @@ public abstract class Request {
         this.authentication = authentication;
     }
 
-    public long getBrowserID() {
+    protected long getBrowserID() {
         return this.browserID;
     }
 
@@ -271,6 +281,7 @@ public abstract class Request {
         if (this.requestID == -1 && br != null) {
             this.browserID = br.getBrowserID();
             this.requestID = br.getNextRequestID();
+            this.browserParentID = br.getBrowserParentID();
         }
         if (this.caller == null) {
             try {

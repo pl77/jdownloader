@@ -140,7 +140,7 @@ public class URLConnectionAdapterDirectImpl extends HTTPConnectionImpl implement
         if (req != null) {
             sb.append("Caller: " + req.getCaller());
             sb.append(URLConnectionAdapter.CRLF);
-            sb.append("BrowserID:" + req.getBrowserID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
+            sb.append("BrowserID:" + req.getBrowserID() + "|BrowserParentID:" + req.getBrowserParentID() + "|RequestID:" + req.getRequestID() + "|URL:" + req.getURL());
             sb.append(URLConnectionAdapter.CRLF);
         }
         sb.append(this.getRequestInfo());

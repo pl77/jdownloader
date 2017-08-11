@@ -544,6 +544,8 @@ public class Browser {
         br.readTimeout = this.readTimeout;
         br.request = this.getRequest();
         br.cookies = this.cookies;
+        br.browserParentID = this.getBrowserID();
+        br.getBrowserID();
         br.authentications = this.authentications;
         br.cookiesExclusive = this.cookiesExclusive;
         br.authenticationFactory = this.authenticationFactory;
@@ -1416,13 +1418,18 @@ public class Browser {
         this.authentications.clear();
     }
 
-    private long browserID = -1;
+    private long browserID       = -1;
+    private long browserParentID = -1;
 
     public synchronized long getBrowserID() {
         if (this.browserID == -1) {
             this.browserID = Browser.BROWSERIDS.incrementAndGet();
         }
         return this.browserID;
+    }
+
+    public long getBrowserParentID() {
+        return this.browserParentID;
     }
 
     protected long getNextRequestID() {
