@@ -8,7 +8,6 @@ import jd.http.Request;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 
 public class PutRequest extends PostRequest {
-
     public PutRequest(final Request cloneRequest) {
         super(cloneRequest);
     }
@@ -22,7 +21,7 @@ public class PutRequest extends PostRequest {
     }
 
     @Override
-    protected RequestMethod getRequestMethod() {
+    public RequestMethod getRequestMethod() {
         return RequestMethod.PUT;
     }
 
@@ -30,5 +29,4 @@ public class PutRequest extends PostRequest {
     protected PostRequest cloneRequestRaw() {
         return new PutRequest(this);
     }
-
 }

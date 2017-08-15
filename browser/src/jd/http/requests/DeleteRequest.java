@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
-
 import jd.http.Request;
+
+import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 
 /**
  * The HTTP/1.0 specification defined the GET, POST and HEAD methods and the HTTP/1.1 specification. The GET method requests a
@@ -49,15 +49,13 @@ public class DeleteRequest extends PostRequest {
         super(url);
     }
 
-
-
     @Override
     protected PostRequest cloneRequestRaw() {
         return new DeleteRequest(this);
     }
 
     @Override
-    protected RequestMethod getRequestMethod() {
+    public RequestMethod getRequestMethod() {
         return RequestMethod.DELETE;
     }
 }

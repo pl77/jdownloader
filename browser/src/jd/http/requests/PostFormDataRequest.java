@@ -122,8 +122,13 @@ public class PostFormDataRequest extends Request {
     }
 
     @Override
+    public RequestMethod getRequestMethod() {
+        return RequestMethod.POST;
+    }
+
+    @Override
     public void preRequest() throws IOException {
-        this.httpConnection.setRequestMethod(RequestMethod.POST);
+        this.httpConnection.setRequestMethod(this.getRequestMethod());
         this.httpConnection.setRequestProperty("Content-Type", this.encodeType + "; boundary=" + this.boundary.substring(2));
         this.httpConnection.setRequestProperty("Content-Length", this.postContent(null) + "");
     }

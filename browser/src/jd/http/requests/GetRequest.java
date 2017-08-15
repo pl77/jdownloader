@@ -74,7 +74,7 @@ public class GetRequest extends Request {
     }
 
     @Override
-    protected RequestMethod getRequestMethod() {
+    public RequestMethod getRequestMethod() {
         return RequestMethod.GET;
     }
 

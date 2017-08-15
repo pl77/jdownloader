@@ -267,7 +267,7 @@ public abstract class Request {
         throw new WTFException("Not Implemented");
     }
 
-    protected RequestMethod getRequestMethod() {
+    public RequestMethod getRequestMethod() {
         return null;
     }
 

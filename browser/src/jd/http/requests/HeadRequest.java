@@ -72,7 +72,7 @@ public class HeadRequest extends Request {
     }
 
     @Override
-    protected RequestMethod getRequestMethod() {
+    public RequestMethod getRequestMethod() {
         return RequestMethod.HEAD;
     }
 
