@@ -342,7 +342,7 @@ public class Form {
             }
         }
         this.parseHeader(headerEntries.toArray(new String[0][]));
-        this.parseInputFields(total);
+        this.inputfields.addAll(parseInputFields(total));
     }
 
     private void parseHeader(final String[][] headerEntries) {
@@ -378,8 +378,8 @@ public class Form {
         }
     }
 
-    private final void parseInputFields(final String htmlCode) {
-        this.inputfields = new ArrayList<InputField>();
+    public static final ArrayList<InputField> parseInputFields(final String htmlCode) {
+        final ArrayList<InputField> inputfields = new ArrayList<InputField>();
         String escapedHtmlCode = htmlCode;
         final List<String> values = new ArrayList<String>();
         final long timeStamp = System.nanoTime();
@@ -413,7 +413,7 @@ public class Form {
             }
             if (matches == null) {
                 matcherString = escapedHtmlCode;
-                while (matches == null) {
+                do {
                     final Matcher matcher = valuePatternB.matcher(matcherString);
                     if (matcher.find()) {
                         final String value = matcher.group(1);
@@ -425,8 +425,8 @@ public class Form {
                     } else {
                         break;
                     }
+                } while (matches == null);
                 }
-            }
             if (matches != null) {
                 final String replace = matches.group(0);
                 final String value = matches.group(1);
@@ -445,17 +445,18 @@ public class Form {
                 break;
             }
         }
-        final Matcher matcher = Pattern.compile("(?s)(<\\s*(input|textarea|select).*?>)", Pattern.CASE_INSENSITIVE).matcher(escapedHtmlCode);
+        final Matcher matcher = Pattern.compile("(?s)(<\\s*(input|textarea|select|button).*?>)", Pattern.CASE_INSENSITIVE).matcher(escapedHtmlCode);
         while (matcher.find()) {
             final InputField nv = InputField.parse(matcher.group(1), timeStamp, values);
             if (nv != null) {
-                this.addInputField(nv);
+                inputfields.add(nv);
             }
         }
+        return inputfields;
     }
 
     /**
-     * Changes the value of the first filed with the key key to value. if no field exists, a new one is created.
+     * Changes the value of the first filed entry with the key, with new key&value. if no field exists, a new one is created.
      *
      * @param key
      * @param value

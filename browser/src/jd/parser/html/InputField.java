@@ -242,6 +242,23 @@ public class InputField {
         return false;
     }
 
+    /**
+     * returns true when Properties of a InputField contains the provided Key and Value
+     *
+     * @author raztoki
+     * @param key
+     * @param value
+     * @return
+     */
+    public boolean containsPropertyKeyValue(final String key, final String value) {
+        if (this.properties != null) {
+            if (containsProperty(key) && value.equals(this.properties.get(key))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void putProperty(String key, String value) {
         if (this.properties == null) {
             this.properties = new HashMap<String, String>();

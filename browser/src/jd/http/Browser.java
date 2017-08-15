@@ -689,14 +689,14 @@ public class Browser {
     }
 
     /**
-     * Creates a new POstrequest based on a variable HashMap
+     * Creates a new PostRequest based on a variable HashMap
      */
     public PostRequest createPostRequest(final String url, final UrlQuery post) throws IOException {
         return this.createPostRequest(url, post.list(), null);
     }
 
     /**
-     * Creates a postrequest based on a querystring
+     * Creates a PostRequest based on a querystring
      */
     public PostRequest createPostRequest(final String url, final String post) throws MalformedURLException, IOException {
         return this.createPostRequest(url, Request.parseQuery(post));
@@ -956,6 +956,25 @@ public class Browser {
         return null;
     }
 
+    /**
+     * Returns the first form that has input field with a property with 'key' that equals 'value'.
+     *
+     * @since JD2
+     * @param key
+     * @param value
+     * @return
+     */
+    public Form getFormByInputFieldPropertyKeyValue(final String key, final String value) {
+        for (final Form f : this.getForms()) {
+            for (final InputField field : f.getInputFields()) {
+                if (field.containsPropertyKeyValue(key, value)) {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
     public Form getFormbyProperty(final String property, final String name) {
         for (final Form form : this.getForms()) {
             if (form.getStringProperty(property) != null && form.getStringProperty(property).equalsIgnoreCase(name)) {
@@ -974,9 +993,6 @@ public class Browser {
      * @return
      */
     public final Form getFormbyAction(final String action) {
-        if (action == null) {
-            return null;
-        }
         for (final Form form : this.getForms()) {
             if (action.equalsIgnoreCase(form.getAction())) {
                 return form;
@@ -1028,11 +1044,6 @@ public class Browser {
         return Form.getForms(this);
     }
 
-    public Form[] getForms(final String downloadURL) throws IOException {
-        this.getPage(downloadURL);
-        return this.getForms();
-    }
-
     /**
      *
      * same as getFormbyAction
@@ -1073,6 +1084,27 @@ public class Browser {
         return results.toArray(new Form[results.size()]);
     }
 
+    /**
+     * finds All forms that matches regex
+     *
+     * @author raztoki
+     * @param regex
+     * @return
+     */
+    public final Form[] getFormsByRegex(final String regex) {
+        if (regex == null) {
+            return null;
+        }
+        final ArrayList<Form> results = new ArrayList<Form>();
+        final Form[] forms = getForms();
+        for (final Form form : forms) {
+            if (form.containsHTML(regex)) {
+                results.add(form);
+            }
+        }
+        return results.toArray(new Form[results.size()]);
+    }
+
     public RequestHeader getHeaders() {
         RequestHeader lHeaders = this.headers;
         if (lHeaders == null) {
@@ -1085,6 +1117,11 @@ public class Browser {
     public String getHost() {
         final Request lRequest = this.getRequest();
         return lRequest == null ? null : Browser.getHost(lRequest.getURL(), false);
+    }
+
+    public String getHost(final boolean subdomain) {
+        final Request lRequest = this.getRequest();
+        return lRequest == null ? null : Browser.getHost(lRequest.getURL(), subdomain);
     }
 
     public URLConnectionAdapter getHttpConnection() {
