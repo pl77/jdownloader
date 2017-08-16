@@ -337,8 +337,9 @@ public abstract class Request {
 
     public void disconnect() {
         try {
-            if (this.httpConnection != null) {
-                this.httpConnection.disconnect();
+            final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+            if (lhttpConnection != null) {
+                lhttpConnection.disconnect();
             }
         } catch (final Throwable ignore) {
         }
@@ -369,7 +370,8 @@ public abstract class Request {
     }
 
     public long getContentLength() {
-        return this.httpConnection == null ? -1 : this.httpConnection.getLongContentLength();
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        return lhttpConnection == null ? -1 : lhttpConnection.getLongContentLength();
     }
 
     public Cookies getCookies() {
@@ -600,11 +602,12 @@ public abstract class Request {
     public String getLocation() {
         final String location = this.location;
         if (location == null) {
-            if (this.httpConnection != null) {
-                final String locationHeader = this.getLocationHeader(this.httpConnection);
+            final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+            if (lhttpConnection != null) {
+                final String locationHeader = this.getLocationHeader(lhttpConnection);
                 if (locationHeader == null) {
                     /* check if we have an old-school refresh header */
-                    final String refresh = this.httpConnection.getHeaderField("refresh");
+                    final String refresh = lhttpConnection.getHeaderField("refresh");
                     if (refresh != null) {
                         // we need to filter the time count from the url
                         final String locationRefresh = new Regex(refresh, "url=(.+);?").getMatch(0);
@@ -673,7 +676,8 @@ public abstract class Request {
     }
 
     public long getRequestTime() {
-        return this.httpConnection == null ? -1 : this.httpConnection.getRequestTime();
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        return lhttpConnection == null ? -1 : lhttpConnection.getRequestTime();
     }
 
     /**
@@ -684,11 +688,13 @@ public abstract class Request {
     }
 
     public String getResponseHeader(final String key) {
-        return this.httpConnection == null ? null : this.httpConnection.getHeaderField(key);
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        return lhttpConnection == null ? null : lhttpConnection.getHeaderField(key);
     }
 
     public Map<String, List<String>> getResponseHeaders() {
-        return this.httpConnection == null ? null : this.httpConnection.getHeaderFields();
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        return lhttpConnection == null ? null : lhttpConnection.getHeaderFields();
     }
 
     /**
@@ -716,11 +722,13 @@ public abstract class Request {
     }
 
     public boolean isContentDecoded() {
-        return this.httpConnection == null ? this.isContentDecodedSet() : this.httpConnection.isContentDecoded();
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        return lhttpConnection == null ? this.isContentDecodedSet() : lhttpConnection.isContentDecoded();
     }
 
     public Boolean isSSLTrustALL() {
-        return this.httpConnection == null ? this.isSSLTrustALLSet() : this.httpConnection.isSSLTrustALL();
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        return lhttpConnection == null ? this.isSSLTrustALLSet() : lhttpConnection.isSSLTrustALL();
     }
 
     public boolean isContentDecodedSet() {
@@ -778,10 +786,11 @@ public abstract class Request {
     abstract public void preRequest() throws IOException;
 
     public String printHeaders() {
-        if (this.httpConnection == null) {
+        final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+        if (lhttpConnection == null) {
             return null;
         } else {
-            return this.httpConnection.toString();
+            return lhttpConnection.toString();
         }
     }
 
@@ -828,8 +837,10 @@ public abstract class Request {
     }
 
     public void resetConnection() {
+        this.disconnect();
         this.responseBytes = null;
         this.htmlCode = null;
+        this.location = null;
         this.requested = false;
     }
 
@@ -874,8 +885,9 @@ public abstract class Request {
         }
         final StringBuilder sb = new StringBuilder();
         try {
-            if (this.httpConnection != null) {
-                sb.append(this.httpConnection.toString());
+            final URLConnectionAdapter lhttpConnection = this.getHttpConnection();
+            if (lhttpConnection != null) {
+                sb.append(lhttpConnection.toString());
                 sb.append("\r\n");
                 this.getHtmlCode();
                 sb.append(this.getHTMLSource());
