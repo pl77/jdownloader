@@ -27,6 +27,7 @@ public class CnlQuery extends AbstractJsonData {
     private String       crypted;
     private String       dir;
     private boolean      permission;
+    private Boolean      autostart;
 
     public boolean isPermission() {
         return permission;
@@ -122,5 +123,13 @@ public class CnlQuery extends AbstractJsonData {
 
     public void setDir(String dir) {
         this.dir = dir;
+    }
+
+    public Boolean getAutostart() {
+        return autostart;
+    }
+
+    public void setAutostart(Boolean autostart) {
+        this.autostart = autostart;
     }
 }

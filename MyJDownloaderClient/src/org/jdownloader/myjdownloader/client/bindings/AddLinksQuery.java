@@ -69,16 +69,17 @@ public class AddLinksQuery extends AbstractJsonData {
     private String   sourceUrl                = null;
     private String   downloadPassword         = null;
     private String   destinationFolder        = null;
+    private String   comment                  = null;
     private Boolean  assignJobID              = null;
 
     public Boolean isAssignJobID() {
         return this.assignJobID;
     }
-    
+
     public void setAssignJobID(Boolean assignJobID) {
         this.assignJobID = assignJobID;
     }
-    
+
     public Boolean isAutostart() {
         return this.autostart;
     }
@@ -180,6 +181,14 @@ public class AddLinksQuery extends AbstractJsonData {
 
     public void setOverwritePackagizerRules(Boolean overwritePackagizerRules) {
         this.overwritePackagizerRules = overwritePackagizerRules;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
 }
