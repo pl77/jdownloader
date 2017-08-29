@@ -31,6 +31,8 @@ import org.appwork.exceptions.ThrowUncheckedException;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
+import org.appwork.utils.IO;
+import org.appwork.utils.IO.BOM;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
@@ -358,11 +360,15 @@ public abstract class Request {
         } else {
             return null;
         }
-        String charSetMetaTag = new Regex(parseFrom, "http-equiv=(\"|'|)Content-Type(\\1)[^<>]+content=(\"|')?[^\"]+charset=([^\"<>]+)").getMatch(3);
-        if (charSetMetaTag == null) {
-            charSetMetaTag = new Regex(parseFrom, "meta charset=\"(.*?)\"").getMatch(0);
+        String charSetFromMetaTag = new Regex(parseFrom, "http-equiv=(\"|'|)Content-Type(\\1)[^<>]+content=(\"|')?[^\"]+charset=([^\"<>]+)").getMatch(3);
+        if (charSetFromMetaTag == null) {
+            charSetFromMetaTag = new Regex(parseFrom, "meta charset=\"(.*?)\"").getMatch(0);
         }
-        return charSetMetaTag;
+        if (charSetFromMetaTag != null) {
+            return charSetFromMetaTag;
+        }
+        final String charSetFromXmlTag = new Regex(parseFrom, "<\\?xml[^>]*version[^>]*encoding=\"([^>]*?)\"[^>]*\\?>").getMatch(0);
+        return charSetFromXmlTag;
     }
 
     public int getConnectTimeout() {
@@ -522,6 +528,12 @@ public abstract class Request {
             }
             if (StringUtils.isEmpty(useCS)) {
                 useCS = this.getCharsetFromMetaTags();
+            }
+            if (StringUtils.isEmpty(useCS)) {
+                final BOM bom = IO.BOM.get(this.responseBytes);
+                if (bom != null) {
+                    useCS = bom.getCharSet();
+                }
             }
             try {
                 try {
