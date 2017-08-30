@@ -33,7 +33,6 @@
  * ==================================================================================================================================================== */
 package org.jdownloader.myjdownloader.client;
 
-import org.jdownloader.myjdownloader.client.exceptions.APIException;
 import org.jdownloader.myjdownloader.client.exceptions.DirectConnectionException;
 import org.jdownloader.myjdownloader.client.exceptions.MyJDownloaderException;
 import org.jdownloader.myjdownloader.client.exceptions.UnexpectedIOException;
@@ -52,7 +51,7 @@ public class AbstractMyJDDeviceClient<GenericType> {
         this.deviceID = deviceID;
     }
     
-    public Object callAction(final String action, final GenericType returnType, final Object... args) throws MyJDownloaderException, APIException {
+    public Object callAction(final String action, final GenericType returnType, final Object... args) throws MyJDownloaderException {
         final DirectConnectionInfo lconnection = this.connection;
         String host = null;
         if (lconnection != null) {
@@ -77,7 +76,7 @@ public class AbstractMyJDDeviceClient<GenericType> {
         return this.connection;
     }
     
-    public DirectConnectionInfos getDirectConnectionInfos() throws MyJDownloaderException, APIException {
+    public DirectConnectionInfos getDirectConnectionInfos() throws MyJDownloaderException {
         return this.api.getDirectConnectionInfos(this.getDeviceID());
     }
     
@@ -112,7 +111,7 @@ public class AbstractMyJDDeviceClient<GenericType> {
         this.connection = connection;
     }
     
-    public boolean verifyDirectConnectionInfo(final DirectConnectionInfo connection) throws MyJDownloaderException, APIException {
+    public boolean verifyDirectConnectionInfo(final DirectConnectionInfo connection) throws MyJDownloaderException {
         if (connection == null) { return false; }
         return this.api.verifyDirectConnectionInfo(this.getDeviceID(), connection);
     }
