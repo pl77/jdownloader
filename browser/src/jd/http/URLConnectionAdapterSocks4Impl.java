@@ -9,7 +9,6 @@ import jd.http.requests.PostFormDataRequest;
 import jd.http.requests.PostRequest;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
-import org.appwork.utils.net.httpconnection.SocketStreamInterface;
 import org.appwork.utils.net.httpconnection.Socks4HTTPConnectionImpl;
 import org.appwork.utils.net.socketconnection.SocketConnection;
 import org.brotli.dec.BrotliInputStream;
@@ -136,9 +135,8 @@ public class URLConnectionAdapterSocks4Impl extends Socks4HTTPConnectionImpl imp
 
     @Override
     public SocketAddress getEndPointSocketAddress() {
-        final SocketStreamInterface socket = this.getConnectionSocket();
-        if (socket != null && socket.getSocket() instanceof SocketConnection) {
-            this.endPointSocketAddress = ((SocketConnection) socket.getSocket()).getEndPointSocketAddress();
+        if (this.endPointSocketAddress == null) {
+            this.endPointSocketAddress = SocketConnection.getRootEndPointSocketAddress(this.getConnectionSocket());
         }
         return this.endPointSocketAddress;
     }

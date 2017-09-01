@@ -2,6 +2,9 @@ package jd.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.net.Proxy;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URL;
 
@@ -10,6 +13,7 @@ import jd.http.requests.PostRequest;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.NativeHTTPConnectionImpl;
+import org.appwork.utils.net.socketconnection.SocketConnection;
 import org.brotli.dec.BrotliInputStream;
 
 public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl implements URLConnectionAdapter {
@@ -75,12 +79,8 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
                 }
             }
         }
+        this.getEndPointSocketAddress();
         return super.getInputStream();
-    }
-
-    @Override
-    public SocketAddress getEndPointSocketAddress() {
-        return null;
     }
 
     @Override
@@ -112,5 +112,42 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
         }
         sb.append(this.getResponseInfo());
         return sb.toString();
+    }
+
+    protected SocketAddress endPointSocketAddress;
+
+    @Override
+    public void disconnect() {
+        try {
+            this.getEndPointSocketAddress();
+        } finally {
+            super.disconnect();
+        }
+    }
+
+    @Override
+    public SocketAddress getEndPointSocketAddress() {
+        if (this.endPointSocketAddress == null) {
+            try {
+                final Field instProxy = this.con.getClass().getDeclaredField("instProxy");
+                instProxy.setAccessible(true);
+                final Proxy proxy = (Proxy) instProxy.get(this.con);
+                if (proxy != null) {
+                    this.endPointSocketAddress = proxy.address();
+                } else {
+                    final Field http = this.con.getClass().getDeclaredField("http");
+                    http.setAccessible(true);
+                    final Object httpValue = http.get(this.con);
+                    if (httpValue != null) {
+                        final Field serverSocket = httpValue.getClass().getSuperclass().getDeclaredField("serverSocket");
+                        serverSocket.setAccessible(true);
+                        this.endPointSocketAddress = SocketConnection.getRootEndPointSocketAddress((Socket) serverSocket.get(httpValue));
+                    }
+                }
+            } catch (final Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        return this.endPointSocketAddress;
     }
 }

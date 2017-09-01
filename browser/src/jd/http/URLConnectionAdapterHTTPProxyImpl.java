@@ -10,6 +10,7 @@ import jd.http.requests.PostRequest;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.HTTPProxyHTTPConnectionImpl;
+import org.appwork.utils.net.socketconnection.SocketConnection;
 import org.brotli.dec.BrotliInputStream;
 
 public class URLConnectionAdapterHTTPProxyImpl extends HTTPProxyHTTPConnectionImpl implements URLConnectionAdapter {
@@ -118,8 +119,22 @@ public class URLConnectionAdapterHTTPProxyImpl extends HTTPProxyHTTPConnectionIm
         return sb.toString();
     }
 
+    protected SocketAddress endPointSocketAddress;
+
+    @Override
+    public void disconnect() {
+        try {
+            this.getEndPointSocketAddress();
+        } finally {
+            super.disconnect();
+        }
+    }
+
     @Override
     public SocketAddress getEndPointSocketAddress() {
-        return null;
+        if (this.endPointSocketAddress == null) {
+            this.endPointSocketAddress = SocketConnection.getRootEndPointSocketAddress(this.getConnectionSocket());
+        }
+        return this.endPointSocketAddress;
     }
 }
