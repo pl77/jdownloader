@@ -1039,6 +1039,26 @@ public class Browser {
         }
         return null;
     }
+    
+    /**
+     * finds first form that matches regex
+     *
+     * @author raztoki
+     * @param regex
+     * @return
+     **/
+    public final Form getFormByRegex(final String regex) {
+        if (regex == null) {
+            return null;
+        }
+        final Form[] forms = getForms();
+        for (final Form form : forms) {
+            if (form.containsHTML(regex)) {
+                return form;
+            }
+        }
+        return null;
+    }
 
     public Form[] getForms() {
         return Form.getForms(this);
