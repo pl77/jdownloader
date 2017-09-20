@@ -597,7 +597,7 @@ public class Browser {
             }
         } catch (final Throwable e) {
         }
-        final String formAction = form.getAction(base);
+        final String formAction = lRequest != null ? form.getAction(lRequest.getURL()) : form.getAction(base);
         if (formAction == null) {
             throw new NullPointerException("no valid action url");
         }
@@ -1039,7 +1039,7 @@ public class Browser {
         }
         return null;
     }
-    
+
     /**
      * finds first form that matches regex
      *
@@ -1051,7 +1051,7 @@ public class Browser {
         if (regex == null) {
             return null;
         }
-        final Form[] forms = getForms();
+        final Form[] forms = this.getForms();
         for (final Form form : forms) {
             if (form.containsHTML(regex)) {
                 return form;
@@ -1116,7 +1116,7 @@ public class Browser {
             return null;
         }
         final ArrayList<Form> results = new ArrayList<Form>();
-        final Form[] forms = getForms();
+        final Form[] forms = this.getForms();
         for (final Form form : forms) {
             if (form.containsHTML(regex)) {
                 results.add(form);

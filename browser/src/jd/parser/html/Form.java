@@ -109,6 +109,12 @@ public class Form {
 
     public String getAction(final URL base) {
         final String formAction = this.getAction();
+        if ("".equals(formAction) && base != null) {
+            // https://html.spec.whatwg.org/multipage/forms.html#form-submission-algorithm
+            // https://www.w3.org/Bugs/Public/show_bug.cgi?id=14215#c1
+            // https://tools.ietf.org/html/rfc3986#section-5.1
+            return base.toString();
+        }
         final boolean baseIsHTTPs = base != null && "https".equalsIgnoreCase(base.getProtocol());
         final boolean actionIsHTTPs = formAction != null && formAction.startsWith("https://");
         final boolean actionIsHTTP = formAction != null && formAction.startsWith("http://");
@@ -342,7 +348,7 @@ public class Form {
             }
         }
         this.parseHeader(headerEntries.toArray(new String[0][]));
-        this.inputfields.addAll(parseInputFields(total));
+        this.inputfields.addAll(Form.parseInputFields(total));
     }
 
     private void parseHeader(final String[][] headerEntries) {
@@ -426,7 +432,7 @@ public class Form {
                         break;
                     }
                 } while (matches == null);
-                }
+            }
             if (matches != null) {
                 final String replace = matches.group(0);
                 final String value = matches.group(1);
