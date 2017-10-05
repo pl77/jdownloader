@@ -41,6 +41,7 @@ import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.net.httpconnection.HTTPConnectionImpl.KEEPALIVE;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.KeepAliveSocketStreamException;
 import org.appwork.utils.os.CrossSystem;
@@ -185,6 +186,15 @@ public abstract class Request {
     protected long                 requestID       = -1;
     protected long                 browserID       = -1;
     protected long                 browserParentID = -1;
+    protected IPVERSION          ipVersion      = null;
+
+    public IPVERSION getIPVersion() {
+        return this.ipVersion;
+    }
+
+    public void setIPVersion(IPVERSION tcpVersion) {
+        this.ipVersion = tcpVersion;
+    }
 
     protected long getBrowserParentID() {
         return this.browserParentID;
@@ -284,6 +294,9 @@ public abstract class Request {
             this.browserID = br.getBrowserID();
             this.requestID = br.getNextRequestID();
             this.browserParentID = br.getBrowserParentID();
+        }
+        if (this.getIPVersion() == null) {
+            this.setIPVersion(br.getIPVersion());
         }
         if (this.caller == null) {
             try {
@@ -762,6 +775,7 @@ public abstract class Request {
     private void openConnection() throws IOException {
         this.httpConnection = HTTPConnectionFactory.createHTTPConnection(URLHelper.getURL(this.getURL(), true, false, false), this.getProxy());
         this.httpConnection.setRequest(this);
+        this.httpConnection.setIPVersion(this.getIPVersion());
         this.httpConnection.setReadTimeout(this.getReadTimeout());
         this.httpConnection.setConnectTimeout(this.getConnectTimeout());
         this.httpConnection.setContentDecoded(this.isContentDecodedSet());

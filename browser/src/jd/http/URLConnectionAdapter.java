@@ -18,6 +18,8 @@ package jd.http;
 import java.io.InputStream;
 import java.net.SocketAddress;
 
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
+
 public interface URLConnectionAdapter extends org.appwork.utils.net.httpconnection.HTTPConnection {
     public static final String CRLF = "\r\n";
 
@@ -32,4 +34,8 @@ public interface URLConnectionAdapter extends org.appwork.utils.net.httpconnecti
     void setRequest(Request request);
 
     public SocketAddress getEndPointSocketAddress();
+
+    public IPVERSION getIPVersion();
+
+    public void setIPVersion(IPVERSION tcpVersion);
 }

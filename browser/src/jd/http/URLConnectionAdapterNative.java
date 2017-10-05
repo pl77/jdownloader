@@ -11,6 +11,7 @@ import java.net.URL;
 import jd.http.requests.PostFormDataRequest;
 import jd.http.requests.PostRequest;
 
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.NativeHTTPConnectionImpl;
 import org.appwork.utils.net.socketconnection.SocketConnection;
@@ -149,5 +150,14 @@ public class URLConnectionAdapterNative extends NativeHTTPConnectionImpl impleme
             }
         }
         return this.endPointSocketAddress;
+    }
+
+    @Override
+    public IPVERSION getIPVersion() {
+        return IPVERSION.SYSTEM;
+    }
+
+    @Override
+    public void setIPVersion(IPVERSION tcpVersion) {
     }
 }

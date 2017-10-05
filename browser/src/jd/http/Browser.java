@@ -50,6 +50,7 @@ import org.appwork.utils.logging2.ConsoleLogImpl;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.URLHelper;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.parser.UrlQuery;
@@ -86,6 +87,28 @@ public class Browser {
     private static int                            TIMEOUT_CONNECT    = 30000;
     private static int                            TIMEOUT_READ       = 30000;
     private Boolean                               defaultSSLTrustALL = null;
+    protected static IPVERSION                    GLOBAL_IPVERSION   = null;
+    protected IPVERSION                           ipVersion          = null;
+
+    public static IPVERSION getGlobalIPVersion() {
+        return Browser.GLOBAL_IPVERSION;
+    }
+
+    public static void setGlobalIPVersion(IPVERSION ipVersion) {
+        Browser.GLOBAL_IPVERSION = ipVersion;
+    }
+
+    public IPVERSION getIPVersion() {
+        if (this.ipVersion != null) {
+            return this.ipVersion;
+        } else {
+            return Browser.getGlobalIPVersion();
+        }
+    }
+
+    public void setIPVersion(IPVERSION ipVersion) {
+        this.ipVersion = ipVersion;
+    }
 
     public static ProxySelectorInterface _getGlobalProxy() {
         return Browser.GLOBAL_PROXY;
@@ -553,6 +576,7 @@ public class Browser {
         br.verbose = this.verbose;
         br.logger = this.getLogger();
         br.proxy = this.proxy;
+        br.ipVersion = this.ipVersion;
         br.keepResponseContentBytes = this.keepResponseContentBytes;
         br.allowedResponseCodes = this.allowedResponseCodes;
         return br;
