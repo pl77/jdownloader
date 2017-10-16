@@ -530,9 +530,9 @@ public class HTMLParser {
     final private static Pattern       pat1                   = Pattern.compile("(" + HTMLParser.protocolPrefixes + "|(?<!://)www\\.)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     final private static Pattern       protocols              = Pattern.compile("(" + HTMLParser.protocolPrefixes + ")");
     final private static Pattern       LINKPROTOCOL           = Pattern.compile("^" + HTMLParser.protocolPrefixes, Pattern.CASE_INSENSITIVE);
-    final private static Pattern       mergePattern_Root      = Pattern.compile("(.*?\\..*?)(/|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern       mergePattern_Directory = Pattern.compile("(.*?\\.[^?#]+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    final private static Pattern       mergePattern_Path      = Pattern.compile("(.*?\\..*?/.*?)($|#|\\?)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       mergePattern_Root      = Pattern.compile("(.*?(\\.[a-z0-9]+|\\])(:\\d+)?)(/|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       mergePattern_Directory = Pattern.compile("(.*?(\\.[a-z0-9]+|\\])(:\\d+)?/[^?#]+/)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    final private static Pattern       mergePattern_Path      = Pattern.compile("(.*?(\\.[a-z0-9]+|\\])(:\\d+)?/[^?#]+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static Pattern             mp                     = null;
     static {
         try {
@@ -1156,7 +1156,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static Collection<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
