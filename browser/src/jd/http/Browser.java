@@ -1580,10 +1580,13 @@ public class Browser {
     }
 
     public URLConnectionAdapter openRequestConnection(Request request, final boolean followRedirects) throws IOException {
+        if (request == null) {
+            throw new IllegalStateException("Request is null");
+        }
         int redirectLoopPrevention = 0;
         final Request originalRequest = request;
         final String refererURL = this.getRefererURL();
-        redirectLoop: while (true) {
+        while (true) {
             this.setRequestProperties(originalRequest, request, refererURL);
             int connectRetryCounter = 0;
             connectLoop: while (true) {
