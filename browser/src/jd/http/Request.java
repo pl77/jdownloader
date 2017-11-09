@@ -186,7 +186,7 @@ public abstract class Request {
     protected long                 requestID       = -1;
     protected long                 browserID       = -1;
     protected long                 browserParentID = -1;
-    protected IPVERSION          ipVersion      = null;
+    protected IPVERSION            ipVersion       = null;
 
     public IPVERSION getIPVersion() {
         return this.ipVersion;
@@ -457,7 +457,8 @@ public abstract class Request {
             osString = null;
             break;
         }
-        final String firefoxRevision = "52.0";
+        // myip.ms/view/comp_browsers/2467/Firefox_56.html
+        final String firefoxRevision = "56.0";
         if (archString != null && osString != null && !new Regex(archString, "(arm|aarch)").matches()) {
             // do not return ARM based strings as it will revert to mobile websites. We do not want that behaviour by default -raztoki
             return "Mozilla/5.0 (X11; Ubuntu; " + osString.trim() + " " + archString.trim() + "; rv:" + firefoxRevision + ") Gecko/20100101 Firefox/" + firefoxRevision;
