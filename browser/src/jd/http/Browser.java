@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -532,18 +533,22 @@ public class Browser {
      * @param url
      */
     public void clearCookies(final String url) {
-        if (url == null) {
-            this.cookies.clear();
-        }
-        final String host = Browser.getHost(url);
-        final Iterator<String> it = this.getCookies().keySet().iterator();
-        while (it.hasNext()) {
-            final String check = it.next();
-            if (check == null) {
-                this.cookies.remove(null);
-            } else if (check.contains(host)) {
-                this.cookies.get(check).clear();
-                break;
+        final Map<String, Cookies> map = this.getCookies();
+        synchronized (map) {
+            if (url == null) {
+                map.clear();
+            } else {
+                final String host = Browser.getHost(url);
+                final Iterator<Entry<String, Cookies>> it = map.entrySet().iterator();
+                while (it.hasNext()) {
+                    final Entry<String, Cookies> next = it.next();
+                    if (next.getKey() == null) {
+                        it.remove();
+                    } else if (StringUtils.equalsIgnoreCase(next.getKey(), host)) {
+                        next.getValue().clear();
+                        break;
+                    }
+                }
             }
         }
     }
@@ -863,7 +868,11 @@ public class Browser {
     public void forwardCookies(final Request request) {
         if (request != null) {
             final String host = Browser.getHost(request.getURL());
-            final Cookies cookies = this.getCookies().get(host);
+            final Map<String, Cookies> map = this.getCookies();
+            final Cookies cookies;
+            synchronized (map) {
+                cookies = map.get(host);
+            }
             if (cookies != null) {
                 final Cookies requestCookies = request.getCookies();
                 for (final Cookie cookie : cookies.getCookies()) {
@@ -905,8 +914,7 @@ public class Browser {
     }
 
     public String getCookie(final String url, final String key) {
-        final String host = Browser.getHost(url);
-        final Cookies cookies = this.getCookies(host);
+        final Cookies cookies = this.getCookies(url);
         final Cookie cookie = cookies.get(key);
         return cookie != null ? cookie.getValue() : null;
     }
@@ -917,11 +925,14 @@ public class Browser {
 
     public Cookies getCookies(final String url) {
         final String host = Browser.getHost(url);
-        Cookies cookies2 = this.getCookies().get(host);
-        if (cookies2 == null) {
-            this.getCookies().put(host, cookies2 = new Cookies());
+        final Map<String, Cookies> map = this.getCookies();
+        synchronized (map) {
+            Cookies cookies = map.get(host);
+            if (cookies == null) {
+                map.put(host, cookies = new Cookies());
+            }
+            return cookies;
         }
-        return cookies2;
     }
 
     public void getDownload(final File file, final String urlString) throws IOException {
@@ -1801,13 +1812,8 @@ public class Browser {
     }
 
     public void setCookie(final String url, final String key, final String value) {
-        final String host = Browser.getHost(url);
-        Cookies cookies;
-        if (!this.getCookies().containsKey(host) || (cookies = this.getCookies().get(host)) == null) {
-            cookies = new Cookies();
-            this.getCookies().put(host, cookies);
-        }
-        cookies.add(new Cookie(host, key, value));
+        final Cookies cookies = this.getCookies(url);
+        cookies.add(new Cookie(Browser.getHost(url), key, value));
     }
 
     /**
@@ -1832,17 +1838,14 @@ public class Browser {
      * @param iCookies
      * @param replace
      */
-    public void setCookies(final String url, final Cookies iCookies, final boolean replace) {
-        final String host = Browser.getHost(url);
-        Cookies cookies;
-        if (!this.getCookies().containsKey(host) || (cookies = this.getCookies().get(host)) == null) {
-            cookies = new Cookies();
-            this.getCookies().put(host, cookies);
-        }
+    public void setCookies(final String url, final Cookies set, final boolean replace) {
+        final Cookies cookies = this.getCookies(url);
         if (replace) {
             cookies.clear();
+            cookies.add(set);
+        } else {
+            cookies.add(set);
         }
-        cookies.add(iCookies);
     }
 
     public void setCookiesExclusive(final boolean b) {
@@ -2037,12 +2040,7 @@ public class Browser {
 
     public void updateCookies(final Request request) {
         if (request != null && request.hasCookies()) {
-            final String host = Browser.getHost(request.getURL());
-            Cookies cookies = this.getCookies().get(host);
-            if (cookies == null) {
-                cookies = new Cookies();
-                this.getCookies().put(host, cookies);
-            }
+            final Cookies cookies = this.getCookies(Browser.getHost(request.getURL()));
             cookies.add(request.getCookies());
         }
     }
