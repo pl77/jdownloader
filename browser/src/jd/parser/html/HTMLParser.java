@@ -139,6 +139,10 @@ public class HTMLParser {
             if (index > this.getStopIndex()) {
                 throw new IndexOutOfBoundsException("index " + index + " > end " + this.getStopIndex());
             }
+            return this.rawCharAt(index);
+        }
+
+        protected char rawCharAt(int index) {
             if (this.chars != null) {
                 return this.chars[index];
             } else {
@@ -200,7 +204,7 @@ public class HTMLParser {
             return this.end;
         }
 
-        private int indexOf(final int sourceOffset, final int sourceCount, final CharSequence target, final int targetOffset, final int targetCount, int fromIndex) {
+        protected int indexOf(final int sourceOffset, final int sourceCount, final CharSequence target, final int targetOffset, final int targetCount, int fromIndex) {
             if (fromIndex >= sourceCount) {
                 return targetCount == 0 ? sourceCount : -1;
             }
@@ -238,8 +242,8 @@ public class HTMLParser {
                 /* we have a charSequence */
                 for (int i = sourceOffset + fromIndex; i <= max; i++) {
                     /* Look for first character. */
-                    if (this.charSequence.charAt(i) != first) {
-                        while (++i <= max && this.charSequence.charAt(i) != first) {
+                    if (this.rawCharAt(i) != first) {
+                        while (++i <= max && this.rawCharAt(i) != first) {
                             ;
                         }
                     }
@@ -247,7 +251,7 @@ public class HTMLParser {
                     if (i <= max) {
                         int j = i + 1;
                         final int end = j + targetCount - 1;
-                        for (int k = targetOffset + 1; j < end && this.charSequence.charAt(j) == target.charAt(k); j++, k++) {
+                        for (int k = targetOffset + 1; j < end && this.rawCharAt(j) == target.charAt(k); j++, k++) {
                             ;
                         }
                         if (j == end) {
@@ -737,6 +741,41 @@ public class HTMLParser {
         return link == null || link.equals("about:blank") || link.equals("/") || link.startsWith("#");
     }
 
+    protected static class HexHtmlParserCharSequence extends HtmlParserCharSequence {
+        protected HexHtmlParserCharSequence(CharSequence charSequence) {
+            super(charSequence);
+        }
+
+        @Override
+        protected char rawCharAt(int index) {
+            final char h1 = this.charSequence.charAt(index * 4 + 2);
+            final char h2 = this.charSequence.charAt(index * 4 + 3);
+            return (char) Long.parseLong("" + h1 + h2, 16);
+        }
+
+        @Override
+        public int getStopIndex() {
+            return super.getStopIndex() / 4;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            for (int i = this.getStartIndex(); i < this.getStopIndex(); i++) {
+                sb.append(this.charAt(i));
+            }
+            return sb.toString();
+        }
+    }
+
+    protected static HtmlParserCharSequence convert(HtmlParserCharSequence sequence) {
+        if (sequence.length() > 2 && sequence.length() % 4 == 0 && sequence.charAt(0) == '\\' && sequence.charAt(1) == 'x') {
+            return new HexHtmlParserCharSequence(sequence);
+        } else {
+            return sequence;
+        }
+    }
+
     private static HtmlParserResultSet _getHttpLinksFinder(HtmlParserCharSequence data, HtmlParserResultSet results, HtmlParserOptions options) {
         if (results == null) {
             results = new HtmlParserResultSet();
@@ -784,6 +823,7 @@ public class HTMLParser {
         for (final Pattern pattern : HTMLParser.hrefPattern) {
             final List<HtmlParserCharSequence> hrefs = data.getColumn(2, pattern);
             for (HtmlParserCharSequence hrefURL : hrefs) {
+                hrefURL = HTMLParser.convert(hrefURL);
                 if (!HTMLParser.skip(hrefURL)) {
                     if (baseURL != null) {
                         hrefURL = HTMLParser.parseLocation(results, baseURL, hrefURL);
@@ -801,6 +841,7 @@ public class HTMLParser {
         for (final Httppattern element : HTMLParser.linkAndFormPattern) {
             final List<HtmlParserCharSequence> links = data.getColumn(element.group, element.p);
             for (HtmlParserCharSequence link : links) {
+                link = HTMLParser.convert(link);
                 if (!HTMLParser.skip(link)) {
                     HtmlParserCharSequence protocol = HTMLParser.getProtocol(link);
                     if (protocol == null) {
@@ -823,6 +864,7 @@ public class HTMLParser {
             final Matcher m = HTMLParser.mp.matcher(data);
             HtmlParserCharSequence link = null;
             while ((link = data.group(2, m)) != null) {
+                link = HTMLParser.convert(link);
                 link = link.trim();
                 final HtmlParserCharSequence protocol = HTMLParser.getProtocol(link);
                 if (protocol == null && !link.contains("%2F")) {
@@ -1156,7 +1198,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     * 
+     *
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static Collection<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
