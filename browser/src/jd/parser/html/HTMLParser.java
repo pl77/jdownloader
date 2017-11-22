@@ -1198,7 +1198,7 @@ public class HTMLParser {
 
     /*
      * return tmplinks.toArray(new String[tmplinks.size()]); }
-     *
+     * 
      * /* parses data for available links and returns a string array which does not contain any duplicates
      */
     public static Collection<String> getHttpLinksIntern(String content, final String baseURLString, HtmlParserResultSet results) {
@@ -1421,7 +1421,7 @@ public class HTMLParser {
                 }
             } else {
                 /* relative path relative to baseURL */
-                final HtmlParserCharSequence path = baseURL.group(1, HTMLParser.mergePattern_Path);
+                final HtmlParserCharSequence path = baseURL.group(1, HTMLParser.mergePattern_Directory);
                 if (path != null) {
                     /* relative to current path */
                     return new HtmlParserCharSequence(new ConcatCharSequence(path, loc));
